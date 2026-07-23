@@ -760,6 +760,10 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
         <div class="toggle on" id="rewardToggle" role="switch" aria-checked="true"></div>
       </div>
       <div class="prow">
+        <div><div class="lab">おんがく（BGM）</div><div class="desc" id="bgmDesc">やさしい音楽を流す</div></div>
+        <div class="toggle on" id="bgmToggle" role="switch" aria-checked="true"></div>
+      </div>
+      <div class="prow">
         <div><div class="lab">データを消す</div><div class="desc">キャラ・きろくを リセット</div></div>
         <button class="link" id="resetBtn" style="color:var(--ink-soft)">リセット</button>
       </div>
@@ -787,7 +791,7 @@ const EFFECTS = [["✨","⭐","🌟"],["🎉","🎊","🎈"],["💛","🧡","�
 const CHEERS  = ["たべたね！","えらいね！","じょうずー！","もぐもぐ！","やったね！","おいしい！","ナイス！"];
 
 const KEY="sodateru_tap_v1";
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true }; }
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true }; }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return Object.assign(base(),d); }catch(e){} return base(); }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
 let st=load();
@@ -1057,8 +1061,27 @@ function speak(text){ try{ if(!("speechSynthesis" in window)) return; if(!jaVoic
   u.rate=1.06; u.pitch=1.4 + ((speakN++ %3)-1)*0.08; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
 function praise(text){ chime(); if(st.rewardMode==="grow"||st.rewardMode==="praise") speak(text); }
 
+/* ---------- recognition sounds + gentle BGM (WebAudio, no external files) ---------- */
+function ensureAudio(){ try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} return audioCtx; }
+function tone(freq,at,dur,type,peak){ try{ ensureAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=type||'sine'; o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
+  g.gain.setValueAtTime(0.0001,at); g.gain.exponentialRampToValueAtTime(peak||0.1,at+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,at+dur); o.start(at); o.stop(at+dur+0.03); }catch(e){} }
+function soundSeen(){ ensureAudio(); if(!audioCtx) return; tone(880,audioCtx.currentTime,0.09,'sine',0.09); }        // 手が見えた「ポッ」
+function soundRecognized(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                        // 認識できた「ピンポン♪」
+  tone(659.25,t,0.10,'triangle',0.13); tone(987.77,t+0.08,0.16,'triangle',0.13); }
+let bgm={on:false,id:null,i:0};
+const BGM_SEQ=[0,4,7,9,7,4,0,-3,0,4,7,12,9,7,4,2]; // やさしい長調ペンタトニック
+function bgmStep(){ if(!bgm.on||!audioCtx) return; const t=audioCtx.currentTime;
+  const semi=BGM_SEQ[bgm.i%BGM_SEQ.length], hz=261.63*Math.pow(2,semi/12);
+  tone(hz,t,0.40,'triangle',0.045);
+  if(bgm.i%4===0) tone(hz/2,t,0.85,'sine',0.04);   // やわらかいベース
+  bgm.i++; }
+function startBGM(){ if(bgm.on||!st.bgm) return; if(!ensureAudio()) return; bgm.on=true; bgm.id=setInterval(bgmStep,440); bgmStep(); }
+function stopBGM(){ bgm.on=false; if(bgm.id){ clearInterval(bgm.id); bgm.id=null; } }
+
 /* ---------- meal ---------- */
-function startMeal(){ if(meal.active) return; meal={active:true,startTs:Date.now(),bites:0,tickId:null};
+function startMeal(){ if(meal.active) return; startBGM(); meal={active:true,startTs:Date.now(),bites:0,tickId:null};
   $("#mealBtn").textContent="🟢 ごはんちゅう… (タップでおわり)"; $("#mealBtn").classList.remove("btn-start"); $("#mealBtn").classList.add("btn-end");
   meal.tickId=setInterval(renderParent,1000); renderParent(); }
 function endMeal(){ if(!meal.active) return; clearInterval(meal.tickId); meal.active=false; const n=meal.bites;
@@ -1083,8 +1106,9 @@ function renderParent(){
   $("#rewardDesc").textContent=st.rewardMode==="grow"?"キャラを そだてる":"ことばで ほめる（育成なし）"; $("#rewardToggle").classList.toggle("on",st.rewardMode==="grow");
   $("#camModeDesc").textContent=st.camMode?"オン（画面を触らずに記録）":"オフ（ボタンで記録）"; $("#camToggle").classList.toggle("on",st.camMode);
   $("#btnDesc").textContent=st.showButton?"いつも表示":"カメラが使えない時だけ表示"; $("#btnToggle").classList.toggle("on",st.showButton);
+  $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
 }
-function resumeAudio(){ try{ audioCtx&&audioCtx.state==="suspended"&&audioCtx.resume(); }catch(e){} }
+function resumeAudio(){ try{ audioCtx&&audioCtx.state==="suspended"&&audioCtx.resume(); }catch(e){} startBGM(); }
 $("#fallback").onclick=()=>{ resumeAudio(); registerBite(); };
 $("#mealBtn").onclick=()=> meal.active?endMeal():startMeal();
 $("#giftBadge").onclick=showGift;
@@ -1093,8 +1117,9 @@ $("#parentClose").onclick=()=> $("#parentBack").style.display="none";
 $("#parentBack").addEventListener("click",e=>{ if(e.target.id==="parentBack") $("#parentBack").style.display="none"; });
 $("#rewardToggle").onclick=()=>{ st.rewardMode=st.rewardMode==="grow"?"praise":"grow"; save(); renderParent(); };
 $("#btnToggle").onclick=()=>{ st.showButton=!st.showButton; save(); renderParent(); updateButtonVis(); };
+$("#bgmToggle").onclick=()=>{ st.bgm=!st.bgm; save(); renderParent(); st.bgm? startBGM():stopBGM(); };
 $("#camToggle").onclick=()=>{ st.camMode=!st.camMode; save(); renderParent(); updateButtonVis(); st.camMode? startCamera():stopCamera(); };
-$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton; st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; save(); meal.bites=0; renderChar(); renderParent(); } };
+$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm; st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; save(); meal.bites=0; renderChar(); renderParent(); } };
 
 /* ---------- camera + hand detection ---------- */
 let handLandmarker=null, stream=null, rafId=null, camReady=false;
@@ -1131,10 +1156,10 @@ function loop(){
   try{ if(v.readyState>=2 && handLandmarker){ const res=handLandmarker.detectForVideo(v, performance.now());
     present=!!(res && res.landmarks && res.landmarks.length>0); } }catch(e){}
   const nowT=performance.now();
-  if(detState==="IDLE"){ if(present){ detState="DETECTING"; holdStart=nowT; } else setRing(0); }
+  if(detState==="IDLE"){ if(present){ detState="DETECTING"; holdStart=nowT; soundSeen(); } else setRing(0); }
   else if(detState==="DETECTING"){ if(!present){ detState="IDLE"; setRing(0); }
     else{ const p=Math.min(1,(nowT-holdStart)/HOLD_MS); setRing(p); camHint("そのまま…");
-      if(p>=1){ detState="COUNTED"; absentSince=0; setRing(1); camHint("できた！ ✨"); resumeAudio(); registerBite(); } } }
+      if(p>=1){ detState="COUNTED"; absentSince=0; setRing(1); camHint("できた！ ✨"); resumeAudio(); soundRecognized(); registerBite(); } } }
   else if(detState==="COUNTED"){ if(!present){ if(!absentSince) absentSince=nowT;
       if(nowT-absentSince>=COOLDOWN_MS){ detState="IDLE"; setRing(0); camHint("おててを かざしてね"); } } else absentSince=0; }
   rafId=requestAnimationFrame(loop);
