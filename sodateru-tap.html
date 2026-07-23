@@ -433,6 +433,55 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   0%   { transform: translate(0,0) scale(.28) rotate(0deg); opacity: 1 }
   100% { transform: translate(var(--dx),var(--dy)) scale(1.3) rotate(var(--rot)); opacity: 0 }
 }
+.get-card {
+  position: absolute;
+  z-index: 56;
+  pointer-events: none;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  animation: getpop .82s var(--spring) forwards;
+}
+.get-card .gi { font-size: 76px; line-height: 1; filter: drop-shadow(0 8px 16px rgba(90,42,6,.35)) }
+.get-card .gl {
+  margin-top: 4px;
+  font-family: var(--disp);
+  font-weight: 800;
+  font-size: 22px;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(148,52,0,.6), 0 0 18px var(--carrot);
+  background: linear-gradient(135deg, var(--carrot), #B83A06);
+  display: inline-block;
+  padding: 4px 16px;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(236,88,16,.4);
+}
+@keyframes getpop {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(.3) }
+  22%  { opacity: 1; transform: translate(-50%,-50%) scale(1.15) }
+  40%  { transform: translate(-50%,-50%) scale(1) }
+  72%  { opacity: 1; transform: translate(-50%,-50%) scale(1) }
+  100% { opacity: 0; transform: translate(-50%,-58%) scale(.9) }
+}
+.get-card.rare .gl { background: linear-gradient(135deg, #E8A400, #B8860B); text-shadow: 0 2px 8px rgba(120,80,0,.7), 0 0 22px #FFD700 }
+.get-card.rare .gi { font-size: 96px; animation: rareSpin .9s ease }
+@keyframes rareSpin { 0%{transform:rotate(-18deg) scale(.6)} 60%{transform:rotate(8deg) scale(1.16)} 100%{transform:rotate(0) scale(1)} }
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin: 14px auto 0;
+  max-width: 280px;
+}
+.bcell {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+}
+.bcell.empty { opacity: .5; background: repeating-linear-gradient(45deg, var(--surface-2), var(--surface-2) 6px, var(--surface) 6px, var(--surface) 12px) }
 .streak-toast {
   position: absolute;
   top: 90px;
@@ -677,7 +726,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
     <div class="topbar">
       <div class="eyebrow">そだてる しょくたく（タップ版）</div>
       <div class="topright">
-        <div class="coll gift" id="giftBadge">🍱 <span id="giftCount">0</span></div>
+        <div class="coll gift" id="giftBadge">📔 <span id="giftCount">0</span></div>
         <div class="coll" id="collBadge">🌸 <span id="collCount">0</span></div>
         <button class="icon-btn" id="parentBtn" aria-label="おうちの人メニュー">👪</button>
       </div>
@@ -729,10 +778,11 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 
   <div class="ov-back" id="giftBack" style="display:none">
     <div class="ov-card">
-      <div class="big">🍱</div>
-      <h3>あげた ごはん</h3>
-      <p><span id="giftTotal">0</span>こ あげたよ！</p>
-      <div class="coll-strip" id="giftGrid"></div>
+      <div class="big">📔</div>
+      <h3>コレクション</h3>
+      <p><span id="boardFill">0</span> / 20　（コンプリート <span id="boardsDone">0</span>）</p>
+      <div class="board-grid" id="boardGrid"></div>
+      <p style="font-size:12px;margin-top:12px">ぜんぶで <span id="giftTotal">0</span>こ あつめたよ！</p>
     </div>
   </div>
 
@@ -787,11 +837,13 @@ const FORMS = [
 ]; // 70 bites per bloom ≈ ~1 dinner
 const FLOWERS = ["🌸","🌻","🌷","🌹","🌼","🏵️","💐","🪷","🌺","🥀","🌾","🍀"];
 const FOODS   = ["🍞","🍙","🍎","🥕","🍓","🐟","🥦","🍌","🧀","🍠","🥚","🍇","🍅","🌽","🥔","🍒","🍡","🍜","🥛","🍰"];
+const COLLECT = ["🍓","🥕","🍎","⭐","🐰","🌈","🍭","🎈","🍇","🐥","🌻","🍀","🎀","🧸","🦊","🌷","🍒","🐱","🍞","🧀"];
+const RARE    = ["💎","👑","🏆","🦄","🌟"]; // 7口ごと
 const EFFECTS = [["✨","⭐","🌟"],["🎉","🎊","🎈"],["💛","🧡","💫"],["🌈","☁️","⚡"],["🌸","🌷","🌼"]];
 const CHEERS  = ["たべたね！","えらいね！","じょうずー！","もぐもぐ！","やったね！","おいしい！","ナイス！"];
 
 const KEY="sodateru_tap_v1";
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true }; }
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true }; }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return Object.assign(base(),d); }catch(e){} return base(); }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
 let st=load();
@@ -985,10 +1037,16 @@ function registerBite(){
   praise(CHEERS[st.total % CHEERS.length]);
 
   if(st.rewardMode==="grow"){
-    const food=FOODS[(st.total-1)%FOODS.length];
-    st.fedCount=(st.fedCount||0)+1; (st.fedBook=st.fedBook||[]).push(food);
-    if(st.fedBook.length>80) st.fedBook.shift();
-    feedAnim(food); $("#giftCount").textContent=st.fedCount;
+    const rare=(st.total%7===0);
+    const item=rare ? RARE[Math.floor((st.total-7)/7)%RARE.length]
+                    : COLLECT[(st.total-1)%COLLECT.length];
+    st.fedCount=(st.fedCount||0)+1; (st.board=st.board||[]).push(item);
+    getReveal(item, rare);                 // 大きな「ゲット！」
+    setTimeout(()=>feedAnim(item), 210);   // モグが食べる
+    $("#giftCount").textContent=st.fedCount;
+    const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
+    if(st.board.length>=20){ st.boardsDone=(st.boardsDone||0)+1; st.board=[]; burst(EFFECTS[2]);
+      showEvolveEmoji("📔","ボード コンプリート！","20こ あつめたよ！ すごい！"); praise("ボードコンプリート！やったね！"); }
   }else{
     const c=$("#char"); c.classList.remove("chomp"); void c.offsetWidth; c.classList.add("chomp");
   }
@@ -1021,7 +1079,15 @@ function feedAnim(food){
   const pl=document.createElement("div"); pl.className="feed-plus"; pl.textContent="+1";
   pl.style.left=cx+"px"; pl.style.top=(cy-70)+"px"; host.appendChild(pl); setTimeout(()=>pl.remove(),900);
   const c=$("#char"); c.classList.remove("chomp"); void c.offsetWidth; c.classList.add("chomp");
-  const b=$("#giftBadge"); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
+}
+function getReveal(item, rare){
+  const host=$(".phone"), hb=host.getBoundingClientRect(), ch=$("#char").getBoundingClientRect();
+  const cx=ch.left-hb.left+ch.width/2, cy=ch.top-hb.top+ch.height*0.34;
+  const card=document.createElement("div"); card.className="get-card"+(rare?" rare":"");
+  card.innerHTML='<div class="gi">'+item+'</div><div class="gl">'+(rare?"レア！ ✨":"ゲット！")+'</div>';
+  card.style.left=cx+"px"; card.style.top=cy+"px";
+  host.appendChild(card); setTimeout(()=>card.remove(), rare?1200:840);
+  if(rare) burst(EFFECTS[1]);
 }
 function burst(set){
   const host=$(".phone"), hb=host.getBoundingClientRect(), ch=$("#char").getBoundingClientRect();
@@ -1041,7 +1107,16 @@ function showEvolveEmoji(emoji,title,msg){
   const ch=$("#char"); ch.classList.remove("evolve"); void ch.offsetWidth; ch.classList.add("evolve");
   clearTimeout(showEvolveEmoji._t); showEvolveEmoji._t=setTimeout(()=>b.style.display="none",2300); b.onclick=()=>b.style.display="none";
 }
-function showGift(){ $("#giftTotal").textContent=st.fedCount||0; $("#giftGrid").textContent=(st.fedBook||[]).slice(-40).join(" "); const b=$("#giftBack"); b.style.display="grid"; b.onclick=()=>b.style.display="none"; }
+function showBoard(){
+  const board=st.board||[]; const grid=$("#boardGrid"); grid.innerHTML="";
+  for(let i=0;i<20;i++){ const c=document.createElement("div");
+    if(board[i]){ c.className="bcell"; c.textContent=board[i]; } else { c.className="bcell empty"; }
+    grid.appendChild(c); }
+  $("#boardFill").textContent=board.length;
+  $("#boardsDone").textContent=st.boardsDone||0;
+  $("#giftTotal").textContent=st.fedCount||0;
+  const b=$("#giftBack"); b.style.display="grid"; b.onclick=()=>b.style.display="none";
+}
 
 /* ---------- praise (audio) ---------- */
 let audioCtx=null;
@@ -1111,7 +1186,7 @@ function renderParent(){
 function resumeAudio(){ try{ audioCtx&&audioCtx.state==="suspended"&&audioCtx.resume(); }catch(e){} startBGM(); }
 $("#fallback").onclick=()=>{ resumeAudio(); registerBite(); };
 $("#mealBtn").onclick=()=> meal.active?endMeal():startMeal();
-$("#giftBadge").onclick=showGift;
+$("#giftBadge").onclick=showBoard;
 $("#parentBtn").onclick=()=>{ renderParent(); $("#parentBack").style.display="flex"; };
 $("#parentClose").onclick=()=> $("#parentBack").style.display="none";
 $("#parentBack").addEventListener("click",e=>{ if(e.target.id==="parentBack") $("#parentBack").style.display="none"; });
