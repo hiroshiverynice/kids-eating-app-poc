@@ -111,6 +111,14 @@
   @keyframes fx{0%{transform:translate(0,0) scale(.4);opacity:1}
     100%{transform:translate(var(--dx),var(--dy)) scale(1.2) rotate(var(--rot));opacity:0}}
 
+  /* Per-bite reward flying into the gift box */
+  .gift.bump{animation:bump .3s ease}
+  @keyframes bump{50%{transform:scale(1.28)}}
+  .reward-fly{position:absolute;z-index:52;font-size:32px;pointer-events:none;
+    animation:rfly .7s cubic-bezier(.4,0,.6,1) forwards}
+  @keyframes rfly{0%{transform:translate(0,0) scale(1.4);opacity:0}
+    18%{opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(.5);opacity:.9}}
+
   /* Parent panel */
   .parent-back{position:absolute;inset:0;background:rgba(40,30,20,.42);z-index:70;display:flex;align-items:flex-end;animation:fade .2s}
   .parent{width:100%;background:var(--surface);border-radius:28px 28px 0 0;padding:22px 20px calc(26px + env(safe-area-inset-bottom));animation:rise .28s cubic-bezier(.2,.8,.2,1)}
@@ -143,6 +151,7 @@
     <div class="topbar">
       <div class="eyebrow">そだてる しょくたく</div>
       <div class="topright">
+        <div class="coll gift" id="giftBadge">🎁 <span id="giftCount">0</span></div>
         <div class="coll" id="collBadge">🏆 <span id="collCount">0</span></div>
         <button class="icon-btn" id="parentBtn" aria-label="おうちの人メニュー">👪</button>
       </div>
@@ -197,6 +206,16 @@
     </div>
   </div>
 
+  <!-- Gift box overlay -->
+  <div class="ov-back" id="giftBack" style="display:none">
+    <div class="ov-card">
+      <div class="big">🎁</div>
+      <h3>あつめた ごほうび</h3>
+      <p><span id="giftTotal">0</span>こ あつめたよ！</p>
+      <div class="coll-strip" id="giftGrid"></div>
+    </div>
+  </div>
+
   <!-- Parent panel -->
   <div class="parent-back" id="parentBack" style="display:none">
     <div class="parent">
@@ -247,13 +266,14 @@ const EFFECTS = [ // rotated per bite so #50 differs from #5
 ];
 const CHEERS = ["たべたね！","えらいね！","じょうずー！","もぐもぐ！","やったね！","ナイス！"];
 const BITE_DOTS = ["🍚","🥕","🥦","🍓","🐟","🍅","🌽","🥔"];
+const REWARDS = ["⭐","🍓","🍎","🍇","🐰","🌈","🍭","🎈","🦄","🌻","🍀","🐧","🎀","🧸","🐥","🦊","🌷","🍬","🐝","🍒","🌟","🐱"];
 
 const KEY = "sodateru_v1";
 function load(){
   try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d){ return Object.assign(base(), d); } }catch(e){}
   return base();
 }
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], rewardMode:"grow", camMode:true }; }
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], rewardCount:0, rewardBook:[], rewardMode:"grow", camMode:true }; }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
 let st = load();
 
@@ -268,6 +288,7 @@ function renderChar(){
   $("#progFill").style.width = Math.min(100, st.stageProg/f.need*100)+"%";
   $("#progCap").textContent = "あと "+(f.need-st.stageProg)+"かい で "+f.next+"よ";
   $("#collCount").textContent = st.coll.length;
+  $("#giftCount").textContent = st.rewardCount || 0;
 }
 
 /* ---------------- a bite happened ---------------- */
@@ -283,6 +304,14 @@ function registerBite(){
   dot.textContent=BITE_DOTS[meal.bites % BITE_DOTS.length];
   const row=$("#bitesRow"); row.appendChild(dot);
   if(row.children.length>32) row.removeChild(row.firstChild);
+
+  // per-bite reward: always give a keepable item that flies into the gift box
+  if(st.rewardMode==="grow"){
+    const rw=REWARDS[(st.total-1) % REWARDS.length];
+    st.rewardCount=(st.rewardCount||0)+1; (st.rewardBook=st.rewardBook||[]).push(rw);
+    if(st.rewardBook.length>80) st.rewardBook.shift();
+    rewardFly(rw); $("#giftCount").textContent=st.rewardCount;
+  }
 
   // combo toast every 5 within a meal
   if(meal.bites>0 && meal.bites%5===0) streak(meal.bites+"れんぞく！");
@@ -327,6 +356,23 @@ function streak(text){
   const t=$("#streakToast"); t.innerHTML=""; const s=document.createElement("span");
   s.textContent=text; t.appendChild(s); setTimeout(()=>{ if(t.firstChild) t.innerHTML=""; },1100);
 }
+function rewardFly(emoji){
+  const host=$(".phone"), hb=host.getBoundingClientRect();
+  const from=$("#char").getBoundingClientRect(), to=$("#giftBadge").getBoundingClientRect();
+  const x0=from.left-hb.left+from.width/2, y0=from.top-hb.top+from.height/3;
+  const x1=to.left-hb.left+to.width/2, y1=to.top-hb.top+to.height/2;
+  const el=document.createElement("div"); el.className="reward-fly"; el.textContent=emoji;
+  el.style.left=x0+"px"; el.style.top=y0+"px";
+  el.style.setProperty("--tx",(x1-x0).toFixed(0)+"px");
+  el.style.setProperty("--ty",(y1-y0).toFixed(0)+"px");
+  host.appendChild(el); setTimeout(()=>el.remove(),720);
+  const b=$("#giftBadge"); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
+}
+function showGift(){
+  $("#giftTotal").textContent=st.rewardCount||0;
+  $("#giftGrid").textContent=(st.rewardBook||[]).slice(-40).join(" ");
+  const b=$("#giftBack"); b.style.display="grid"; b.onclick=()=>b.style.display="none";
+}
 function showEvolve(emoji,title,msg){
   $("#evoBig").textContent=emoji; $("#evoTitle").textContent=title; $("#evoMsg").textContent=msg;
   const b=$("#evoBack"); b.style.display="grid";
@@ -351,10 +397,26 @@ function chime(){
     });
   }catch(e){}
 }
+let jaVoice=null;
+function pickVoice(){
+  try{
+    const vs=speechSynthesis.getVoices();
+    jaVoice = vs.find(v=>/ja(-|_)?JP/i.test(v.lang) && /(premium|enhanced|neural|siri|kyoko)/i.test(v.name))
+           || vs.find(v=>v.name==="Kyoko")
+           || vs.find(v=>/^ja\b/i.test(v.lang) || /ja(-|_)?JP/i.test(v.lang))
+           || null;
+  }catch(e){}
+}
+if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+let speakN=0;
 function speak(text){
   try{
     if(!("speechSynthesis" in window)) return;
-    const u=new SpeechSynthesisUtterance(text); u.lang="ja-JP"; u.rate=1.02; u.pitch=1.25;
+    if(!jaVoice) pickVoice();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="ja-JP"; if(jaVoice) u.voice=jaVoice;
+    // friendly, lively: higher pitch + slight per-utterance variation so it isn't monotone
+    u.rate=1.06; u.pitch=1.4 + ((speakN++ %3)-1)*0.08;
     speechSynthesis.cancel(); speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -404,6 +466,7 @@ function renderParent(){
   $("#camModeDesc").textContent = st.camMode ? "オン（画面を触らずに記録）" : "オフ（ボタンで記録）";
   $("#camToggle").classList.toggle("on", st.camMode);
 }
+$("#giftBadge").onclick=showGift;
 $("#parentBtn").onclick=()=>{ renderParent(); $("#parentBack").style.display="flex"; };
 $("#parentClose").onclick=()=> $("#parentBack").style.display="none";
 $("#parentBack").addEventListener("click",e=>{ if(e.target.id==="parentBack") $("#parentBack").style.display="none"; });
