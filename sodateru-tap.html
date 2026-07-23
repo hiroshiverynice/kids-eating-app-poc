@@ -5,124 +5,670 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>育てる食卓（タップ版）</title>
 <style>
-  :root{
-    --ground:#FFF7EE; --surface:#FFFFFF; --surface-2:#FDEEE0;
-    --ink:#40342B; --ink-soft:#8A7A6D;
-    --carrot:#F97A2E; --carrot-ink:#B4531A;
-    --leaf:#5FA45A; --berry:#D06A93; --sun:#F5B93F;
-    --line:#F0E2D3; --shadow:24px 24px 60px rgba(180,120,60,.14);
-    --r:22px;
-    --disp:"Hiragino Maru Gothic ProN","Hiragino Maru Gothic Pro",-apple-system,system-ui,sans-serif;
-    --body:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+/* ─────────────────────────────────────────────────────────────────────────
+   育てる食卓 — Visual System v2  "Ohana Garden"
+   ───────────────────────────────────────────────────────────────────────── */
+:root {
+  --ground:     #FDF0D8;
+  --surface:    #FFFCF0;
+  --surface-2:  #EDD9B5;
+  --surface-up: #FFFEF6;
+  --ink:        #352618;
+  --ink-soft:   #866840;
+  --ink-muted:  #C0A060;
+  --carrot:     #F05C10;
+  --carrot-ink: #A03400;
+  --leaf:       #3C9035;
+  --berry:      #B83E6E;
+  --sun:        #E89C08;
+  --line:       #E8CFA0;
+  --r:          22px;
+  --r-lg:       32px;
+  --shadow:     0 12px 40px rgba(80,38,4,.15);
+  --shadow-sm:  0 3px 10px rgba(80,38,4,.10);
+  --shadow-up:  0 24px 64px rgba(16,8,0,.30);
+  --stage-glow: rgba(230,148,8,.17);
+  --spring: cubic-bezier(.2, 1.4, .4, 1);
+  --out:    cubic-bezier(.2, .8, .2, 1);
+  --disp: "Hiragino Maru Gothic ProN", "Hiragino Maru Gothic Pro",
+          -apple-system, system-ui, sans-serif;
+  --body: -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic",
+          system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --ground:     #170E04;
+  --surface:    #211408;
+  --surface-2:  #2E1C0A;
+  --surface-up: #291808;
+  --ink:        #F5E4C6;
+  --ink-soft:   #B08448;
+  --ink-muted:  #785C30;
+  --carrot:     #FF8040;
+  --carrot-ink: #FFB87A;
+  --leaf:       #5EC054;
+  --berry:      #E06898;
+  --sun:        #F5BE2C;
+  --line:       #3C2210;
+  --shadow:     0 12px 40px rgba(0,0,0,.58);
+  --shadow-sm:  0 3px 10px rgba(0,0,0,.36);
+  --shadow-up:  0 24px 64px rgba(0,0,0,.72);
+  --stage-glow: rgba(245,190,44,.13);
+}}
+*, *::before, *::after { box-sizing: border-box }
+html, body { margin: 0; height: 100% }
+body {
+  font-family: var(--body);
+  color: var(--ink);
+  background: var(--ground);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+.phone {
+  width: 100%;
+  max-width: 440px;
+  background: var(--ground);
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+@media (min-width: 460px) {
+  .phone {
+    min-height: 820px;
+    height: min(920px, 96vh);
+    margin: auto;
+    border-radius: 40px;
+    box-shadow: var(--shadow), 0 0 0 1px var(--line);
   }
-  @media (prefers-color-scheme:dark){:root{
-    --ground:#1C1815; --surface:#262019; --surface-2:#302720;
-    --ink:#F3E9DE; --ink-soft:#B3A498; --carrot:#FF9A55; --carrot-ink:#FFB985;
-    --leaf:#7FC178; --berry:#E68AAE; --sun:#F5C669; --line:#3A2F26; --shadow:24px 24px 60px rgba(0,0,0,.4);
-  }}
-  *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
-  body{font-family:var(--body);color:var(--ink);background:var(--ground);
-    -webkit-font-smoothing:antialiased;display:flex;justify-content:center;min-height:100vh;
-    -webkit-tap-highlight-color:transparent}
-  .phone{width:100%;max-width:440px;background:var(--ground);min-height:100vh;position:relative;
-    display:flex;flex-direction:column;overflow:hidden}
-  @media (min-width:460px){.phone{min-height:820px;height:min(920px,96vh);margin:auto;border-radius:34px;
-    box-shadow:var(--shadow);border:1px solid var(--line)} body{align-items:center;padding:16px}}
-  h1,h2,h3,.disp{font-family:var(--disp);font-weight:600;letter-spacing:.01em}
-  button{font-family:var(--disp);cursor:pointer;border:none;color:inherit}
-  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);font-family:var(--disp)}
-
-  .stage{flex:1;display:flex;flex-direction:column;align-items:center;padding:14px 20px 18px;gap:12px;overflow:hidden}
-  .topbar{width:100%;display:flex;justify-content:space-between;align-items:center}
-  .topright{display:flex;align-items:center;gap:8px}
-  .coll{font-family:var(--disp);font-size:14px;color:var(--carrot-ink);background:var(--surface);
-    border:1px solid var(--line);border-radius:20px;padding:6px 12px}
-  .icon-btn{width:42px;height:42px;border-radius:50%;background:var(--surface);
-    box-shadow:inset 0 0 0 1px var(--line);font-size:18px}
-
-  .char-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:6px}
-  .char{font-size:150px;line-height:1;filter:drop-shadow(0 12px 20px rgba(180,120,60,.24));
-    animation:breathe 4s ease-in-out infinite;transition:transform .2s;user-select:none}
-  @keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.03)}}
-  .char.hop{animation:hop .5s ease}
-  @keyframes hop{0%{transform:translateY(0)}30%{transform:translateY(-30px) scale(1.09) rotate(-4deg)}
-    60%{transform:translateY(0) scale(.98)}100%{transform:translateY(0)}}
-  .char.evolve{animation:evolvePop .8s cubic-bezier(.2,1.3,.5,1)}
-  @keyframes evolvePop{0%{transform:scale(.4) rotate(-20deg);filter:brightness(2)}
-    60%{transform:scale(1.25)}100%{transform:scale(1)}}
-  .char-name{font-family:var(--disp);font-size:16px;color:var(--ink-soft)}
-  .prog{width:min(80%,320px);height:18px;border-radius:20px;background:var(--surface-2);
-    box-shadow:inset 0 0 0 1.5px var(--line);overflow:hidden}
-  .prog>i{display:block;height:100%;width:0;border-radius:20px;
-    background:linear-gradient(90deg,var(--sun),var(--carrot));transition:width .45s cubic-bezier(.2,.8,.2,1)}
-  .prog-cap{font-size:13px;color:var(--ink-soft);font-family:var(--disp)}
-
-  .prompt-big{font-family:var(--disp);font-size:20px;text-align:center;text-wrap:balance;margin:0;color:var(--ink-soft)}
-  .bites-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;min-height:26px;max-width:92%;max-height:56px;overflow:hidden}
-  .bite-dot{font-size:20px;animation:pop .4s cubic-bezier(.2,1.3,.5,1)}
-  @keyframes pop{from{transform:scale(0)}}
-
-  .eat-btn{width:min(88%,340px);padding:26px;border-radius:28px;font-size:26px;color:#fff;
-    background:linear-gradient(135deg,var(--leaf),#4f9a4a);box-shadow:0 12px 28px rgba(95,164,90,.38);
-    transition:transform .1s;margin-top:auto}
-  .eat-btn:active{transform:translateY(3px) scale(.98)}
-
-  .meal-ctrl{width:min(88%,340px);display:flex;gap:10px}
-  .meal-ctrl button{flex:1;padding:14px;border-radius:16px;font-size:16px}
-  .btn-start{background:var(--carrot);color:#fff;box-shadow:0 8px 20px rgba(249,122,46,.3)}
-  .btn-end{background:var(--surface);color:var(--ink-soft);box-shadow:inset 0 0 0 1.5px var(--line)}
-
-  .ov-back{position:absolute;inset:0;background:rgba(40,30,20,.5);z-index:60;display:grid;place-items:center;animation:fade .2s}
-  @keyframes fade{from{opacity:0}}
-  .ov-card{background:var(--surface);border-radius:28px;padding:30px 34px;text-align:center;max-width:80%;animation:evolvePop .6s cubic-bezier(.2,1.3,.5,1)}
-  .ov-card .big{font-size:96px;line-height:1}
-  .ov-card h3{margin:12px 0 4px;font-size:23px}
-  .ov-card p{margin:0;color:var(--ink-soft);font-size:14px;text-wrap:balance;white-space:pre-line}
-  .ov-card .rec{margin-top:10px;font-family:var(--disp);color:var(--berry);font-size:15px}
-  .ov-card .coll-strip{margin-top:14px;font-size:26px;letter-spacing:2px;line-height:1.3;word-break:break-word}
-
-  .streak-toast{position:absolute;top:120px;left:0;right:0;text-align:center;z-index:55;pointer-events:none}
-  .streak-toast span{display:inline-block;font-family:var(--disp);font-size:26px;color:#fff;
-    background:linear-gradient(135deg,var(--berry),var(--carrot));padding:8px 20px;border-radius:24px;
-    box-shadow:0 8px 20px rgba(208,106,147,.4);animation:streakPop 1.1s cubic-bezier(.2,1.3,.5,1) forwards}
-  @keyframes streakPop{0%{transform:scale(.4) translateY(10px);opacity:0}
-    20%{transform:scale(1.1);opacity:1}70%{opacity:1}100%{transform:translateY(-30px) scale(1);opacity:0}}
-
-  .fx{position:absolute;pointer-events:none;z-index:50;font-size:28px;animation:fx 1s ease forwards}
-  @keyframes fx{0%{transform:translate(0,0) scale(.4);opacity:1}
-    100%{transform:translate(var(--dx),var(--dy)) scale(1.2) rotate(var(--rot));opacity:0}}
-
-  .gift.bump{animation:bump .3s ease}
-  @keyframes bump{50%{transform:scale(1.28)}}
-  .reward-fly{position:absolute;z-index:52;font-size:34px;pointer-events:none;
-    animation:rfly .7s cubic-bezier(.4,0,.6,1) forwards}
-  @keyframes rfly{0%{transform:translate(0,0) scale(1.4);opacity:0}
-    18%{opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(.5);opacity:.9}}
-
-  .parent-back{position:absolute;inset:0;background:rgba(40,30,20,.42);z-index:70;display:flex;align-items:flex-end;animation:fade .2s}
-  .parent{width:100%;background:var(--surface);border-radius:28px 28px 0 0;padding:22px 20px calc(26px + env(safe-area-inset-bottom));animation:rise .28s cubic-bezier(.2,.8,.2,1)}
-  @keyframes rise{from{transform:translateY(100%)}}
-  .parent h3{margin:0 0 12px;font-size:19px}
-  .pstat{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-  .pstat>div{flex:1;min-width:88px;background:var(--surface-2);border-radius:16px;padding:13px;text-align:center}
-  .pstat b{font-family:var(--disp);font-size:24px;display:block;color:var(--carrot-ink);font-variant-numeric:tabular-nums}
-  .pstat span{font-size:11px;color:var(--ink-soft)}
-  .pnote{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--leaf);
-    border-radius:14px;padding:13px 15px;font-size:13px;line-height:1.6;color:var(--ink-soft)}
-  .pnote b{color:var(--ink)}
-  .prow{display:flex;justify-content:space-between;align-items:center;padding:12px 2px;border-top:1px solid var(--line);margin-top:8px}
-  .prow .lab{font-family:var(--disp);font-size:14px}
-  .prow .desc{font-size:12px;color:var(--ink-soft);max-width:20em}
-  .toggle{width:52px;height:31px;border-radius:20px;background:var(--line);position:relative;flex:none;transition:.2s}
-  .toggle.on{background:var(--leaf)}
-  .toggle::after{content:"";position:absolute;width:25px;height:25px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-  .toggle.on::after{left:24px}
-  .pclose{width:100%;margin-top:16px;padding:14px;border-radius:16px;background:var(--surface-2);color:var(--ink-soft);font-size:15px}
-  .link{background:none;color:var(--berry);font-size:13px;font-family:var(--disp);padding:6px 0}
-
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-  :focus-visible{outline:3px solid var(--carrot);outline-offset:2px}
+  body { align-items: center; padding: 16px }
+}
+h1, h2, h3, .disp { font-family: var(--disp); font-weight: 700; letter-spacing: .01em }
+button { font-family: var(--disp); cursor: pointer; border: none; color: inherit }
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: .20em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-family: var(--disp);
+  font-weight: 700;
+}
+.stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 20px 20px;
+  gap: 10px;
+  overflow: hidden;
+  background: radial-gradient(ellipse 88% 52% at 50% -2%, var(--surface-2) 0%, transparent 70%);
+}
+.topbar { width: 100%; display: flex; justify-content: space-between; align-items: center }
+.topright { display: flex; align-items: center; gap: 6px }
+.coll {
+  font-family: var(--disp);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--carrot-ink);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 13px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform .14s, box-shadow .14s;
+}
+.coll:active { transform: scale(.93); box-shadow: none }
+.gift.bump { animation: bump .34s var(--spring) }
+@keyframes bump {
+  0%   { transform: scale(1)    rotate(0deg) }
+  40%  { transform: scale(1.36) rotate(-7deg) }
+  68%  { transform: scale(.93)  rotate(3deg) }
+  100% { transform: scale(1)    rotate(0deg) }
+}
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm), inset 0 0 0 1.5px var(--line);
+  font-size: 20px;
+  transition: transform .13s, box-shadow .13s;
+}
+.icon-btn:active { transform: scale(.90); box-shadow: 0 1px 4px rgba(80,38,4,.08) }
+.char-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  margin-top: 2px;
+  position: relative;
+}
+.char-wrap::before {
+  content: "";
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--stage-glow) 0%, transparent 65%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  pointer-events: none;
+  z-index: 0;
+}
+.char {
+  width: 230px;
+  height: 230px;
+  display: grid;
+  place-items: center;
+  animation: breathe 3.8s ease-in-out infinite;
+  transition: transform .2s;
+  filter: drop-shadow(0 20px 28px rgba(90,42,6,.22));
+  position: relative;
+  z-index: 1;
+}
+.char svg { width: 100%; height: 100%; overflow: visible }
+@keyframes breathe {
+  0%, 100% { transform: translateY(0) scale(1) }
+  50%       { transform: translateY(-9px) scale(1.026) }
+}
+.char.chomp { animation: chomp .54s var(--spring) }
+@keyframes chomp {
+  0%   { transform: scale(1)    rotate(0deg) }
+  20%  { transform: scale(1.15) rotate(-4deg) }
+  44%  { transform: scale(.88)  rotate(1deg) }
+  66%  { transform: scale(1.10) rotate(3deg) }
+  100% { transform: scale(1)    rotate(0deg) }
+}
+.char.evolve { animation: evolvePop .88s var(--spring) }
+@keyframes evolvePop {
+  0%   { transform: scale(.30) rotate(-22deg);
+         filter: brightness(2.5) drop-shadow(0 0 28px var(--sun)) }
+  52%  { transform: scale(1.30) rotate(3deg) }
+  74%  { transform: scale(.96) rotate(0deg) }
+  100% { transform: scale(1) rotate(0deg) }
+}
+.char-name {
+  font-family: var(--disp);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--carrot-ink);
+  letter-spacing: .08em;
+  position: relative;
+  z-index: 1;
+}
+.prog {
+  width: min(78%, 300px);
+  height: 26px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  box-shadow: inset 0 3px 8px rgba(80,38,4,.16), inset 0 0 0 1.5px var(--line);
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+.prog > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--sun) 0%, var(--carrot) 52%, var(--berry) 100%);
+  transition: width .50s var(--out);
+  box-shadow: 0 2px 14px rgba(236,88,16,.48), inset 0 2px 5px rgba(255,255,255,.28);
+  position: relative;
+}
+.prog > i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,.30) 0%, transparent 52%);
+  pointer-events: none;
+}
+.prog-cap {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  font-family: var(--disp);
+  letter-spacing: .04em;
+  position: relative;
+  z-index: 1;
+}
+.prompt-big {
+  font-family: var(--disp);
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  text-wrap: balance;
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.cam-card {
+  width: min(60%, 214px);
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--surface-2);
+  box-shadow: 0 6px 18px rgba(80,38,4,.12), inset 0 0 0 1.5px var(--line);
+  display: grid;
+  place-items: center;
+  margin-top: 0;
+}
+#cam {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+.cam-off {
+  position: relative;
+  text-align: center;
+  color: var(--ink-soft);
+  font-family: var(--disp);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 14px;
+  z-index: 2;
+  line-height: 1.55;
+}
+.ring {
+  position: absolute;
+  width: 86px;
+  height: 86px;
+  z-index: 3;
+  pointer-events: none;
+}
+.ring circle { fill: none; stroke-width: 8; stroke-linecap: round }
+.ring .bg { stroke: rgba(255,255,255,.30) }
+.ring .fg {
+  stroke: var(--leaf);
+  stroke-dasharray: 339;
+  stroke-dashoffset: 339;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset .1s linear;
+  filter: drop-shadow(0 0 5px var(--leaf));
+}
+.cam-hint {
+  position: absolute;
+  bottom: 7px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 4;
+  font-family: var(--disp);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0,0,0,.65);
+}
+.cam-badge {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  z-index: 4;
+  font-size: 10px;
+  font-family: var(--disp);
+  font-weight: 700;
+  background: rgba(0,0,0,.54);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: .04em;
+}
+.fallback {
+  width: min(82%, 310px);
+  padding: 19px 24px;
+  border-radius: var(--r);
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(148deg, var(--leaf), #2C7625 100%);
+  box-shadow: 0 10px 28px rgba(60,144,53,.38), inset 0 1px 0 rgba(255,255,255,.22);
+  transition: transform .12s, box-shadow .12s;
+  margin-top: 4px;
+}
+.fallback:active {
+  transform: translateY(3px) scale(.97);
+  box-shadow: 0 4px 12px rgba(60,144,53,.26);
+}
+.hide { display: none !important }
+.meal-ctrl {
+  width: min(84%, 318px);
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+  padding-bottom: max(4px, env(safe-area-inset-bottom));
+}
+.meal-ctrl button {
+  flex: 1;
+  padding: 17px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: .025em;
+}
+.btn-start {
+  background: linear-gradient(148deg, var(--carrot), #B83A06 100%);
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(236,88,16,.40), inset 0 1px 0 rgba(255,255,255,.22);
+  transition: transform .12s, box-shadow .12s;
+}
+.btn-start:active {
+  transform: translateY(3px);
+  box-shadow: 0 4px 12px rgba(236,88,16,.26);
+}
+.btn-end {
+  background: var(--surface);
+  color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1.5px var(--line), 0 3px 8px rgba(80,38,4,.08);
+  transition: transform .12s;
+}
+.btn-end:active { transform: translateY(2px) }
+.feed-item {
+  position: absolute;
+  z-index: 53;
+  font-size: 76px;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 18px rgba(90,42,6,.36));
+  animation: feed .88s cubic-bezier(.26,.66,.36,1) forwards;
+}
+@keyframes feed {
+  0%   { transform: translate(-50%,-50%) translateY(26px)  scale(.16); opacity: 0 }
+  22%  { transform: translate(-50%,-50%) translateY(-76px) scale(1.62); opacity: 1 }
+  54%  { transform: translate(-50%,-50%) translateY(-76px) scale(1.54); opacity: 1 }
+  100% { transform: translate(-50%,-50%) translateY(10px)  scale(.24); opacity: 0 }
+}
+.feed-plus {
+  position: absolute;
+  z-index: 54;
+  font-family: var(--disp);
+  font-weight: 800;
+  font-size: 30px;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(148,52,0,.60), 0 0 22px var(--carrot);
+  pointer-events: none;
+  animation: fplus 1s var(--spring) forwards;
+}
+@keyframes fplus {
+  0%   { transform: translate(-50%,  0px) scale(.46); opacity: 0 }
+  24%  { transform: translate(-50%,  0px) scale(1.12); opacity: 1 }
+  100% { transform: translate(-50%, -68px) scale(1);  opacity: 0 }
+}
+.feed-flash {
+  position: absolute;
+  z-index: 51;
+  width: 220px;
+  height: 220px;
+  margin: -110px 0 0 -110px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle,
+    rgba(236,152,12,.64) 0%,
+    rgba(236,88,16,.26)  46%,
+    transparent 70%);
+  animation: flash .64s ease forwards;
+}
+@keyframes flash {
+  0%   { transform: scale(.34); opacity: 1 }
+  54%  { opacity: .5 }
+  100% { transform: scale(1.68); opacity: 0 }
+}
+.fx {
+  position: absolute;
+  pointer-events: none;
+  z-index: 50;
+  font-size: 28px;
+  animation: fx 1.1s var(--out) forwards;
+}
+@keyframes fx {
+  0%   { transform: translate(0,0) scale(.28) rotate(0deg); opacity: 1 }
+  100% { transform: translate(var(--dx),var(--dy)) scale(1.3) rotate(var(--rot)); opacity: 0 }
+}
+.streak-toast {
+  position: absolute;
+  top: 90px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 55;
+  pointer-events: none;
+}
+.streak-toast span {
+  display: inline-block;
+  font-family: var(--disp);
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #B83468, var(--carrot) 86%);
+  padding: 9px 26px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(168,58,106,.48), inset 0 1px 0 rgba(255,255,255,.24);
+  animation: streakPop 1.18s var(--spring) forwards;
+  letter-spacing: .05em;
+}
+@keyframes streakPop {
+  0%   { transform: scale(.34) translateY(14px); opacity: 0 }
+  24%  { transform: scale(1.14) translateY(-5px); opacity: 1 }
+  54%  { transform: scale(1)   translateY(0);    opacity: 1 }
+  100% { transform: scale(.94) translateY(-36px); opacity: 0 }
+}
+.ov-back {
+  position: absolute;
+  inset: 0;
+  background: rgba(28,14,4,.56);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  animation: fade .22s ease;
+}
+@keyframes fade { from { opacity: 0 } }
+.ov-card {
+  background: var(--surface-up);
+  border-radius: var(--r-lg);
+  padding: 32px 36px;
+  text-align: center;
+  max-width: 84%;
+  box-shadow: var(--shadow-up), inset 0 0 0 1px var(--line);
+  animation: evolvePop .68s var(--spring);
+}
+.ov-card .big {
+  font-size: 100px;
+  line-height: 1;
+  filter: drop-shadow(0 10px 20px rgba(90,42,6,.22));
+}
+.ov-card .bigsvg { width: 130px; height: 130px; margin: 0 auto }
+.ov-card h3 {
+  margin: 14px 0 6px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.ov-card p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  text-wrap: balance;
+  white-space: pre-line;
+  line-height: 1.70;
+}
+.ov-card .rec {
+  margin-top: 12px;
+  font-family: var(--disp);
+  font-weight: 800;
+  color: var(--berry);
+  font-size: 16px;
+}
+.ov-card .coll-strip {
+  margin-top: 16px;
+  font-size: 30px;
+  letter-spacing: 4px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.parent-back {
+  position: absolute;
+  inset: 0;
+  background: rgba(28,14,4,.48);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 70;
+  display: flex;
+  align-items: flex-end;
+  animation: fade .22s ease;
+}
+.parent {
+  width: 100%;
+  background: var(--surface);
+  border-radius: 32px 32px 0 0;
+  padding: 0 20px calc(28px + env(safe-area-inset-bottom));
+  animation: rise .30s var(--out);
+  max-height: 90%;
+  overflow-y: auto;
+  box-shadow: 0 -10px 40px rgba(0,0,0,.18), inset 0 0 0 1px var(--line);
+}
+@keyframes rise { from { transform: translateY(100%) } }
+.parent::before {
+  content: "";
+  display: block;
+  width: 38px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--line);
+  margin: 14px auto 18px;
+}
+.parent h3 {
+  margin: 0 0 14px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.pstat {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.pstat > div {
+  flex: 1;
+  min-width: 72px;
+  background: var(--surface-2);
+  border-radius: 18px;
+  padding: 14px 10px;
+  text-align: center;
+  border: 1px solid var(--line);
+}
+.pstat b {
+  font-family: var(--disp);
+  font-size: 26px;
+  font-weight: 800;
+  display: block;
+  color: var(--carrot-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.pstat span {
+  font-size: 10px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  letter-spacing: .04em;
+  display: block;
+  margin-top: 4px;
+}
+.pnote {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--leaf);
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.70;
+  color: var(--ink-soft);
+}
+.pnote b { color: var(--ink) }
+.prow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 2px;
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+}
+.prow .lab { font-family: var(--disp); font-size: 15px; font-weight: 700; color: var(--ink) }
+.prow .desc {
+  font-size: 12px;
+  color: var(--ink-soft);
+  max-width: 20em;
+  margin-top: 2px;
+  line-height: 1.45;
+}
+.toggle {
+  width: 54px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--line);
+  position: relative;
+  flex: none;
+  cursor: pointer;
+  transition: background .22s;
+}
+.toggle.on { background: var(--leaf) }
+.toggle::after {
+  content: "";
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  top: 3px;
+  left: 3px;
+  transition: left .22s var(--spring);
+  box-shadow: 0 2px 6px rgba(0,0,0,.22);
+}
+.toggle.on::after { left: 25px }
+.pclose {
+  width: 100%;
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  font-size: 16px;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  transition: background .15s;
+}
+.pclose:active { background: var(--line) }
+.link {
+  background: none;
+  color: var(--berry);
+  font-size: 13px;
+  font-family: var(--disp);
+  font-weight: 700;
+  padding: 8px 4px;
+  white-space: nowrap;
+}
+:focus-visible {
+  outline: 3px solid var(--carrot);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important }
+}
+#camCard{display:none}
+.fallback{font-size:24px;padding:22px}
 </style>
 </head>
 <body>
@@ -131,23 +677,30 @@
     <div class="topbar">
       <div class="eyebrow">そだてる しょくたく（タップ版）</div>
       <div class="topright">
-        <div class="coll gift" id="giftBadge">🎁 <span id="giftCount">0</span></div>
-        <div class="coll" id="collBadge">🏆 <span id="collCount">0</span></div>
+        <div class="coll gift" id="giftBadge">🍱 <span id="giftCount">0</span></div>
+        <div class="coll" id="collBadge">🌸 <span id="collCount">0</span></div>
         <button class="icon-btn" id="parentBtn" aria-label="おうちの人メニュー">👪</button>
       </div>
     </div>
 
     <div class="char-wrap">
-      <div class="char" id="char" role="button" aria-label="たべた">🥚</div>
+      <div class="char" id="char"></div>
       <div class="char-name" id="charName">たまご</div>
       <div class="prog"><i id="progFill"></i></div>
       <div class="prog-cap" id="progCap">たべると そだつよ</div>
     </div>
 
-    <p class="prompt-big" id="prompt">ひとくち たべたら ボタンを タップ！</p>
-    <div class="bites-row" id="bitesRow"></div>
+    <p class="prompt-big" id="prompt">ごはんを たべたら ボタンを おしてね 🥄</p>
 
-    <button class="eat-btn" id="eatBtn">🍚 たべた！</button>
+    <div class="cam-card" id="camCard">
+      <video id="cam" playsinline muted autoplay></video>
+      <div class="cam-off" id="camOff">カメラで きろく</div>
+      <svg class="ring" viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="54"/><circle class="fg" id="ring" cx="60" cy="60" r="54"/></svg>
+      <div class="cam-badge" id="camBadge">じゅんび中…</div>
+      <div class="cam-hint" id="camHint"></div>
+    </div>
+
+    <button class="fallback hide" id="fallback">🥄 たべた！</button>
 
     <div class="meal-ctrl">
       <button class="btn-start" id="mealBtn">🍽️ ごはん スタート</button>
@@ -158,7 +711,7 @@
 
   <div class="ov-back" id="evoBack" style="display:none">
     <div class="ov-card">
-      <div class="big" id="evoBig">🐣</div>
+      <div class="big" id="evoBig">🌱</div>
       <h3 id="evoTitle">うまれた！</h3>
       <p id="evoMsg">たくさん たべてくれて ありがとう</p>
     </div>
@@ -176,9 +729,9 @@
 
   <div class="ov-back" id="giftBack" style="display:none">
     <div class="ov-card">
-      <div class="big">🎁</div>
-      <h3>あつめた ごほうび</h3>
-      <p><span id="giftTotal">0</span>こ あつめたよ！</p>
+      <div class="big">🍱</div>
+      <h3>あげた ごはん</h3>
+      <p><span id="giftTotal">0</span>こ あげたよ！</p>
       <div class="coll-strip" id="giftGrid"></div>
     </div>
   </div>
@@ -193,6 +746,15 @@
         <div><b id="pBest">0</b><span>1食の最高</span></div>
       </div>
       <div class="pnote"><b>今は食べきれなくてOK。</b>ひとくちの挑戦をくり返すことが「すき」への近道です。時間は記録だけ・子どもには見せていません。</div>
+
+      <div class="prow">
+        <div><div class="lab">カメラで手かざし検知</div><div class="desc" id="camModeDesc">オン（画面を触らずに記録）</div></div>
+        <div class="toggle on" id="camToggle" role="switch" aria-checked="true"></div>
+      </div>
+      <div class="prow">
+        <div><div class="lab">「たべた」ボタンを出す</div><div class="desc" id="btnDesc">カメラが使えない時だけ表示</div></div>
+        <div class="toggle" id="btnToggle" role="switch" aria-checked="false"></div>
+      </div>
       <div class="prow">
         <div><div class="lab">ごほうびモード</div><div class="desc" id="rewardDesc">キャラを そだてる</div></div>
         <div class="toggle on" id="rewardToggle" role="switch" aria-checked="true"></div>
@@ -202,96 +764,282 @@
         <button class="link" id="resetBtn" style="color:var(--ink-soft)">リセット</button>
       </div>
       <p style="font-size:11px;color:var(--ink-soft);text-align:center;line-height:1.6;margin:10px 0 0">
-        タップ版・手かざしが使えない時のバックアップ<br>食べた量でなく“ひとくちの回数”を大切にします
+        V1 PoC・「育てる食卓」/ 一口ごとに ごはんをあげて キャラが育つ<br>食べた量でなく“ひとくちの回数”を大切にします
       </p>
       <button class="pclose" id="parentClose">とじる</button>
     </div>
   </div>
 </div>
 
-<script>
-(function(){
-/* growth model — same as hand-wave version */
+<script type="module">
+import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+/* ---------- growth model: a cute sprout pet grows, then blooms into a collected flower ---------- */
 const FORMS = [
-  {emoji:"🥚", name:"たまご",   need:8,  next:"うまれる",     evo:"うまれた！"},
-  {emoji:"🐣", name:"うまれたて", need:12, next:"おおきくなる", evo:"おおきくなった！"},
-  {emoji:"🐤", name:"ひよこ",   need:20, next:"こどりに なる", evo:"こどりに なった！"},
-  {emoji:"🐥", name:"こどり",   need:30, next:"おとなに なる", evo:"おとなに なった！"}
-];
-const ADULTS = ["🐔","🦆","🦉","🦢","🦜","🦩","🦚","🐧","🐓","🦃","🕊️","🦅"];
-const EFFECTS = [["✨","⭐","🌟"],["🎉","🎊","🎈"],["💛","🧡","💫"],["🌈","☁️","⚡"],["🍎","🍓","🍇"],["🌸","🌷","🌼"],["🐾","🎀","🍀"]];
-const CHEERS = ["たべたね！","えらいね！","じょうずー！","もぐもぐ！","やったね！","ナイス！"];
-const BITE_DOTS = ["🍚","🥕","🥦","🍓","🐟","🍅","🌽","🥔"];
-const REWARDS = ["⭐","🍓","🍎","🍇","🐰","🌈","🍭","🎈","🦄","🌻","🍀","🐧","🎀","🧸","🐥","🦊","🌷","🍬","🐝","🍒","🌟","🐱"];
+  {variant:"egg",   name:"たまご", need:8,  next:"うまれる",     evo:"うまれた！",   evoEmoji:"🥚"},
+  {variant:"baby",  name:"ふたば", need:12, next:"おおきくなる", evo:"おおきくなった！", evoEmoji:"🌱"},
+  {variant:"child", name:"わかば", need:20, next:"つぼみに なる", evo:"つぼみに なった！", evoEmoji:"🌿"},
+  {variant:"teen",  name:"つぼみ", need:30, next:"はなに なる",   evo:"はなが さいた！", evoEmoji:"🌷"}
+]; // 70 bites per bloom ≈ ~1 dinner
+const FLOWERS = ["🌸","🌻","🌷","🌹","🌼","🏵️","💐","🪷","🌺","🥀","🌾","🍀"];
+const FOODS   = ["🍞","🍙","🍎","🥕","🍓","🐟","🥦","🍌","🧀","🍠","🥚","🍇","🍅","🌽","🥔","🍒","🍡","🍜","🥛","🍰"];
+const EFFECTS = [["✨","⭐","🌟"],["🎉","🎊","🎈"],["💛","🧡","💫"],["🌈","☁️","⚡"],["🌸","🌷","🌼"]];
+const CHEERS  = ["たべたね！","えらいね！","じょうずー！","もぐもぐ！","やったね！","おいしい！","ナイス！"];
+
 const KEY="sodateru_tap_v1";
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], rewardCount:0, rewardBook:[], rewardMode:"grow" }; }
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true }; }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return Object.assign(base(),d); }catch(e){} return base(); }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
 let st=load();
 let meal={active:false,startTs:0,bites:0,tickId:null};
+let camFailed=false;
 const $=s=>document.querySelector(s);
 
+/* ---------- cute mascot (Mogu) ---------- */
+function buildMascot(v) {
+  const INK    = '#40342B';
+  const LEAF   = '#5FA45A';
+  const LEAF_L = '#7FC66F';
+  const BLUSH  = '#F7A8C4';
+  const SUN    = '#F5B93F';
+  const TONGUE = '#F08090';
+
+  function bGrad(id, c0, c1) {
+    return `<radialGradient id="${id}" cx="38%" cy="30%" r="70%">` +
+      `<stop offset="0%" stop-color="${c0}"/>` +
+      `<stop offset="100%" stop-color="${c1}"/>` +
+      `</radialGradient>`;
+  }
+
+  function eye(cx, cy, s) {
+    return (
+      `<ellipse cx="${cx}" cy="${cy}" rx="${(s*.84).toFixed(1)}" ry="${s}" fill="${INK}"/>` +
+      `<ellipse cx="${cx}" cy="${(cy+s*.1).toFixed(1)}" rx="${(s*.52).toFixed(1)}" ry="${(s*.60).toFixed(1)}" fill="#5E9ACA"/>` +
+      `<circle  cx="${(cx-s*.27).toFixed(1)}" cy="${(cy-s*.27).toFixed(1)}" r="${(s*.30).toFixed(1)}" fill="#fff"/>` +
+      `<circle  cx="${(cx+s*.14).toFixed(1)}" cy="${(cy+s*.18).toFixed(1)}" r="${(s*.13).toFixed(1)}" fill="rgba(255,255,255,.5)"/>`
+    );
+  }
+
+  function shad(rx) {
+    return `<ellipse cx="50" cy="96" rx="${rx}" ry="4" fill="rgba(180,120,60,.14)"/>`;
+  }
+
+  if (v === 'egg') {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<defs>${bGrad('egG','#FFF8EE','#EED09A')}</defs>
+${shad(19)}
+<ellipse cx="50" cy="57" rx="27" ry="33" fill="url(#egG)" stroke="#DDBE88" stroke-width="2"/>
+<ellipse cx="39" cy="42" rx="7.5" ry="10" fill="rgba(255,255,255,.38)" transform="rotate(-22 39 42)"/>
+<path d="M34 46 l4.5 3.5 -3 4 5.5 3 4 -3.5 5.5 2.5" stroke="#C0A070" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M38 59 q3.5 -3.5 7 0" stroke="${INK}" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+<path d="M55 59 q3.5 -3.5 7 0" stroke="${INK}" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+<line x1="38"  y1="59"  x2="36"  y2="56"  stroke="${INK}" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="45"  y1="57"  x2="45"  y2="54"  stroke="${INK}" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="55"  y1="59"  x2="53"  y2="56"  stroke="${INK}" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="62"  y1="57"  x2="62"  y2="54"  stroke="${INK}" stroke-width="1.4" stroke-linecap="round"/>
+<ellipse cx="32" cy="65" rx="5.5" ry="3.4" fill="${BLUSH}" opacity=".66"/>
+<ellipse cx="68" cy="65" rx="5.5" ry="3.4" fill="${BLUSH}" opacity=".66"/>
+<path d="M46 67 q4 2.5 8 0" stroke="${INK}" stroke-width="2" fill="none" stroke-linecap="round"/>
+<text x="71" y="40" font-size="7" fill="${INK}" opacity=".30" font-family="sans-serif" font-weight="bold">z</text>
+<text x="76" y="33" font-size="5" fill="${INK}" opacity=".18" font-family="sans-serif">z</text>
+</svg>`;
+  }
+
+  if (v === 'baby') {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<defs>${bGrad('baG','#FFF2D0','#FAD87A')}</defs>
+${shad(20)}
+<path d="M50 34 q-1.5 -8 -8.5 -13" stroke="${LEAF}" stroke-width="3" fill="none" stroke-linecap="round"/>
+<ellipse cx="41.5" cy="21" rx="6.5" ry="4" fill="${LEAF_L}" transform="rotate(-30 41.5 21)"/>
+<path d="M50 34 q1.5 -8 8.5 -13" stroke="${LEAF}" stroke-width="3" fill="none" stroke-linecap="round"/>
+<ellipse cx="58.5" cy="21" rx="6.5" ry="4" fill="${LEAF_L}" transform="rotate(30 58.5 21)"/>
+<ellipse cx="50" cy="63" rx="26" ry="25" fill="url(#baG)" stroke="#E6BE50" stroke-width="1.8"/>
+<ellipse cx="38" cy="51" rx="6" ry="8.5" fill="rgba(255,255,255,.35)" transform="rotate(-22 38 51)"/>
+${eye(41, 59, 7.5)}
+${eye(59, 59, 7.5)}
+<ellipse cx="29" cy="67" rx="7"   ry="4.3" fill="${BLUSH}" opacity=".72"/>
+<ellipse cx="71" cy="67" rx="7"   ry="4.3" fill="${BLUSH}" opacity=".72"/>
+<ellipse cx="50" cy="74.5" rx="4.5" ry="3" fill="${TONGUE}"/>
+<path d="M43 72 q7 8 14 0" stroke="${INK}" stroke-width="2" fill="none" stroke-linecap="round"/>
+<ellipse cx="23" cy="68" rx="5.5" ry="4" fill="#FAD87A" stroke="#E6BE50" stroke-width="1.2" transform="rotate(-18 23 68)"/>
+<ellipse cx="77" cy="68" rx="5.5" ry="4" fill="#FAD87A" stroke="#E6BE50" stroke-width="1.2" transform="rotate(18 77 68)"/>
+</svg>`;
+  }
+
+  if (v === 'child') {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<defs>${bGrad('chG','#FDE8B0','#F3BE30')}</defs>
+${shad(22)}
+<line x1="50" y1="32" x2="50" y2="14" stroke="${LEAF}" stroke-width="3.5" stroke-linecap="round"/>
+<ellipse cx="41" cy="16" rx="9.5" ry="5.5" fill="${LEAF_L}" stroke="${LEAF}" stroke-width=".8" transform="rotate(-32 41 16)"/>
+<ellipse cx="59" cy="16" rx="9.5" ry="5.5" fill="${LEAF_L}" stroke="${LEAF}" stroke-width=".8" transform="rotate(32 59 16)"/>
+<ellipse cx="50" cy="11" rx="6.5" ry="5" fill="#8ED07E"/>
+<ellipse cx="50" cy="63" rx="29" ry="27" fill="url(#chG)" stroke="#D6A424" stroke-width="1.9"/>
+<ellipse cx="37" cy="49" rx="7" ry="9.5" fill="rgba(255,255,255,.30)" transform="rotate(-20 37 49)"/>
+${eye(41, 58, 8)}
+${eye(59, 58, 8)}
+<ellipse cx="28" cy="66" rx="7.5" ry="4.6" fill="${BLUSH}" opacity=".74"/>
+<ellipse cx="72" cy="66" rx="7.5" ry="4.6" fill="${BLUSH}" opacity=".74"/>
+<ellipse cx="50" cy="75" rx="5" ry="3.3" fill="${TONGUE}"/>
+<path d="M42 72 q8 9 16 0" stroke="${INK}" stroke-width="2.1" fill="none" stroke-linecap="round"/>
+<ellipse cx="21" cy="65" rx="6.5" ry="4.5" fill="#F3BE30" stroke="#D6A424" stroke-width="1.3" transform="rotate(-26 21 65)"/>
+<ellipse cx="79" cy="65" rx="6.5" ry="4.5" fill="#F3BE30" stroke="#D6A424" stroke-width="1.3" transform="rotate(26 79 65)"/>
+</svg>`;
+  }
+
+  if (v === 'teen') {
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  ${bGrad('teG','#FBDF88','#E8AC14')}
+  <radialGradient id="teBud" cx="50%" cy="35%" r="62%">
+    <stop offset="0%" stop-color="#FDDAEB"/>
+    <stop offset="100%" stop-color="#D06A93"/>
+  </radialGradient>
+</defs>
+${shad(24)}
+<line x1="50" y1="31" x2="50" y2="18" stroke="${LEAF}" stroke-width="3.5" stroke-linecap="round"/>
+<ellipse cx="40" cy="22" rx="9" ry="5.2" fill="${LEAF_L}" stroke="${LEAF}" stroke-width=".9" transform="rotate(-36 40 22)"/>
+<ellipse cx="60" cy="22" rx="9" ry="5.2" fill="${LEAF_L}" stroke="${LEAF}" stroke-width=".9" transform="rotate(36 60 22)"/>
+<ellipse cx="50" cy="14" rx="8.5" ry="7" fill="url(#teBud)"/>
+<path d="M50 7 q3.5 -4.5 7 0 q0 6.5 -7 6.5 q-7 0 -7 -6.5 q3.5 -4.5 7 0z" fill="#FDDAEB" opacity=".75"/>
+<ellipse cx="50" cy="63" rx="31" ry="28.5" fill="url(#teG)" stroke="#C68E0C" stroke-width="2"/>
+<ellipse cx="36" cy="48" rx="7.5" ry="10.5" fill="rgba(255,255,255,.26)" transform="rotate(-20 36 48)"/>
+${eye(40.5, 57, 8.5)}
+${eye(59.5, 57, 8.5)}
+<path d="M73.5 45.5 l2.2 -3.8 2.2 3.8z" fill="${SUN}" opacity=".82"/>
+<line x1="74.7" y1="41.7" x2="74.7" y2="39"   stroke="${SUN}" stroke-width="1.3" stroke-linecap="round"/>
+<line x1="73"   y1="40.3" x2="76.4" y2="40.3"  stroke="${SUN}" stroke-width="1.3" stroke-linecap="round"/>
+<ellipse cx="26" cy="66" rx="8.5" ry="5.2" fill="${BLUSH}" opacity=".78"/>
+<ellipse cx="74" cy="66" rx="8.5" ry="5.2" fill="${BLUSH}" opacity=".78"/>
+<ellipse cx="50" cy="75.5" rx="5.5" ry="3.5" fill="${TONGUE}"/>
+<path d="M41 72 q9 11 18 0" stroke="${INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<ellipse cx="19" cy="62" rx="7" ry="5" fill="#E8AC14" stroke="#C68E0C" stroke-width="1.4" transform="rotate(-32 19 62)"/>
+<ellipse cx="81" cy="62" rx="7" ry="5" fill="#E8AC14" stroke="#C68E0C" stroke-width="1.4" transform="rotate(32 81 62)"/>
+</svg>`;
+  }
+
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  ${bGrad('adG','#FBDA74','#E09608')}
+  <radialGradient id="adP" cx="50%" cy="35%" r="62%">
+    <stop offset="0%" stop-color="#FDDAEB"/>
+    <stop offset="100%" stop-color="#D06A93"/>
+  </radialGradient>
+  <radialGradient id="adC" cx="42%" cy="36%" r="62%">
+    <stop offset="0%" stop-color="#FFFACC"/>
+    <stop offset="100%" stop-color="${SUN}"/>
+  </radialGradient>
+</defs>
+${shad(26)}
+<line x1="50" y1="31" x2="50" y2="21" stroke="${LEAF}" stroke-width="3.7" stroke-linecap="round"/>
+<ellipse cx="39" cy="26" rx="9.5" ry="5.5" fill="${LEAF_L}" stroke="${LEAF}" stroke-width="1" transform="rotate(-40 39 26)"/>
+<ellipse cx="61" cy="26" rx="9.5" ry="5.5" fill="${LEAF_L}" stroke="${LEAF}" stroke-width="1" transform="rotate(40 61 26)"/>
+<g transform="translate(50,16)">
+  <ellipse cx="0" cy="-8.5" rx="5"   ry="7.5" fill="url(#adP)"/>
+  <ellipse cx="0" cy="-8.5" rx="5"   ry="7.5" fill="url(#adP)" transform="rotate(72)"/>
+  <ellipse cx="0" cy="-8.5" rx="5"   ry="7.5" fill="url(#adP)" transform="rotate(144)"/>
+  <ellipse cx="0" cy="-8.5" rx="5"   ry="7.5" fill="url(#adP)" transform="rotate(216)"/>
+  <ellipse cx="0" cy="-8.5" rx="5"   ry="7.5" fill="url(#adP)" transform="rotate(288)"/>
+  <circle cx="0" cy="0" r="6.5" fill="url(#adC)"/>
+</g>
+<ellipse cx="50" cy="64" rx="33" ry="30" fill="url(#adG)" stroke="#A07000" stroke-width="2.2"/>
+<ellipse cx="35" cy="48" rx="8.5" ry="11.5" fill="rgba(255,255,255,.27)" transform="rotate(-20 35 48)"/>
+${eye(40, 57, 9)}
+${eye(60, 57, 9)}
+<path d="M76.5 43 l2.4 -4.2 2.4 4.2z" fill="${SUN}" opacity=".85"/>
+<line x1="77.9" y1="38.8" x2="77.9" y2="36"   stroke="${SUN}" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="76"   y1="37.4" x2="79.8" y2="37.4"  stroke="${SUN}" stroke-width="1.4" stroke-linecap="round"/>
+<path d="M23.5 43 l-2.4 -4.2 -2.4 4.2z" fill="${SUN}" opacity=".85"/>
+<line x1="22.1" y1="38.8" x2="22.1" y2="36"   stroke="${SUN}" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="20.2" y1="37.4" x2="24"   y2="37.4"  stroke="${SUN}" stroke-width="1.4" stroke-linecap="round"/>
+<ellipse cx="25" cy="65" rx="9"   ry="5.5" fill="${BLUSH}" opacity=".82"/>
+<ellipse cx="75" cy="65" rx="9"   ry="5.5" fill="${BLUSH}" opacity=".82"/>
+<ellipse cx="50" cy="77" rx="6"   ry="4"   fill="${TONGUE}"/>
+<path d="M40 73 q10 13 20 0" stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+<ellipse cx="17" cy="60" rx="7.5" ry="5.2" fill="#E09608" stroke="#A07000" stroke-width="1.5" transform="rotate(-38 17 60)"/>
+<ellipse cx="83" cy="60" rx="7.5" ry="5.2" fill="#E09608" stroke="#A07000" stroke-width="1.5" transform="rotate(38 83 60)"/>
+<circle cx="64" cy="52" r="2"   fill="rgba(255,255,255,.38)"/>
+<circle cx="68" cy="61" r="1.3" fill="rgba(255,255,255,.28)"/>
+</svg>`;
+}
+
+/* ---------- render ---------- */
 function renderChar(){
   const f=FORMS[st.stageIdx];
-  $("#char").textContent=f.emoji; $("#charName").textContent=f.name;
+  $("#char").innerHTML=buildMascot(f.variant);
+  $("#charName").textContent=f.name;
   $("#progFill").style.width=Math.min(100,st.stageProg/f.need*100)+"%";
   $("#progCap").textContent="あと "+(f.need-st.stageProg)+"かい で "+f.next+"よ";
   $("#collCount").textContent=st.coll.length;
-  $("#giftCount").textContent=st.rewardCount||0;
+  $("#giftCount").textContent=st.fedCount||0;
 }
+
+/* ---------- a bite happened: get a food, feed the pet, it grows ---------- */
 function registerBite(){
   if(!meal.active) startMeal();
   st.total++; meal.bites++; st.stageProg++;
-  const c=$("#char"); c.classList.remove("hop"); void c.offsetWidth; c.classList.add("hop");
-  burst(EFFECTS[st.total%EFFECTS.length]); praise(CHEERS[st.total%CHEERS.length]);
-  const dot=document.createElement("span"); dot.className="bite-dot"; dot.textContent=BITE_DOTS[meal.bites%BITE_DOTS.length];
-  const row=$("#bitesRow"); row.appendChild(dot); if(row.children.length>32) row.removeChild(row.firstChild);
+  praise(CHEERS[st.total % CHEERS.length]);
+
   if(st.rewardMode==="grow"){
-    const rw=REWARDS[(st.total-1)%REWARDS.length];
-    st.rewardCount=(st.rewardCount||0)+1; (st.rewardBook=st.rewardBook||[]).push(rw);
-    if(st.rewardBook.length>80) st.rewardBook.shift();
-    rewardFly(rw); $("#giftCount").textContent=st.rewardCount;
+    const food=FOODS[(st.total-1)%FOODS.length];
+    st.fedCount=(st.fedCount||0)+1; (st.fedBook=st.fedBook||[]).push(food);
+    if(st.fedBook.length>80) st.fedBook.shift();
+    feedAnim(food); $("#giftCount").textContent=st.fedCount;
+  }else{
+    const c=$("#char"); c.classList.remove("chomp"); void c.offsetWidth; c.classList.add("chomp");
   }
+
   if(meal.bites>0 && meal.bites%5===0) streak(meal.bites+"れんぞく！");
+
   const f=FORMS[st.stageIdx];
   if(st.stageProg>=f.need){
-    if(st.stageIdx<FORMS.length-1){ st.stageIdx++; st.stageProg=0;
-      showEvolve(FORMS[st.stageIdx].emoji,f.evo,"どんどん おおきく なってるよ！"); praise(f.evo); }
-    else{ const a=ADULTS[st.coll.length%ADULTS.length]; st.coll.push(a); st.stageIdx=0; st.stageProg=0;
-      showEvolve(a,"おとなに なった！","「なかま」が "+st.coll.length+"ひきに！\nあたらしい たまごが きたよ 🥚"); praise("おとなに なったよ！やったね！"); }
+    if(st.stageIdx<FORMS.length-1){
+      st.stageIdx++; st.stageProg=0; burst(EFFECTS[st.stageIdx%EFFECTS.length]);
+      showEvolveEmoji(FORMS[st.stageIdx].evoEmoji, f.evo, "どんどん おおきく なってるよ！"); praise(f.evo);
+    }else{
+      const flower=FLOWERS[st.coll.length%FLOWERS.length]; st.coll.push(flower);
+      st.stageIdx=0; st.stageProg=0; burst(EFFECTS[0]);
+      showEvolveEmoji(flower, "はなが さいた！", "「おはな」が "+st.coll.length+"こに！\nあたらしい たまごが きたよ 🥚");
+      praise("おはなが さいたよ！やったね！");
+    }
   }
   save(); renderChar(); renderParent();
 }
+
+/* ---------- effects ---------- */
+function feedAnim(food){
+  const host=$(".phone"), hb=host.getBoundingClientRect(), ch=$("#char").getBoundingClientRect();
+  const cx=ch.left-hb.left+ch.width/2, cy=ch.top-hb.top+ch.height/2;
+  const el=document.createElement("div"); el.className="feed-item"; el.textContent=food;
+  el.style.left=cx+"px"; el.style.top=cy+"px"; host.appendChild(el); setTimeout(()=>el.remove(),840);
+  const fl=document.createElement("div"); fl.className="feed-flash"; fl.style.left=cx+"px"; fl.style.top=cy+"px";
+  host.appendChild(fl); setTimeout(()=>fl.remove(),560);
+  const pl=document.createElement("div"); pl.className="feed-plus"; pl.textContent="+1";
+  pl.style.left=cx+"px"; pl.style.top=(cy-70)+"px"; host.appendChild(pl); setTimeout(()=>pl.remove(),900);
+  const c=$("#char"); c.classList.remove("chomp"); void c.offsetWidth; c.classList.add("chomp");
+  const b=$("#giftBadge"); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
+}
 function burst(set){
   const host=$(".phone"), hb=host.getBoundingClientRect(), ch=$("#char").getBoundingClientRect();
-  const cx=ch.left-hb.left+ch.width/2, cy=ch.top-hb.top+ch.height/2, n=6;
+  const cx=ch.left-hb.left+ch.width/2, cy=ch.top-hb.top+ch.height/2, n=8;
   for(let i=0;i<n;i++){ const e=document.createElement("div"); e.className="fx"; e.textContent=set[i%set.length];
-    const ang=(Math.PI*2*i)/n+(st.total%7)*0.3, dist=80+(i%3)*22;
+    const ang=(Math.PI*2*i)/n+(st.total%7)*0.3, dist=80+(i%3)*24;
     e.style.left=cx+"px"; e.style.top=cy+"px";
     e.style.setProperty("--dx",(Math.cos(ang)*dist).toFixed(0)+"px");
-    e.style.setProperty("--dy",(Math.sin(ang)*dist-30).toFixed(0)+"px");
+    e.style.setProperty("--dy",(Math.sin(ang)*dist-20).toFixed(0)+"px");
     e.style.setProperty("--rot",((i%2?1:-1)*40)+"deg");
     host.appendChild(e); setTimeout(()=>e.remove(),1000); }
 }
 function streak(text){ const t=$("#streakToast"); t.innerHTML=""; const s=document.createElement("span"); s.textContent=text; t.appendChild(s); setTimeout(()=>{if(t.firstChild)t.innerHTML="";},1100); }
-function rewardFly(emoji){
-  const host=$(".phone"), hb=host.getBoundingClientRect();
-  const from=$("#char").getBoundingClientRect(), to=$("#giftBadge").getBoundingClientRect();
-  const x0=from.left-hb.left+from.width/2, y0=from.top-hb.top+from.height/3;
-  const x1=to.left-hb.left+to.width/2, y1=to.top-hb.top+to.height/2;
-  const el=document.createElement("div"); el.className="reward-fly"; el.textContent=emoji;
-  el.style.left=x0+"px"; el.style.top=y0+"px";
-  el.style.setProperty("--tx",(x1-x0).toFixed(0)+"px"); el.style.setProperty("--ty",(y1-y0).toFixed(0)+"px");
-  host.appendChild(el); setTimeout(()=>el.remove(),720);
-  const b=$("#giftBadge"); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
-}
-function showGift(){ $("#giftTotal").textContent=st.rewardCount||0; $("#giftGrid").textContent=(st.rewardBook||[]).slice(-40).join(" "); const b=$("#giftBack"); b.style.display="grid"; b.onclick=()=>b.style.display="none"; }
-function showEvolve(emoji,title,msg){
+function showEvolveEmoji(emoji,title,msg){
   $("#evoBig").textContent=emoji; $("#evoTitle").textContent=title; $("#evoMsg").textContent=msg;
   const b=$("#evoBack"); b.style.display="grid";
   const ch=$("#char"); ch.classList.remove("evolve"); void ch.offsetWidth; ch.classList.add("evolve");
-  clearTimeout(showEvolve._t); showEvolve._t=setTimeout(()=>b.style.display="none",2200); b.onclick=()=>b.style.display="none";
+  clearTimeout(showEvolveEmoji._t); showEvolveEmoji._t=setTimeout(()=>b.style.display="none",2300); b.onclick=()=>b.style.display="none";
 }
+function showGift(){ $("#giftTotal").textContent=st.fedCount||0; $("#giftGrid").textContent=(st.fedBook||[]).slice(-40).join(" "); const b=$("#giftBack"); b.style.display="grid"; b.onclick=()=>b.style.display="none"; }
+
+/* ---------- praise (audio) ---------- */
 let audioCtx=null;
 function chime(){ try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); const t=audioCtx.currentTime;
   [523.25,659.25,783.99].forEach((f,i)=>{ const o=audioCtx.createOscillator(),g=audioCtx.createGain();
@@ -301,8 +1049,7 @@ function chime(){ try{ audioCtx=audioCtx||new (window.AudioContext||window.webki
 let jaVoice=null;
 function pickVoice(){ try{ const vs=speechSynthesis.getVoices();
   jaVoice = vs.find(v=>/ja(-|_)?JP/i.test(v.lang) && /(premium|enhanced|neural|siri|kyoko)/i.test(v.name))
-         || vs.find(v=>v.name==="Kyoko")
-         || vs.find(v=>/ja(-|_)?JP/i.test(v.lang) || /^ja\b/i.test(v.lang)) || null; }catch(e){} }
+         || vs.find(v=>v.name==="Kyoko") || vs.find(v=>/ja(-|_)?JP/i.test(v.lang)||/^ja\b/i.test(v.lang)) || null; }catch(e){} }
 if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
 let speakN=0;
 function speak(text){ try{ if(!("speechSynthesis" in window)) return; if(!jaVoice) pickVoice();
@@ -310,9 +1057,10 @@ function speak(text){ try{ if(!("speechSynthesis" in window)) return; if(!jaVoic
   u.rate=1.06; u.pitch=1.4 + ((speakN++ %3)-1)*0.08; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
 function praise(text){ chime(); if(st.rewardMode==="grow"||st.rewardMode==="praise") speak(text); }
 
+/* ---------- meal ---------- */
 function startMeal(){ if(meal.active) return; meal={active:true,startTs:Date.now(),bites:0,tickId:null};
-  $("#bitesRow").innerHTML=""; $("#mealBtn").textContent="🟢 ごはんちゅう… (タップでおわり)";
-  $("#mealBtn").classList.remove("btn-start"); $("#mealBtn").classList.add("btn-end"); meal.tickId=setInterval(renderParent,1000); renderParent(); }
+  $("#mealBtn").textContent="🟢 ごはんちゅう… (タップでおわり)"; $("#mealBtn").classList.remove("btn-start"); $("#mealBtn").classList.add("btn-end");
+  meal.tickId=setInterval(renderParent,1000); renderParent(); }
 function endMeal(){ if(!meal.active) return; clearInterval(meal.tickId); meal.active=false; const n=meal.bites;
   $("#mealBtn").textContent="🍽️ ごはん スタート"; $("#mealBtn").classList.add("btn-start"); $("#mealBtn").classList.remove("btn-end");
   const rec=n>st.best&&n>0; if(n>st.best) st.best=n; save();
@@ -322,23 +1070,80 @@ function endMeal(){ if(!meal.active) return; clearInterval(meal.tickId); meal.ac
   if(n>0){ $("#sumBack").style.display="grid"; praise(rec?"しんきろく！すごい！":"ごちそうさま！"); }
   const sb=$("#sumBack"); clearTimeout(endMeal._t); endMeal._t=setTimeout(()=>sb.style.display="none",3200); sb.onclick=()=>sb.style.display="none"; renderParent(); }
 
-function renderParent(){ $("#pBites").textContent=meal.bites; $("#pTotal").textContent=st.total; $("#pBest").textContent=st.best;
-  const sec=meal.active?Math.floor((Date.now()-meal.startTs)/1000):0; $("#pTime").textContent=Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
-  $("#rewardDesc").textContent=st.rewardMode==="grow"?"キャラを そだてる":"ことばで ほめる（育成なし）"; $("#rewardToggle").classList.toggle("on",st.rewardMode==="grow"); }
+/* ---------- button visibility (hidden by default) ---------- */
+function updateButtonVis(){
+  const show = st.showButton || camFailed || !st.camMode;
+  $("#fallback").classList.toggle("hide", !show);
+}
 
+/* ---------- parent panel ---------- */
+function renderParent(){
+  $("#pBites").textContent=meal.bites; $("#pTotal").textContent=st.total; $("#pBest").textContent=st.best;
+  const sec=meal.active?Math.floor((Date.now()-meal.startTs)/1000):0; $("#pTime").textContent=Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
+  $("#rewardDesc").textContent=st.rewardMode==="grow"?"キャラを そだてる":"ことばで ほめる（育成なし）"; $("#rewardToggle").classList.toggle("on",st.rewardMode==="grow");
+  $("#camModeDesc").textContent=st.camMode?"オン（画面を触らずに記録）":"オフ（ボタンで記録）"; $("#camToggle").classList.toggle("on",st.camMode);
+  $("#btnDesc").textContent=st.showButton?"いつも表示":"カメラが使えない時だけ表示"; $("#btnToggle").classList.toggle("on",st.showButton);
+}
 function resumeAudio(){ try{ audioCtx&&audioCtx.state==="suspended"&&audioCtx.resume(); }catch(e){} }
-$("#eatBtn").onclick=()=>{ resumeAudio(); registerBite(); };
-$("#char").onclick=()=>{ resumeAudio(); registerBite(); };
+$("#fallback").onclick=()=>{ resumeAudio(); registerBite(); };
 $("#mealBtn").onclick=()=> meal.active?endMeal():startMeal();
 $("#giftBadge").onclick=showGift;
 $("#parentBtn").onclick=()=>{ renderParent(); $("#parentBack").style.display="flex"; };
 $("#parentClose").onclick=()=> $("#parentBack").style.display="none";
 $("#parentBack").addEventListener("click",e=>{ if(e.target.id==="parentBack") $("#parentBack").style.display="none"; });
 $("#rewardToggle").onclick=()=>{ st.rewardMode=st.rewardMode==="grow"?"praise":"grow"; save(); renderParent(); };
-$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode; st=base(); st.rewardMode=rm; save(); meal.bites=0; $("#bitesRow").innerHTML=""; renderChar(); renderParent(); } };
+$("#btnToggle").onclick=()=>{ st.showButton=!st.showButton; save(); renderParent(); updateButtonVis(); };
+$("#camToggle").onclick=()=>{ st.camMode=!st.camMode; save(); renderParent(); updateButtonVis(); st.camMode? startCamera():stopCamera(); };
+$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton; st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; save(); meal.bites=0; renderChar(); renderParent(); } };
+
+/* ---------- camera + hand detection ---------- */
+let handLandmarker=null, stream=null, rafId=null, camReady=false;
+let detState="IDLE", holdStart=0, absentSince=0;
+const HOLD_MS=550, COOLDOWN_MS=1100, RING_LEN=339;
+function setRing(pct){ $("#ring").style.strokeDashoffset=RING_LEN*(1-pct); }
+function camBadge(t){ $("#camBadge").textContent=t; }
+function camHint(t){ $("#camHint").textContent=t; }
+
+async function startCamera(){
+  if(!st.camMode) return;
+  camFailed=false; $("#camOff").style.display="none"; camBadge("じゅんび中…");
+  try{
+    if(!handLandmarker){
+      const vision=await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+      handLandmarker=await HandLandmarker.createFromOptions(vision,{
+        baseOptions:{ modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task", delegate:"GPU" },
+        runningMode:"VIDEO", numHands:1 });
+    }
+    stream=await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user", width:640, height:480 }, audio:false });
+    const v=$("#cam"); v.srcObject=stream; await v.play();
+    camReady=true; camBadge("👀 みてるよ"); camHint("おててを かざしてね"); detState="IDLE"; updateButtonVis(); loop();
+  }catch(e){
+    camReady=false; camFailed=true; $("#camOff").style.display="block";
+    $("#camOff").innerHTML=(location.protocol==="file:")?"カメラは https か localhost で<br>ためせます":"カメラが つかえません<br>ボタンで きろくしてね";
+    camBadge("カメラ オフ"); updateButtonVis(); console.warn("camera/mediapipe init failed:", e);
+  }
+}
+function stopCamera(){ camReady=false; if(rafId) cancelAnimationFrame(rafId);
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  $("#cam").srcObject=null; $("#camOff").style.display="block"; camBadge("カメラ オフ"); camHint(""); setRing(0); }
+function loop(){
+  if(!camReady) return; const v=$("#cam"); let present=false;
+  try{ if(v.readyState>=2 && handLandmarker){ const res=handLandmarker.detectForVideo(v, performance.now());
+    present=!!(res && res.landmarks && res.landmarks.length>0); } }catch(e){}
+  const nowT=performance.now();
+  if(detState==="IDLE"){ if(present){ detState="DETECTING"; holdStart=nowT; } else setRing(0); }
+  else if(detState==="DETECTING"){ if(!present){ detState="IDLE"; setRing(0); }
+    else{ const p=Math.min(1,(nowT-holdStart)/HOLD_MS); setRing(p); camHint("そのまま…");
+      if(p>=1){ detState="COUNTED"; absentSince=0; setRing(1); camHint("できた！ ✨"); resumeAudio(); registerBite(); } } }
+  else if(detState==="COUNTED"){ if(!present){ if(!absentSince) absentSince=nowT;
+      if(nowT-absentSince>=COOLDOWN_MS){ detState="IDLE"; setRing(0); camHint("おててを かざしてね"); } } else absentSince=0; }
+  rafId=requestAnimationFrame(loop);
+}
+
+/* ---------- boot ---------- */
+renderChar(); renderParent(); updateButtonVis();
 document.addEventListener("click",resumeAudio,{once:true});
-renderChar(); renderParent();
-})();
+if(st.camMode) startCamera(); else { camFailed=false; updateButtonVis(); }
 </script>
 </body>
 </html>
