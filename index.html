@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>育てる食卓 PoC</title>
+<style>
+  :root{
+    --ground:#FFF7EE; --surface:#FFFFFF; --surface-2:#FDEEE0;
+    --ink:#40342B; --ink-soft:#8A7A6D;
+    --carrot:#F97A2E; --carrot-ink:#B4531A;
+    --leaf:#5FA45A; --berry:#D06A93; --sun:#F5B93F;
+    --line:#F0E2D3; --shadow:24px 24px 60px rgba(180,120,60,.14);
+    --r:22px;
+    --disp:"Hiragino Maru Gothic ProN","Hiragino Maru Gothic Pro",-apple-system,system-ui,sans-serif;
+    --body:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --ground:#1C1815; --surface:#262019; --surface-2:#302720;
+    --ink:#F3E9DE; --ink-soft:#B3A498; --carrot:#FF9A55; --carrot-ink:#FFB985;
+    --leaf:#7FC178; --berry:#E68AAE; --sun:#F5C669; --line:#3A2F26; --shadow:24px 24px 60px rgba(0,0,0,.4);
+  }}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--body);color:var(--ink);background:var(--ground);
+    -webkit-font-smoothing:antialiased;display:flex;justify-content:center;min-height:100vh}
+  .phone{width:100%;max-width:440px;background:var(--ground);min-height:100vh;position:relative;
+    display:flex;flex-direction:column;overflow:hidden}
+  @media (min-width:460px){.phone{min-height:820px;height:min(920px,96vh);margin:auto;border-radius:34px;
+    box-shadow:var(--shadow);border:1px solid var(--line)} body{align-items:center;padding:16px}}
+  h1,h2,h3,.disp{font-family:var(--disp);font-weight:600;letter-spacing:.01em}
+  button{font-family:var(--disp);cursor:pointer;border:none;color:inherit}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);font-family:var(--disp)}
+
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;padding:16px 20px 20px;gap:10px;overflow:hidden}
+  .topbar{width:100%;display:flex;justify-content:space-between;align-items:center}
+  .icon-btn{width:42px;height:42px;border-radius:50%;background:var(--surface);
+    box-shadow:inset 0 0 0 1px var(--line);font-size:18px}
+
+  /* Character */
+  .char-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:4px}
+  .char{font-size:120px;line-height:1;filter:drop-shadow(0 10px 18px rgba(180,120,60,.22));
+    animation:breathe 4s ease-in-out infinite;transition:transform .2s}
+  @keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.03)}}
+  .char.hop{animation:hop .5s ease}
+  @keyframes hop{0%{transform:translateY(0)}30%{transform:translateY(-26px) scale(1.08) rotate(-4deg)}
+    60%{transform:translateY(0) scale(.98)}100%{transform:translateY(0)}}
+  .char.evolve{animation:evolvePop .8s cubic-bezier(.2,1.3,.5,1)}
+  @keyframes evolvePop{0%{transform:scale(.4) rotate(-20deg);filter:brightness(2)}
+    60%{transform:scale(1.25)}100%{transform:scale(1)}}
+  .char-name{font-family:var(--disp);font-size:15px;color:var(--ink-soft)}
+  .prog{width:min(78%,300px);height:16px;border-radius:20px;background:var(--surface-2);
+    box-shadow:inset 0 0 0 1.5px var(--line);overflow:hidden}
+  .prog>i{display:block;height:100%;width:0;border-radius:20px;
+    background:linear-gradient(90deg,var(--sun),var(--carrot));transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .prog-cap{font-size:12px;color:var(--ink-soft);font-family:var(--disp)}
+
+  /* Camera window */
+  .cam-card{width:min(84%,320px);position:relative;aspect-ratio:4/3;border-radius:26px;overflow:hidden;
+    background:var(--surface-2);box-shadow:var(--shadow);border:1px solid var(--line);display:grid;place-items:center}
+  #cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+  .cam-off{position:relative;text-align:center;color:var(--ink-soft);font-family:var(--disp);font-size:14px;padding:20px;z-index:2}
+  .ring{position:absolute;width:118px;height:118px;z-index:3;pointer-events:none}
+  .ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+  .ring .bg{stroke:rgba(255,255,255,.5)}
+  .ring .fg{stroke:var(--leaf);stroke-dasharray:339;stroke-dashoffset:339;
+    transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .1s linear}
+  .cam-hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;z-index:4;
+    font-family:var(--disp);font-size:15px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+  .cam-badge{position:absolute;top:10px;left:10px;z-index:4;font-size:11px;font-family:var(--disp);
+    background:rgba(0,0,0,.42);color:#fff;padding:4px 9px;border-radius:20px}
+
+  .prompt-big{font-family:var(--disp);font-size:22px;text-align:center;text-wrap:balance;margin:2px 0}
+  .bites-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:30px;max-width:90%}
+  .bite-dot{font-size:24px;animation:pop .4s cubic-bezier(.2,1.3,.5,1)}
+  @keyframes pop{from{transform:scale(0)}}
+
+  .fallback{width:min(84%,320px);padding:18px;border-radius:var(--r);font-size:20px;color:#fff;
+    background:linear-gradient(135deg,var(--leaf),#4f9a4a);box-shadow:0 10px 24px rgba(95,164,90,.34);
+    transition:transform .12s}
+  .fallback:active{transform:translateY(2px) scale(.99)}
+
+  .meal-ctrl{width:min(84%,320px);display:flex;gap:10px}
+  .meal-ctrl button{flex:1;padding:15px;border-radius:16px;font-size:16px}
+  .btn-start{background:var(--carrot);color:#fff;box-shadow:0 8px 20px rgba(249,122,46,.3)}
+  .btn-end{background:var(--surface);color:var(--ink-soft);box-shadow:inset 0 0 0 1.5px var(--line)}
+
+  /* Evolve overlay */
+  .evo-back{position:absolute;inset:0;background:rgba(40,30,20,.5);z-index:60;display:grid;place-items:center;animation:fade .2s}
+  @keyframes fade{from{opacity:0}}
+  .evo-card{background:var(--surface);border-radius:28px;padding:30px 34px;text-align:center;animation:evolvePop .6s cubic-bezier(.2,1.3,.5,1)}
+  .evo-card .big{font-size:100px;line-height:1}
+  .evo-card h3{margin:12px 0 2px;font-size:22px}
+  .evo-card p{margin:0;color:var(--ink-soft);font-size:14px}
+
+  /* Sparkles */
+  .spark{position:absolute;font-size:26px;pointer-events:none;z-index:50;animation:spark .9s ease forwards}
+  @keyframes spark{0%{transform:translateY(0) scale(.4);opacity:1}100%{transform:translateY(-70px) scale(1.2) rotate(30deg);opacity:0}}
+
+  /* Parent panel */
+  .parent-back{position:absolute;inset:0;background:rgba(40,30,20,.42);z-index:70;display:flex;align-items:flex-end;animation:fade .2s}
+  .parent{width:100%;background:var(--surface);border-radius:28px 28px 0 0;padding:22px 20px calc(26px + env(safe-area-inset-bottom));animation:rise .28s cubic-bezier(.2,.8,.2,1)}
+  @keyframes rise{from{transform:translateY(100%)}}
+  .parent h3{margin:0 0 12px;font-size:19px}
+  .pstat{display:flex;gap:12px;margin-bottom:14px}
+  .pstat>div{flex:1;background:var(--surface-2);border-radius:16px;padding:14px;text-align:center}
+  .pstat b{font-family:var(--disp);font-size:26px;display:block;color:var(--carrot-ink);font-variant-numeric:tabular-nums}
+  .pstat span{font-size:12px;color:var(--ink-soft)}
+  .pnote{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--leaf);
+    border-radius:14px;padding:13px 15px;font-size:13px;line-height:1.6;color:var(--ink-soft)}
+  .pnote b{color:var(--ink)}
+  .prow{display:flex;justify-content:space-between;align-items:center;padding:12px 2px;border-top:1px solid var(--line);margin-top:8px}
+  .prow .lab{font-family:var(--disp);font-size:14px}
+  .prow .desc{font-size:12px;color:var(--ink-soft);max-width:20em}
+  .toggle{width:52px;height:31px;border-radius:20px;background:var(--line);position:relative;flex:none;transition:.2s}
+  .toggle.on{background:var(--leaf)}
+  .toggle::after{content:"";position:absolute;width:25px;height:25px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .toggle.on::after{left:24px}
+  .pclose{width:100%;margin-top:16px;padding:14px;border-radius:16px;background:var(--surface-2);color:var(--ink-soft);font-size:15px}
+  .link{background:none;color:var(--berry);font-size:13px;font-family:var(--disp);padding:6px 0}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  :focus-visible{outline:3px solid var(--carrot);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="stage">
+    <div class="topbar">
+      <div class="eyebrow">そだてる しょくたく</div>
+      <button class="icon-btn" id="parentBtn" aria-label="おうちの人メニュー">👪</button>
+    </div>
+
+    <div class="char-wrap">
+      <div class="char" id="char">🥚</div>
+      <div class="char-name" id="charName">たまご</div>
+      <div class="prog"><i id="progFill"></i></div>
+      <div class="prog-cap" id="progCap">あと 3かい で うまれるよ</div>
+    </div>
+
+    <p class="prompt-big" id="prompt">ごはんを たべたら<br>おててを かざしてね ✋</p>
+
+    <div class="cam-card" id="camCard">
+      <video id="cam" playsinline muted autoplay></video>
+      <div class="cam-off" id="camOff">カメラを つかうと<br>おててで きろくできるよ</div>
+      <svg class="ring" viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="54"/><circle class="fg" id="ring" cx="60" cy="60" r="54"/></svg>
+      <div class="cam-badge" id="camBadge">じゅんび中…</div>
+      <div class="cam-hint" id="camHint"></div>
+    </div>
+
+    <div class="bites-row" id="bitesRow"></div>
+
+    <button class="fallback" id="fallback">🥄 たべた！（ボタン）</button>
+
+    <div class="meal-ctrl">
+      <button class="btn-start" id="mealBtn">🍽️ ごはん スタート</button>
+    </div>
+  </div>
+
+  <!-- Evolve overlay -->
+  <div class="evo-back" id="evoBack" style="display:none">
+    <div class="evo-card">
+      <div class="big" id="evoBig">🐣</div>
+      <h3 id="evoTitle">うまれた！</h3>
+      <p id="evoMsg">たくさん たべてくれて ありがとう</p>
+    </div>
+  </div>
+
+  <!-- Parent panel -->
+  <div class="parent-back" id="parentBack" style="display:none">
+    <div class="parent">
+      <h3>おうちの人メニュー</h3>
+      <div class="pstat">
+        <div><b id="pBites">0</b><span>この食事のひとくち</span></div>
+        <div><b id="pTime">0:00</b><span>食事の時間</span></div>
+        <div><b id="pTotal">0</b><span>ぜんぶのひとくち</span></div>
+      </div>
+      <div class="pnote" id="pNote"><b>今は食べきれなくてOK。</b>ひとくちの挑戦をくり返すことが「すき」への近道です。時間は記録だけ・子どもには見せていません。</div>
+
+      <div class="prow">
+        <div><div class="lab">ごほうびモード</div><div class="desc" id="rewardDesc">キャラを そだてる</div></div>
+        <div class="toggle on" id="rewardToggle" role="switch" aria-checked="true"></div>
+      </div>
+      <div class="prow">
+        <div><div class="lab">カメラで手かざし検知</div><div class="desc" id="camModeDesc">オン（画面を触らずに記録）</div></div>
+        <div class="toggle on" id="camToggle" role="switch" aria-checked="true"></div>
+      </div>
+      <div class="prow">
+        <div><div class="lab">データを消す</div><div class="desc">キャラ・きろくを リセット</div></div>
+        <button class="link" id="resetBtn" style="color:var(--ink-soft)">リセット</button>
+      </div>
+      <p style="font-size:11px;color:var(--ink-soft);text-align:center;line-height:1.6;margin:10px 0 0">
+        V1 PoC・「育てる食卓」コアループ検証用<br>手かざし=ハンズフリー入力 / 食べた量でなく“ひとくちの回数”を大切にします
+      </p>
+      <button class="pclose" id="parentClose">とじる</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+/* ---------------- state ---------------- */
+const KEY = "sodateru_v1";
+const STAGES = [
+  {emoji:"🥚", name:"たまご",  need:3, next:"うまれる",     evo:"うまれた！",   evoMsg:"ひよこに なったよ！"},
+  {emoji:"🐣", name:"うまれたて", need:3, next:"おおきくなる", evo:"おおきくなった！", evoMsg:"ひよこに せいちょう！"},
+  {emoji:"🐤", name:"ひよこ",  need:4, next:"こどりに なる", evo:"こどりに なった！", evoMsg:"どんどん おおきく！"},
+  {emoji:"🐥", name:"こどり",  need:5, next:"おとなに なる", evo:"りっぱに なった！", evoMsg:"もうすぐ おとな！"},
+  {emoji:"🐔", name:"おとなの とり", need:9999, next:"", evo:"", evoMsg:""}
+];
+const CHEERS = ["たべたね！","えらいね！","じょうずー！","もぐもぐ！","やったね！"];
+
+function load(){
+  try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return d; }catch(e){}
+  return { total:0, rewardMode:"grow", camMode:true };
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+let st = load();
+
+let meal = { active:false, startTs:0, bites:0, tickId:null };
+const $ = s => document.querySelector(s);
+
+/* ---------------- character / growth ---------------- */
+function stageFor(total){
+  let acc=0;
+  for(let i=0;i<STAGES.length;i++){
+    if(i===STAGES.length-1) return {idx:i, into: total-acc, need: STAGES[i].need};
+    if(total < acc + STAGES[i].need) return {idx:i, into: total-acc, need: STAGES[i].need};
+    acc += STAGES[i].need;
+  }
+}
+function renderChar(){
+  const s = stageFor(st.total);
+  const stg = STAGES[s.idx];
+  $("#char").textContent = stg.emoji;
+  $("#charName").textContent = stg.name;
+  const last = s.idx===STAGES.length-1;
+  const pct = last ? 100 : Math.min(100, s.into/s.need*100);
+  $("#progFill").style.width = pct+"%";
+  $("#progCap").textContent = last ? "りっぱに そだったね！" : ("あと "+(s.need-s.into)+"かい で "+STAGES[s.idx].next+"よ");
+}
+
+/* ---------------- a bite happened ---------------- */
+function registerBite(){
+  if(!meal.active){ // gentle nudge: still allow, but start a meal implicitly
+    startMeal();
+  }
+  const before = stageFor(st.total).idx;
+  st.total++; meal.bites++;
+  save();
+
+  // hop + sparkle + cheer
+  const c = $("#char");
+  c.classList.remove("hop"); void c.offsetWidth; c.classList.add("hop");
+  sparkle();
+  praise(CHEERS[st.total % CHEERS.length]);
+
+  // bite dot
+  const dot=document.createElement("span"); dot.className="bite-dot"; dot.textContent="🍚";
+  $("#bitesRow").appendChild(dot);
+
+  renderChar();
+  const after = stageFor(st.total).idx;
+  if(after>before) showEvolve(before);
+  renderParent();
+}
+
+function sparkle(){
+  const card=$("#camCard").getBoundingClientRect();
+  const host=$(".phone");
+  const hb=host.getBoundingClientRect();
+  ["✨","⭐","🌟"].forEach((e,i)=>{
+    const s=document.createElement("div"); s.className="spark"; s.textContent=e;
+    s.style.left=(60 + i*70 - hb.left + (card.left-hb.left))+"px";
+    s.style.top=(card.top-hb.top+20)+"px";
+    host.appendChild(s); setTimeout(()=>s.remove(),900);
+  });
+}
+function showEvolve(prevIdx){
+  const stg = STAGES[Math.min(prevIdx+1, STAGES.length-1)];
+  $("#evoBig").textContent = stg.emoji;
+  $("#evoTitle").textContent = STAGES[prevIdx].evo || "おおきくなった！";
+  $("#evoMsg").textContent = STAGES[prevIdx].evoMsg || "たくさん たべてくれて ありがとう";
+  const b=$("#evoBack"); b.style.display="grid";
+  const ch=$("#char"); ch.classList.remove("evolve"); void ch.offsetWidth; ch.classList.add("evolve");
+  praise(STAGES[prevIdx].evo || "おおきくなったね");
+  clearTimeout(showEvolve._t);
+  showEvolve._t=setTimeout(()=>b.style.display="none", 2400);
+  b.onclick=()=>b.style.display="none";
+}
+
+/* ---------------- praise (audio) ---------------- */
+let audioCtx=null;
+function chime(){
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    const t=audioCtx.currentTime;
+    [523.25,659.25,783.99].forEach((f,i)=>{
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.type="sine"; o.frequency.value=f; o.connect(g); g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.0001,t+i*0.09);
+      g.gain.exponentialRampToValueAtTime(0.14,t+i*0.09+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+i*0.09+0.32);
+      o.start(t+i*0.09); o.stop(t+i*0.09+0.34);
+    });
+  }catch(e){}
+}
+function speak(text){
+  try{
+    if(!("speechSynthesis" in window)) return;
+    const u=new SpeechSynthesisUtterance(text); u.lang="ja-JP"; u.rate=1.02; u.pitch=1.25;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){}
+}
+function praise(text){ chime(); if(st.rewardMode==="grow"||st.rewardMode==="praise") speak(text); }
+
+/* ---------------- meal timer (silent for child) ---------------- */
+function startMeal(){
+  if(meal.active) return;
+  meal={active:true,startTs:Date.now(),bites:0,tickId:null};
+  $("#bitesRow").innerHTML="";
+  $("#mealBtn").textContent="🟢 ごはんちゅう… (タップでおわり)";
+  $("#mealBtn").classList.remove("btn-start"); $("#mealBtn").classList.add("btn-end");
+  meal.tickId=setInterval(renderParent,1000);
+  renderParent();
+}
+function endMeal(){
+  if(!meal.active) return;
+  clearInterval(meal.tickId); meal.active=false;
+  $("#mealBtn").textContent="🍽️ ごはん スタート";
+  $("#mealBtn").classList.add("btn-start"); $("#mealBtn").classList.remove("btn-end");
+  renderParent();
+}
+$("#mealBtn").onclick=()=> meal.active? endMeal() : startMeal();
+$("#fallback").onclick=()=>{ resumeAudio(); registerBite(); };
+function resumeAudio(){ try{ audioCtx&&audioCtx.state==="suspended"&&audioCtx.resume(); }catch(e){} }
+
+/* ---------------- parent panel ---------------- */
+function renderParent(){
+  $("#pBites").textContent = meal.bites;
+  $("#pTotal").textContent = st.total;
+  const sec = meal.active? Math.floor((Date.now()-meal.startTs)/1000) : 0;
+  $("#pTime").textContent = Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
+  $("#rewardDesc").textContent = st.rewardMode==="grow" ? "キャラを そだてる" : "ことばで ほめる（育成なし）";
+  $("#rewardToggle").classList.toggle("on", st.rewardMode==="grow");
+  $("#camModeDesc").textContent = st.camMode ? "オン（画面を触らずに記録）" : "オフ（ボタンで記録）";
+  $("#camToggle").classList.toggle("on", st.camMode);
+}
+$("#parentBtn").onclick=()=>{ renderParent(); $("#parentBack").style.display="flex"; };
+$("#parentClose").onclick=()=> $("#parentBack").style.display="none";
+$("#parentBack").addEventListener("click",e=>{ if(e.target.id==="parentBack") $("#parentBack").style.display="none"; });
+$("#rewardToggle").onclick=()=>{ st.rewardMode = st.rewardMode==="grow"?"praise":"grow"; save(); renderParent(); };
+$("#camToggle").onclick=()=>{ st.camMode=!st.camMode; save(); renderParent(); st.camMode? startCamera() : stopCamera(); };
+$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ st={total:0,rewardMode:st.rewardMode,camMode:st.camMode}; save(); meal.bites=0; $("#bitesRow").innerHTML=""; renderChar(); renderParent(); } };
+
+/* ---------------- camera + hand detection ---------------- */
+let handLandmarker=null, stream=null, rafId=null, camReady=false;
+// detection state machine: IDLE -> DETECTING(fill) -> COUNTED(wait absence) -> IDLE
+let detState="IDLE", holdStart=0, absentSince=0;
+const HOLD_MS=550;      // hand must stay this long to count
+const COOLDOWN_MS=1100; // hand must be gone this long to re-arm
+const RING_LEN=339;
+
+function setRing(pct){ $("#ring").style.strokeDashoffset = RING_LEN*(1-pct); }
+function camBadge(t){ $("#camBadge").textContent=t; }
+function camHint(t){ $("#camHint").textContent=t; }
+
+async function startCamera(){
+  if(!st.camMode){ return; }
+  $("#camOff").style.display="none";
+  camBadge("じゅんび中…");
+  try{
+    if(!handLandmarker){
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+      handLandmarker = await HandLandmarker.createFromOptions(vision,{
+        baseOptions:{ modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task", delegate:"GPU" },
+        runningMode:"VIDEO", numHands:1 });
+    }
+    stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user", width:640, height:480 }, audio:false });
+    const v=$("#cam"); v.srcObject=stream; await v.play();
+    camReady=true; camBadge("👀 みてるよ"); camHint("おててを かざしてね");
+    detState="IDLE"; loop();
+  }catch(e){
+    camReady=false; $("#camOff").style.display="block";
+    $("#camOff").innerHTML = (location.protocol==="file:")
+      ? "カメラは https か localhost で<br>ためせます（今はボタンで記録）"
+      : "カメラが つかえません<br>（ボタンで記録できます）";
+    camBadge("カメラ オフ");
+    console.warn("camera/mediapipe init failed:", e);
+  }
+}
+function stopCamera(){
+  camReady=false; if(rafId) cancelAnimationFrame(rafId);
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  $("#cam").srcObject=null; $("#camOff").style.display="block"; camBadge("カメラ オフ"); camHint(""); setRing(0);
+}
+function loop(){
+  if(!camReady){ return; }
+  const v=$("#cam");
+  let present=false;
+  try{
+    if(v.readyState>=2 && handLandmarker){
+      const res=handLandmarker.detectForVideo(v, performance.now());
+      present = !!(res && res.landmarks && res.landmarks.length>0);
+    }
+  }catch(e){ /* ignore per-frame */ }
+
+  const nowT=performance.now();
+  if(detState==="IDLE"){
+    if(present){ detState="DETECTING"; holdStart=nowT; }
+    else setRing(0);
+  }else if(detState==="DETECTING"){
+    if(!present){ detState="IDLE"; setRing(0); }
+    else{
+      const p=Math.min(1,(nowT-holdStart)/HOLD_MS); setRing(p);
+      camHint("そのまま…");
+      if(p>=1){ detState="COUNTED"; absentSince=0; setRing(1);
+        camHint("できた！ ✨"); resumeAudio(); registerBite(); }
+    }
+  }else if(detState==="COUNTED"){
+    if(!present){ if(!absentSince) absentSince=nowT;
+      if(nowT-absentSince>=COOLDOWN_MS){ detState="IDLE"; setRing(0); camHint("おててを かざしてね"); } }
+    else absentSince=0;
+  }
+  rafId=requestAnimationFrame(loop);
+}
+
+/* ---------------- boot ---------------- */
+renderChar(); renderParent();
+document.addEventListener("click",resumeAudio,{once:true});
+if(st.camMode) startCamera();
+</script>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<title>もぐたいむ v0</title>
+<style>
+  :root{
+    --ground:#FFF7EE; --surface:#FFFFFF; --surface-2:#FDEEE0;
+    --ink:#40342B; --ink-soft:#8A7A6D;
+    --carrot:#F97A2E; --carrot-ink:#B4531A;
+    --leaf:#5FA45A; --berry:#D06A93; --sun:#F5B93F;
+    --line:#F0E2D3; --shadow:24px 24px 60px rgba(180,120,60,.12);
+    --r:22px;
+    --disp:"Hiragino Maru Gothic ProN","Hiragino Maru Gothic Pro","ヒラギノ丸ゴ ProN W4",-apple-system,system-ui,sans-serif;
+    --body:-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#1C1815; --surface:#262019; --surface-2:#302720;
+      --ink:#F3E9DE; --ink-soft:#B3A498;
+      --carrot:#FF9A55; --carrot-ink:#FFB985;
+      --leaf:#7FC178; --berry:#E68AAE; --sun:#F5C669;
+      --line:#3A2F26; --shadow:24px 24px 60px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#1C1815; --surface:#262019; --surface-2:#302720;
+    --ink:#F3E9DE; --ink-soft:#B3A498;
+    --carrot:#FF9A55; --carrot-ink:#FFB985;
+    --leaf:#7FC178; --berry:#E68AAE; --sun:#F5C669;
+    --line:#3A2F26; --shadow:24px 24px 60px rgba(0,0,0,.4);
+  }
+  :root[data-theme="light"]{
+    --ground:#FFF7EE; --surface:#FFFFFF; --surface-2:#FDEEE0;
+    --ink:#40342B; --ink-soft:#8A7A6D;
+    --carrot:#F97A2E; --carrot-ink:#B4531A;
+    --leaf:#5FA45A; --berry:#D06A93; --sun:#F5B93F;
+    --line:#F0E2D3; --shadow:24px 24px 60px rgba(180,120,60,.12);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:var(--body); color:var(--ink);
+    background:var(--ground);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    display:flex; justify-content:center; min-height:100vh;
+  }
+  .phone{
+    width:100%; max-width:440px; background:var(--ground);
+    min-height:100vh; position:relative; display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  @media (min-width:460px){
+    .phone{min-height:min(920px,100vh); margin:auto; border-radius:34px;
+      box-shadow:var(--shadow); border:1px solid var(--line); overflow:hidden;
+      min-height:820px; height:min(920px,96vh);}
+    body{align-items:center; padding:16px}
+  }
+  h1,h2,h3,.disp{font-family:var(--disp); font-weight:600; letter-spacing:.01em}
+  button{font-family:var(--disp); cursor:pointer; border:none; color:inherit}
+  .screen{flex:1; overflow-y:auto; padding:22px 20px 108px; -webkit-overflow-scrolling:touch}
+  .hide{display:none!important}
+  .eyebrow{font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ink-soft); font-family:var(--disp)}
+
+  /* Home */
+  .greet{font-size:15px; color:var(--ink-soft); margin:4px 0 2px}
+  .home-title{font-size:26px; margin:0 0 20px; text-wrap:balance; line-height:1.35}
+  .mascot{
+    width:190px; height:190px; margin:6px auto 4px; border-radius:50%;
+    background:radial-gradient(circle at 50% 38%,var(--surface-2),var(--surface));
+    display:grid; place-items:center; font-size:104px; line-height:1;
+    box-shadow:inset 0 -8px 20px rgba(180,120,60,.10), var(--shadow);
+    animation:breathe 4.5s ease-in-out infinite;
+  }
+  @keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.02)}}
+  .mascot-cap{text-align:center; color:var(--ink-soft); font-size:14px; margin:2px 0 26px}
+  .big-btn{
+    width:100%; padding:20px; border-radius:var(--r); font-size:20px;
+    background:var(--carrot); color:#fff; font-weight:600;
+    box-shadow:0 10px 24px rgba(249,122,46,.32); transition:transform .12s ease, filter .12s ease;
+  }
+  .big-btn:active{transform:translateY(2px) scale(.99); filter:brightness(.97)}
+  .big-btn.ghost{background:var(--surface); color:var(--carrot-ink);
+    box-shadow:inset 0 0 0 2px var(--line)}
+  .row-mini{display:flex; gap:12px; margin-top:14px}
+  .stat-mini{flex:1; background:var(--surface); border:1px solid var(--line);
+    border-radius:18px; padding:14px; text-align:center}
+  .stat-mini b{font-family:var(--disp); font-size:24px; display:block; color:var(--carrot-ink)}
+  .stat-mini span{font-size:12px; color:var(--ink-soft)}
+
+  /* Timer overlay */
+  .timer-wrap{position:absolute; inset:0; background:var(--ground); z-index:40;
+    display:flex; flex-direction:column; padding:26px 20px 30px}
+  .timer-top{display:flex; justify-content:space-between; align-items:center}
+  .timer-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px}
+  .eat-mascot{font-size:120px; line-height:1; animation:munch 1.6s ease-in-out infinite}
+  @keyframes munch{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg) translateY(-4px)}}
+  .elapsed{font-family:var(--disp); font-variant-numeric:tabular-nums; font-size:20px;
+    color:var(--ink-soft); letter-spacing:.04em}
+  .timer-cheer{font-family:var(--disp); font-size:22px; text-align:center; text-wrap:balance; max-width:16em}
+  .taste-btn{width:100%; padding:22px; border-radius:var(--r); font-size:21px; color:#fff;
+    background:linear-gradient(135deg,var(--leaf),#4f9a4a); font-weight:600;
+    box-shadow:0 10px 24px rgba(95,164,90,.34); transition:transform .12s}
+  .taste-btn:active{transform:translateY(2px) scale(.99)}
+  .end-btn{width:100%; padding:15px; border-radius:16px; font-size:15px; margin-top:12px;
+    background:transparent; color:var(--ink-soft); box-shadow:inset 0 0 0 1.5px var(--line)}
+  .icon-btn{width:42px; height:42px; border-radius:50%; background:var(--surface);
+    box-shadow:inset 0 0 0 1px var(--line); font-size:18px}
+
+  /* Sheet */
+  .sheet-back{position:absolute; inset:0; background:rgba(40,30,20,.42); z-index:50;
+    display:flex; align-items:flex-end; animation:fade .2s ease}
+  @keyframes fade{from{opacity:0}}
+  .sheet{width:100%; background:var(--surface); border-radius:28px 28px 0 0;
+    padding:22px 20px calc(24px + env(safe-area-inset-bottom)); animation:rise .28s cubic-bezier(.2,.8,.2,1)}
+  @keyframes rise{from{transform:translateY(100%)}}
+  .sheet h3{margin:0 0 4px; font-size:19px}
+  .sheet p.sub{margin:0 0 16px; color:var(--ink-soft); font-size:13px}
+  .chips{display:flex; flex-wrap:wrap; gap:9px; margin-bottom:6px}
+  .chip{padding:11px 15px; border-radius:14px; background:var(--surface-2); font-size:15px;
+    font-family:var(--disp); box-shadow:inset 0 0 0 1.5px transparent; transition:.12s}
+  .chip.on{background:var(--carrot); color:#fff}
+  .chip.add{background:transparent; box-shadow:inset 0 0 0 1.5px var(--line); color:var(--ink-soft)}
+  .react-row{display:flex; gap:10px; margin:8px 0 18px}
+  .react{flex:1; padding:14px 6px; border-radius:18px; background:var(--surface-2);
+    display:flex; flex-direction:column; align-items:center; gap:6px; transition:.12s;
+    box-shadow:inset 0 0 0 2px transparent}
+  .react .em{font-size:34px; line-height:1}
+  .react .lb{font-size:12px; font-family:var(--disp); color:var(--ink-soft)}
+  .react.on{box-shadow:inset 0 0 0 2px var(--berry)}
+  .react.on .lb{color:var(--berry)}
+  .sheet-actions{display:flex; gap:10px}
+  .sheet-actions button{flex:1; padding:15px; border-radius:16px; font-size:16px}
+  .btn-primary{background:var(--carrot); color:#fff}
+  .btn-primary:disabled{opacity:.4}
+  .btn-cancel{background:var(--surface-2); color:var(--ink-soft)}
+
+  /* Reward pop */
+  .reward-back{position:absolute; inset:0; background:rgba(40,30,20,.5); z-index:60;
+    display:grid; place-items:center; animation:fade .2s}
+  .reward-card{background:var(--surface); border-radius:28px; padding:30px 34px; text-align:center;
+    animation:pop .4s cubic-bezier(.2,1.3,.5,1)}
+  @keyframes pop{from{transform:scale(.5); opacity:0}}
+  .reward-sticker{font-size:96px; line-height:1; animation:spin 1s ease}
+  @keyframes spin{from{transform:rotate(-25deg) scale(.6)}}
+  .reward-card h3{margin:12px 0 2px; font-size:22px}
+  .reward-card p{margin:0; color:var(--ink-soft); font-size:14px; text-wrap:balance; max-width:14em}
+
+  /* Sticker book */
+  .page-h{font-size:22px; margin:2px 0 4px}
+  .page-sub{color:var(--ink-soft); font-size:13px; margin:0 0 20px}
+  .sticker-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+  .st-cell{aspect-ratio:1; border-radius:18px; background:var(--surface);
+    border:1px solid var(--line); display:grid; place-items:center; font-size:38px}
+  .st-cell.empty{background:repeating-linear-gradient(45deg,var(--surface),var(--surface) 8px,var(--surface-2) 8px,var(--surface-2) 16px); opacity:.5}
+  .empty-note{text-align:center; color:var(--ink-soft); font-size:14px; padding:40px 10px; font-family:var(--disp)}
+
+  /* Parent record */
+  .win-card{background:linear-gradient(135deg,var(--surface-2),var(--surface));
+    border:1px solid var(--line); border-radius:var(--r); padding:20px; margin-bottom:16px}
+  .win-card .eyebrow{color:var(--carrot-ink)}
+  .win-line{display:flex; align-items:baseline; gap:8px; margin-top:12px}
+  .win-line b{font-family:var(--disp); font-size:30px; color:var(--ink); font-variant-numeric:tabular-nums}
+  .win-line span{color:var(--ink-soft); font-size:14px}
+  .food-row{display:flex; align-items:center; gap:12px; padding:12px 0; border-top:1px solid var(--line)}
+  .food-row .fn{font-family:var(--disp); font-size:16px; flex:1}
+  .food-row .cnt{font-size:13px; color:var(--ink-soft)}
+  .pill{font-size:11px; font-family:var(--disp); padding:4px 9px; border-radius:20px;
+    background:var(--leaf); color:#fff; letter-spacing:.02em}
+  .bars{display:flex; align-items:flex-end; gap:7px; height:80px; margin-top:14px}
+  .bar{flex:1; background:var(--carrot); border-radius:6px 6px 3px 3px; min-height:6px;
+    opacity:.85; position:relative}
+  .bar span{position:absolute; bottom:-20px; left:0; right:0; text-align:center; font-size:10px; color:var(--ink-soft)}
+  .advice{background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--leaf);
+    border-radius:14px; padding:14px 16px; font-size:14px; line-height:1.6; color:var(--ink-soft); margin-top:8px}
+  .advice b{color:var(--ink)}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px; margin-bottom:14px}
+  .set-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0}
+  .set-row+.set-row{border-top:1px solid var(--line)}
+  .set-row .lab{font-family:var(--disp); font-size:15px}
+  .set-row .desc{font-size:12px; color:var(--ink-soft); margin-top:2px; max-width:22em}
+  .toggle{width:52px; height:31px; border-radius:20px; background:var(--line); position:relative; flex:none; transition:.2s}
+  .toggle.on{background:var(--leaf)}
+  .toggle::after{content:""; position:absolute; width:25px; height:25px; border-radius:50%; background:#fff; top:3px; left:3px; transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .toggle.on::after{left:24px}
+  .link-btn{background:none; color:var(--berry); font-size:13px; padding:8px 0; font-family:var(--disp)}
+  .section-label{font-family:var(--disp); font-size:13px; color:var(--ink-soft); letter-spacing:.08em; margin:22px 0 8px}
+
+  /* Bottom nav */
+  .nav{position:absolute; bottom:0; left:0; right:0; display:flex; background:var(--surface);
+    border-top:1px solid var(--line); padding:8px 8px calc(8px + env(safe-area-inset-bottom)); z-index:30}
+  .nav button{flex:1; background:none; padding:8px 4px; display:flex; flex-direction:column;
+    align-items:center; gap:4px; color:var(--ink-soft); font-size:11px; font-family:var(--disp)}
+  .nav button .ni{font-size:22px; line-height:1; transition:transform .15s}
+  .nav button.on{color:var(--carrot-ink)}
+  .nav button.on .ni{transform:translateY(-2px) scale(1.12)}
+
+  /* Onboarding */
+  .onb{position:absolute; inset:0; background:var(--ground); z-index:80; display:flex;
+    flex-direction:column; justify-content:center; padding:32px 26px; gap:6px}
+  .onb .mascot{width:130px; height:130px; font-size:72px; margin:0 auto 10px}
+  .onb h2{font-size:24px; text-align:center; margin:0 0 6px; text-wrap:balance}
+  .onb p{text-align:center; color:var(--ink-soft); font-size:14px; margin:0 0 22px; line-height:1.6}
+  .onb input{width:100%; padding:16px; border-radius:16px; border:1.5px solid var(--line);
+    background:var(--surface); color:var(--ink); font-size:17px; font-family:var(--disp); text-align:center; margin-bottom:16px}
+  .onb input:focus{outline:none; border-color:var(--carrot)}
+  .theme-btn{position:absolute; top:14px; right:14px; z-index:90}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+  :focus-visible{outline:3px solid var(--carrot); outline-offset:2px}
+</style>
+
+<div class="phone">
+  <button class="icon-btn theme-btn" id="themeBtn" aria-label="テーマ切替">🌙</button>
+
+  <!-- Onboarding -->
+  <div class="onb" id="onb">
+    <div class="mascot">🍚</div>
+    <h2>もぐたいむへ ようこそ</h2>
+    <p>おこさんのお名前をおしえてね。<br>ごはんの「ひとくちチャレンジ」を いっしょに たのしもう。</p>
+    <input id="nameInput" placeholder="なまえ（ニックネーム）" maxlength="10" autocomplete="off">
+    <button class="big-btn" id="onbStart">はじめる</button>
+    <p style="font-size:12px;margin-top:16px;opacity:.8">きろくは この端末だけに保存されます</p>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen" id="s-home">
+    <div class="eyebrow">もぐたいむ</div>
+    <p class="greet" id="greet">こんにちは</p>
+    <h1 class="home-title" id="homeTitle">きょうも すこしずつ たべてみよう</h1>
+    <div class="mascot" id="homeMascot">🐥</div>
+    <p class="mascot-cap">タップして ごはんスタート！</p>
+    <button class="big-btn" id="startMeal">🍽️ ごはんをはじめる</button>
+    <div class="row-mini">
+      <div class="stat-mini"><b id="hToday">0</b><span>きょうのひとくち</span></div>
+      <div class="stat-mini"><b id="hStickers">0</b><span>あつめたシール</span></div>
+    </div>
+  </div>
+
+  <!-- STICKER BOOK -->
+  <div class="screen hide" id="s-book">
+    <h2 class="page-h">シールちょう</h2>
+    <p class="page-sub">ひとくちチャレンジすると シールがもらえるよ</p>
+    <div class="sticker-grid" id="stickerGrid"></div>
+  </div>
+
+  <!-- PARENT RECORD -->
+  <div class="screen hide" id="s-record">
+    <h2 class="page-h">きろく</h2>
+    <p class="page-sub">おうちの人むけ・今週のようす</p>
+
+    <div class="win-card">
+      <div class="eyebrow">今週の小さな一歩</div>
+      <div class="win-line"><b id="wTastes">0</b><span>回 ひとくちにチャレンジ</span></div>
+      <div class="win-line"><b id="wFoods">0</b><span>しゅるいの食べものに出会えた</span></div>
+    </div>
+
+    <div class="advice" id="advice">
+      <b>コツ：</b>今は食べきれなくてOK。同じ食べものに<b>くり返し出会う</b>ことが、「すき」への近道です。無理に食べさせず、ひとくちの挑戦を一緒に喜びましょう。
+    </div>
+
+    <div class="section-label">よく出会えた食べもの</div>
+    <div id="foodList"></div>
+
+    <div class="section-label">食事の時間（ながさ）</div>
+    <div class="card" style="padding:18px 18px 30px">
+      <div class="bars" id="timeBars"></div>
+    </div>
+
+    <div class="section-label">設定</div>
+    <div class="card">
+      <div class="set-row">
+        <div>
+          <div class="lab">ごほうびモード</div>
+          <div class="desc" id="rewardDesc">シールをあつめる</div>
+        </div>
+        <div class="toggle on" id="rewardToggle" role="switch" aria-checked="true"></div>
+      </div>
+      <div class="set-row">
+        <div>
+          <div class="lab">おなまえ</div>
+          <div class="desc" id="curName">—</div>
+        </div>
+        <button class="link-btn" id="renameBtn">へんこう</button>
+      </div>
+      <div class="set-row">
+        <div>
+          <div class="lab">データを消す</div>
+          <div class="desc">きろく・シールを すべてリセット</div>
+        </div>
+        <button class="link-btn" id="resetBtn" style="color:var(--ink-soft)">リセット</button>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--ink-soft);text-align:center;line-height:1.6">
+      v0 プロトタイプ・コアループ検証用<br>「食べた量」ではなく「ひとくちの回数」を大切にしています
+    </p>
+  </div>
+
+  <!-- Bottom nav -->
+  <nav class="nav" id="nav">
+    <button data-tab="home" class="on"><span class="ni">🏠</span>おうち</button>
+    <button data-tab="book"><span class="ni">✨</span>シール</button>
+    <button data-tab="record"><span class="ni">📖</span>きろく</button>
+  </nav>
+
+  <!-- TIMER overlay -->
+  <div class="timer-wrap hide" id="timer">
+    <div class="timer-top">
+      <div class="eyebrow" id="timerName">ごはんちゅう</div>
+      <div class="elapsed" id="elapsed">0:00</div>
+    </div>
+    <div class="timer-body">
+      <div class="eat-mascot">😋</div>
+      <p class="timer-cheer" id="timerCheer">じぶんのペースで だいじょうぶ！</p>
+    </div>
+    <button class="taste-btn" id="tasteBtn">🥄 ひとくち できた！</button>
+    <button class="end-btn" id="endMeal">ごちそうさま（おわる）</button>
+  </div>
+
+  <!-- Taste sheet -->
+  <div class="sheet-back hide" id="sheetBack">
+    <div class="sheet">
+      <h3>なにを ひとくち できた？</h3>
+      <p class="sub">食べきれなくても、ひとくち挑戦できたらOK！</p>
+      <div class="chips" id="foodChips"></div>
+      <div class="react-row">
+        <button class="react" data-react="iya"><span class="em">😖</span><span class="lb">むずかしい</span></button>
+        <button class="react" data-react="tabeta"><span class="em">🙂</span><span class="lb">たべた</span></button>
+        <button class="react" data-react="suki"><span class="em">😋</span><span class="lb">だいすき</span></button>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn-cancel" id="sheetCancel">やめる</button>
+        <button class="btn-primary" id="sheetOk" disabled>きろくする</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reward pop -->
+  <div class="reward-back hide" id="rewardBack">
+    <div class="reward-card">
+      <div class="reward-sticker" id="rewardSticker">⭐</div>
+      <h3 id="rewardTitle">シールゲット！</h3>
+      <p id="rewardMsg">よく ちょうせんできたね</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const KEY="mogu_v0";
+  const STICKERS=["⭐","🌟","🍓","🐰","🐱","🌈","🎈","🦄","🍭","🎉","🐥","🌻","🐸","🍀","🎀","🧸","🐧","🦊","🌷","🍎","🐨","🦋"];
+  const FOODS=["にんじん","ピーマン","トマト","ブロッコリー","なす","しいたけ","さかな","ほうれん草","たまねぎ","きゅうり"];
+  const CHEERS=["じぶんのペースで だいじょうぶ！","あわてなくて いいよ 🌱","いっしょに たべよう！","ひとくちで じゅうぶん えらい！","おいしく たべられるかな？"];
+
+  let st=load();
+  let cur={mealId:null, startTs:null, tickId:null, food:null, react:null};
+
+  function load(){
+    try{const d=JSON.parse(localStorage.getItem(KEY)); if(d) return d;}catch(e){}
+    return {name:"", rewardMode:"sticker", meals:[], tastes:[], stickers:[]};
+  }
+  function save(){localStorage.setItem(KEY,JSON.stringify(st));}
+  const $=s=>document.querySelector(s);
+  const now=()=>Date.now();
+  const day=ts=>{const d=new Date(ts); return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();};
+  const within7=ts=>ts> now()-7*864e5;
+
+  /* ---------- Onboarding ---------- */
+  if(st.name){ $("#onb").classList.add("hide"); }
+  $("#onbStart").onclick=()=>{
+    const v=$("#nameInput").value.trim()||"きみ";
+    st.name=v; save(); $("#onb").classList.add("hide"); renderAll();
+  };
+  $("#nameInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("#onbStart").click();});
+
+  /* ---------- Theme ---------- */
+  const tb=$("#themeBtn");
+  function applyTheme(t){document.documentElement.setAttribute("data-theme",t); tb.textContent=t==="dark"?"☀️":"🌙"; localStorage.setItem("mogu_theme",t);}
+  const savedT=localStorage.getItem("mogu_theme");
+  if(savedT) applyTheme(savedT);
+  tb.onclick=()=>{const cur=document.documentElement.getAttribute("data-theme");
+    const isDark = cur? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches;
+    applyTheme(isDark?"light":"dark");};
+
+  /* ---------- Nav ---------- */
+  document.querySelectorAll("#nav button").forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("on"));
+      b.classList.add("on");
+      ["home","book","record"].forEach(t=>$("#s-"+t).classList.add("hide"));
+      $("#s-"+b.dataset.tab).classList.remove("hide");
+      if(b.dataset.tab==="record") renderRecord();
+      if(b.dataset.tab==="book") renderBook();
+    };
+  });
+
+  /* ---------- Meal timer ---------- */
+  $("#startMeal").onclick=startMeal;
+  function startMeal(){
+    cur.mealId="m"+now(); cur.startTs=now();
+    $("#timerName").textContent=st.name+"の ごはんちゅう";
+    $("#timerCheer").textContent=CHEERS[Math.floor(Math.random()*CHEERS.length)];
+    $("#timer").classList.remove("hide");
+    tick(); cur.tickId=setInterval(tick,1000);
+  }
+  function tick(){
+    const s=Math.floor((now()-cur.startTs)/1000);
+    $("#elapsed").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+  }
+  $("#endMeal").onclick=()=>{
+    clearInterval(cur.tickId);
+    const dur=Math.floor((now()-cur.startTs)/1000);
+    st.meals.push({id:cur.mealId,ts:cur.startTs,durationSec:dur});
+    save();
+    $("#timer").classList.add("hide");
+    cur.mealId=null;
+    renderHome();
+  };
+
+  /* ---------- Taste sheet ---------- */
+  $("#tasteBtn").onclick=openSheet;
+  function openSheet(){
+    cur.food=null; cur.react=null;
+    const wrap=$("#foodChips"); wrap.innerHTML="";
+    FOODS.forEach(f=>{
+      const c=document.createElement("button"); c.className="chip"; c.textContent=f;
+      c.onclick=()=>{document.querySelectorAll("#foodChips .chip").forEach(x=>x.classList.remove("on"));
+        c.classList.add("on"); cur.food=f; checkOk();};
+      wrap.appendChild(c);
+    });
+    const add=document.createElement("button"); add.className="chip add"; add.textContent="＋ じぶんで入力";
+    add.onclick=()=>{const v=prompt("食べもののなまえ"); if(v&&v.trim()){
+      const c=document.createElement("button"); c.className="chip on"; c.textContent=v.trim();
+      document.querySelectorAll("#foodChips .chip").forEach(x=>x.classList.remove("on"));
+      wrap.insertBefore(c,add); cur.food=v.trim(); checkOk();
+      c.onclick=()=>{document.querySelectorAll("#foodChips .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");cur.food=c.textContent;checkOk();};
+    }};
+    wrap.appendChild(add);
+    document.querySelectorAll(".react").forEach(r=>r.classList.remove("on"));
+    $("#sheetOk").disabled=true;
+    $("#sheetBack").classList.remove("hide");
+  }
+  document.querySelectorAll(".react").forEach(r=>{
+    r.onclick=()=>{document.querySelectorAll(".react").forEach(x=>x.classList.remove("on"));
+      r.classList.add("on"); cur.react=r.dataset.react; checkOk();};
+  });
+  function checkOk(){$("#sheetOk").disabled=!(cur.food&&cur.react);}
+  $("#sheetCancel").onclick=()=>$("#sheetBack").classList.add("hide");
+  $("#sheetOk").onclick=()=>{
+    const t={id:"t"+now(),mealId:cur.mealId,food:cur.food,react:cur.react,ts:now()};
+    st.tastes.push(t);
+    // repeat-exposure count for this food
+    const cnt=st.tastes.filter(x=>x.food===cur.food).length;
+    let sticker=null;
+    if(st.rewardMode==="sticker"){
+      const emoji=STICKERS[Math.floor(Math.random()*STICKERS.length)];
+      sticker={id:"s"+now(),emoji,food:cur.food,ts:now()};
+      st.stickers.push(sticker);
+    }
+    save();
+    $("#sheetBack").classList.add("hide");
+    showReward(cnt,sticker);
+    renderHome();
+  };
+
+  /* ---------- Reward pop ---------- */
+  function showReward(cnt,sticker){
+    const milestone = cnt>0 && cnt%3===0;
+    if(st.rewardMode==="sticker"){
+      $("#rewardSticker").textContent = milestone? "🏅" : (sticker?sticker.emoji:"⭐");
+      $("#rewardTitle").textContent = milestone? "がんばりメダル！" : "シールゲット！";
+      $("#rewardMsg").textContent = milestone
+        ? cur.food+"に "+cnt+"回も であえたね！すごい！"
+        : "よく ちょうせんできたね 🌟";
+    }else{
+      $("#rewardSticker").textContent="👏";
+      $("#rewardTitle").textContent="よく できたね！";
+      $("#rewardMsg").textContent = milestone
+        ? cur.food+"に "+cnt+"回目の ちょうせん！えらい！"
+        : "ひとくち ちょうせん できたね";
+    }
+    const rb=$("#rewardBack"); rb.classList.remove("hide");
+    clearTimeout(showReward._t);
+    showReward._t=setTimeout(()=>rb.classList.add("hide"),1900);
+    rb.onclick=()=>rb.classList.add("hide");
+  }
+
+  /* ---------- Renders ---------- */
+  function renderHome(){
+    $("#greet").textContent="こんにちは、"+st.name+"！";
+    const today=day(now());
+    $("#hToday").textContent=st.tastes.filter(t=>day(t.ts)===today).length;
+    $("#hStickers").textContent=st.stickers.length;
+    const mascots=["🐥","🐰","🐱","🦊","🐨","🐧"];
+    $("#homeMascot").textContent=mascots[st.tastes.length%mascots.length];
+  }
+  function renderBook(){
+    const grid=$("#stickerGrid"); grid.innerHTML="";
+    const total=Math.max(16,Math.ceil((st.stickers.length+1)/4)*4);
+    for(let i=0;i<total;i++){
+      const cell=document.createElement("div");
+      if(st.stickers[i]){cell.className="st-cell"; cell.textContent=st.stickers[i].emoji;}
+      else{cell.className="st-cell empty";}
+      grid.appendChild(cell);
+    }
+    if(st.stickers.length===0){
+      grid.innerHTML='<p class="empty-note" style="grid-column:1/-1">まだシールがないよ。<br>ごはんで ひとくちチャレンジしてみよう！</p>';
+    }
+  }
+  function renderRecord(){
+    const wk=st.tastes.filter(t=>within7(t.ts));
+    $("#wTastes").textContent=wk.length;
+    $("#wFoods").textContent=new Set(wk.map(t=>t.food)).size;
+
+    // food list with repeat-exposure
+    const counts={};
+    st.tastes.forEach(t=>{counts[t.food]=(counts[t.food]||0)+1;});
+    const arr=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const fl=$("#foodList"); fl.innerHTML="";
+    if(arr.length===0){fl.innerHTML='<p class="empty-note">まだ記録がありません</p>';}
+    arr.forEach(([f,c])=>{
+      const row=document.createElement("div"); row.className="food-row";
+      row.innerHTML='<span class="fn">'+f+'</span><span class="cnt">'+c+'回 であった</span>'+
+        (c>=3?'<span class="pill">くり返し◎</span>':'');
+      fl.appendChild(row);
+    });
+    // advice adapts
+    const rep=arr.find(x=>x[1]>=3);
+    if(rep){$("#advice").innerHTML='<b>いいですね：</b>「'+rep[0]+'」に'+rep[1]+'回も出会えています。研究では、苦手な食材でも<b>くり返し味見する</b>ほど受け入れやすくなります。この調子で、無理なく食卓に出してあげましょう。';}
+
+    // meal time bars (last up to 8 meals)
+    const meals=st.meals.slice(-8);
+    const bars=$("#timeBars"); bars.innerHTML="";
+    if(meals.length===0){bars.innerHTML='<p class="empty-note" style="width:100%">まだ食事の記録がありません</p>';}
+    else{
+      const max=Math.max(...meals.map(m=>m.durationSec),60);
+      meals.forEach(m=>{
+        const b=document.createElement("div"); b.className="bar";
+        b.style.height=Math.max(6,m.durationSec/max*74)+"px";
+        const mm=Math.round(m.durationSec/60);
+        b.innerHTML='<span>'+mm+'分</span>';
+        bars.appendChild(b);
+      });
+    }
+    // settings
+    $("#curName").textContent=st.name;
+    const tg=$("#rewardToggle");
+    tg.classList.toggle("on",st.rewardMode==="sticker");
+    tg.setAttribute("aria-checked",st.rewardMode==="sticker");
+    $("#rewardDesc").textContent=st.rewardMode==="sticker"?"シールをあつめる":"ことばで ほめる（シールなし）";
+  }
+  $("#rewardToggle").onclick=()=>{
+    st.rewardMode=st.rewardMode==="sticker"?"praise":"sticker"; save(); renderRecord();
+  };
+  $("#renameBtn").onclick=()=>{const v=prompt("あたらしいおなまえ",st.name); if(v&&v.trim()){st.name=v.trim();save();renderRecord();renderHome();}};
+  $("#resetBtn").onclick=()=>{if(confirm("すべての記録・シールを消しますか？")){st={name:st.name,rewardMode:st.rewardMode,meals:[],tastes:[],stickers:[]};save();renderAll();}};
+
+  function renderAll(){renderHome();renderBook();renderRecord();}
+  renderAll();
+})();
+</script>
