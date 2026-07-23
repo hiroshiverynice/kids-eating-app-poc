@@ -439,7 +439,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   pointer-events: none;
   text-align: center;
   transform: translate(-50%, -50%);
-  animation: getpop .82s var(--spring) forwards;
+  animation: getpop 2s var(--spring) forwards;
 }
 .get-card .gi { font-size: 76px; line-height: 1; filter: drop-shadow(0 8px 16px rgba(90,42,6,.35)) }
 .get-card .gl {
@@ -457,12 +457,13 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 }
 @keyframes getpop {
   0%   { opacity: 0; transform: translate(-50%,-50%) scale(.3) }
-  22%  { opacity: 1; transform: translate(-50%,-50%) scale(1.15) }
-  40%  { transform: translate(-50%,-50%) scale(1) }
-  72%  { opacity: 1; transform: translate(-50%,-50%) scale(1) }
-  100% { opacity: 0; transform: translate(-50%,-58%) scale(.9) }
+  10%  { opacity: 1; transform: translate(-50%,-50%) scale(1.18) }
+  18%  { transform: translate(-50%,-50%) scale(1) }
+  84%  { opacity: 1; transform: translate(-50%,-50%) scale(1) }
+  100% { opacity: 0; transform: translate(-50%,-64%) scale(.92) }
 }
 .get-card.rare .gl { background: linear-gradient(135deg, #E8A400, #B8860B); text-shadow: 0 2px 8px rgba(120,80,0,.7), 0 0 22px #FFD700 }
+.get-card.rare { animation-duration: 2.6s }
 .get-card.rare .gi { font-size: 96px; animation: rareSpin .9s ease }
 @keyframes rareSpin { 0%{transform:rotate(-18deg) scale(.6)} 60%{transform:rotate(8deg) scale(1.16)} 100%{transform:rotate(0) scale(1)} }
 .board-grid {
@@ -1041,8 +1042,8 @@ function registerBite(){
     const item=rare ? RARE[Math.floor((st.total-7)/7)%RARE.length]
                     : COLLECT[(st.total-1)%COLLECT.length];
     st.fedCount=(st.fedCount||0)+1; (st.board=st.board||[]).push(item);
-    getReveal(item, rare);                 // 大きな「ゲット！」
-    setTimeout(()=>feedAnim(item), 210);   // モグが食べる
+    getReveal(item, rare);                          // 大きく「ゲット！」（約1.5秒はっきり見せる）
+    setTimeout(()=>feedAnim(item), rare?1900:1400); // 子が見たあとに モグが食べる
     $("#giftCount").textContent=st.fedCount;
     const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
     if(st.board.length>=20){ st.boardsDone=(st.boardsDone||0)+1; st.board=[]; burst(EFFECTS[2]);
@@ -1086,7 +1087,7 @@ function getReveal(item, rare){
   const card=document.createElement("div"); card.className="get-card"+(rare?" rare":"");
   card.innerHTML='<div class="gi">'+item+'</div><div class="gl">'+(rare?"レア！ ✨":"ゲット！")+'</div>';
   card.style.left=cx+"px"; card.style.top=cy+"px";
-  host.appendChild(card); setTimeout(()=>card.remove(), rare?1200:840);
+  host.appendChild(card); setTimeout(()=>card.remove(), rare?2700:2100);
   if(rare) burst(EFFECTS[1]);
 }
 function burst(set){
