@@ -687,17 +687,33 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   box-shadow: 0 2px 6px rgba(0,0,0,.22);
 }
 .toggle.on::after { left: 25px }
-/* あそびの場: ゲームごとに色も中身も変わる（切り替えたことが一目でわかる） */
+/* 育成キャラ(モグ)はトップに出さない — 選んだゲームを主役にする（ユーザー要望） */
+.no-pet .char-wrap { display: none !important }
+.no-pet #collBadge { display: none }   /* 🌸開花図鑑は育成の指標なので隠す（📔スタンプ累計は残す） */
+/* あそびの場: 画面の主役。ゲームごとに色も中身も変わる（切り替えたことが一目でわかる） */
 .game-field {
   flex: 0 0 auto;
   align-self: stretch;
-  margin: 4px 14px 0;
-  padding: 8px 10px 10px;
-  border-radius: 18px;
+  margin: 10px 14px 0;
+  padding: 16px 14px 18px;
+  border-radius: 24px;
   border: 1.5px solid rgba(255,255,255,.5);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow);
   background: linear-gradient(180deg, #EAF6FF, #BFE3F7);
   transition: background .35s var(--out);
+}
+.no-pet .game-field { margin-top: 18px }
+.gf-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--disp);
+  font-size: 22px;
+  font-weight: 800;
+  color: #2A1D10;
+  margin-bottom: 12px;
+  text-align: center;
 }
 .gf-head {
   display: flex;
@@ -708,18 +724,18 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   font-weight: 700;
   color: #3A2A18;
   opacity: .85;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
-.gf-track { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px }
+.gf-track { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px }
 .gf-cell {
-  height: 22px;
-  border-radius: 7px;
+  height: 30px;
+  border-radius: 9px;
   background: rgba(255,255,255,.35);
   border: 1px solid rgba(255,255,255,.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 19px;
   line-height: 1;
 }
 .gf-cell.on { background: rgba(255,255,255,.82); box-shadow: 0 2px 5px rgba(60,30,0,.14) }
@@ -732,6 +748,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .gf-fish   { background: linear-gradient(180deg, #EAF6FF, #9AD5F0) }
 .gf-rocket { background: linear-gradient(180deg, #2B2A5C, #7E6BC0) }
 .gf-rocket .gf-head { color: #FFF6DC; opacity: .95 }
+.gf-rocket .gf-title { color: #FFF6DC }
 .gf-flower { background: linear-gradient(180deg, #FFEDF4, #FFC4DC) }
 .gf-dress  { background: linear-gradient(180deg, #F6EAFF, #D9BDFF) }
 .gf-cake   { background: linear-gradient(180deg, #FFF1E0, #FFCBA4) }
@@ -746,7 +763,8 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   .prompt-big { font-size: 16px; line-height: 1.4 }
   .fallback { padding: 13px 20px; font-size: 20px }
   .cam-card { width: min(52%, 168px) }
-  .gf-cell { height: 20px }
+  .gf-cell { height: 26px; font-size: 17px }
+  .gf-title { font-size: 20px; margin-bottom: 9px }
 }
 .cam-card { flex: 0 0 auto }
 /* カメラ枠と「たべた」ボタンが両方出る時は、枠を小さくして下のバーを画面内に保つ */
@@ -818,7 +836,8 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
     </div>
 
     <div class="game-field" id="gameField">
-      <div class="gf-head"><span id="gameChipName">…</span><span id="gfCount">0 / 20</span></div>
+      <div class="gf-title" id="gfTitle">…</div>
+      <div class="gf-head"><span id="gfSub">きょうの あそび</span><span id="gfCount">0 / 20</span></div>
       <div class="gf-track" id="gfTrack"></div>
     </div>
     <p class="prompt-big" id="prompt">ごはんを たべたら ボタンを おしてね 🥄</p>
@@ -922,7 +941,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
         <button class="link" id="resetBtn" style="color:var(--ink-soft)">リセット</button>
       </div>
       <p style="font-size:11px;color:var(--ink-soft);text-align:center;line-height:1.6;margin:10px 0 0">
-        V1 PoC・「育てる食卓」/ 一口ごとに ごはんをあげて キャラが育つ<br>食べた量でなく“ひとくちの回数”を大切にします
+        V1 PoC・「育てる食卓」/ 一口ごとに あそびが すすむ<br>食べた量でなく“ひとくちの回数”を大切にします
       </p>
       <button class="pclose" id="parentClose">とじる</button>
     </div>
@@ -993,7 +1012,7 @@ function ensureGame(){
 /* あそびの場を描き直す（pop=最後の1個をポンと出す） */
 function renderGame(pop){
   const g=ensureGame();
-  $("#gameChipName").textContent=g.icon+" "+g.name;
+  $("#gfTitle").textContent=g.icon+" "+g.name;
   $("#gameField").className="game-field gf-"+g.id;
   const board=st.board||[];
   $("#gfCount").textContent=board.length+" / 20";
@@ -1026,6 +1045,9 @@ let st=load();
 let meal={active:false,startTs:0,bites:0,tickId:null};
 let camFailed=false;
 const $=s=>document.querySelector(s);
+/* 選んだゲームを画面の主役にする。育成キャラ(モグ)はトップに出さない（ユーザー要望）。
+   育成メカニクスは残してあり、true にすればキャラ主役UIに戻せる。 */
+const SHOW_PET=false;
 
 /* ---------- cute mascot (Mogu) ---------- */
 function buildMascot(v) {
@@ -1197,13 +1219,14 @@ ${eye(60, 57, 9)}
 
 /* ---------- render ---------- */
 function renderChar(){
+  $("#collCount").textContent=st.coll.length;
+  $("#giftCount").textContent=st.fedCount||0;
+  if(!SHOW_PET) return;                             // 育成キャラをトップに出さない時は描かない
   const f=FORMS[st.stageIdx];
   $("#char").innerHTML=buildMascot(f.variant);
   $("#charName").textContent=f.name;
   $("#progFill").style.width=Math.min(100,st.stageProg/f.need*100)+"%";
   $("#progCap").textContent="あと "+(f.need-st.stageProg)+"かい で "+f.next+"よ";
-  $("#collCount").textContent=st.coll.length;
-  $("#giftCount").textContent=st.fedCount||0;
 }
 
 /* ---------- a bite happened: get a food, feed the pet, it grows ---------- */
@@ -1221,7 +1244,7 @@ function registerBite(){
                     : itemSet[st.board.length%itemSet.length];
     st.fedCount=(st.fedCount||0)+1; st.board.push(item);
     getReveal(item, rare, g.verb);                  // 大きく「つれた！」等（約1.5秒はっきり見せる）
-    setTimeout(()=>{ feedAnim(item); renderGame(true); }, rare?1900:1400); // 子が見たあとに モグが食べて、あそびの場に1つ増える
+    setTimeout(()=>{ if(SHOW_PET) feedAnim(item); else soundEat(); renderGame(true); }, rare?1900:1400); // 子が見たあと あそびの場に1つ増える
     $("#giftCount").textContent=st.fedCount;
     const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
     if(st.board.length>=20){ st.boardsDone=(st.boardsDone||0)+1; st.board=[]; burst(EFFECTS[2]);
@@ -1232,22 +1255,30 @@ function registerBite(){
 
   if(meal.bites>0 && meal.bites%5===0) streak(meal.bites+"れんぞく！");
 
-  const f=FORMS[st.stageIdx];
-  if(st.stageProg>=f.need){
-    if(st.stageIdx<FORMS.length-1){
-      st.stageIdx++; st.stageProg=0; burst(EFFECTS[st.stageIdx%EFFECTS.length]);
-      showEvolveEmoji(FORMS[st.stageIdx].evoEmoji, f.evo, "どんどん おおきく なってるよ！"); praise(f.evo);
-    }else{
-      const flower=FLOWERS[st.coll.length%FLOWERS.length]; st.coll.push(flower);
-      st.stageIdx=0; st.stageProg=0; burst(EFFECTS[0]);
-      showEvolveEmoji(flower, "はなが さいた！", "「おはな」が "+st.coll.length+"こに！\nあたらしい たまごが きたよ 🥚");
-      praise("おはなが さいたよ！やったね！");
+  if(SHOW_PET){                                     // 育成キャラ表示時のみ進化・開花（トップ非表示時はゲームのスタンプに一本化）
+    const f=FORMS[st.stageIdx];
+    if(st.stageProg>=f.need){
+      if(st.stageIdx<FORMS.length-1){
+        st.stageIdx++; st.stageProg=0; burst(EFFECTS[st.stageIdx%EFFECTS.length]);
+        showEvolveEmoji(FORMS[st.stageIdx].evoEmoji, f.evo, "どんどん おおきく なってるよ！"); praise(f.evo);
+      }else{
+        const flower=FLOWERS[st.coll.length%FLOWERS.length]; st.coll.push(flower);
+        st.stageIdx=0; st.stageProg=0; burst(EFFECTS[0]);
+        showEvolveEmoji(flower, "はなが さいた！", "「おはな」が "+st.coll.length+"こに！\nあたらしい たまごが きたよ 🥚");
+        praise("おはなが さいたよ！やったね！");
+      }
     }
   }
   save(); renderChar(); renderParent();
 }
 
 /* ---------- effects ---------- */
+/* 演出の中心: 育成キャラがいればキャラ、いなければ「あそびの場」に合わせる */
+function fxCenter(yFrac){
+  const host=$(".phone"), hb=host.getBoundingClientRect();
+  const el=$(SHOW_PET?"#char":"#gameField").getBoundingClientRect();
+  return { cx: el.left-hb.left+el.width/2, cy: el.top-hb.top+el.height*(yFrac==null?0.5:yFrac) };
+}
 function feedAnim(food){
   const host=$(".phone"), hb=host.getBoundingClientRect(), ch=$("#char").getBoundingClientRect();
   const cx=ch.left-hb.left+ch.width/2, cy=ch.top-hb.top+ch.height/2;
@@ -1261,8 +1292,7 @@ function feedAnim(food){
   soundEat();
 }
 function getReveal(item, rare, verb){
-  const host=$(".phone"), hb=host.getBoundingClientRect(), ch=$("#char").getBoundingClientRect();
-  const cx=ch.left-hb.left+ch.width/2, cy=ch.top-hb.top+ch.height*0.34;
+  const host=$(".phone"); const {cx,cy}=fxCenter(SHOW_PET?0.34:0.5);
   const card=document.createElement("div"); card.className="get-card"+(rare?" rare":"");
   card.innerHTML='<div class="gi">'+item+'</div><div class="gl">'+(rare?"レア！ ✨":(verb||"ゲット！"))+'</div>';
   card.style.left=cx+"px"; card.style.top=cy+"px";
@@ -1270,8 +1300,7 @@ function getReveal(item, rare, verb){
   if(rare){ soundRare(); burst(EFFECTS[1]); } else soundGet();
 }
 function burst(set){
-  const host=$(".phone"), hb=host.getBoundingClientRect(), ch=$("#char").getBoundingClientRect();
-  const cx=ch.left-hb.left+ch.width/2, cy=ch.top-hb.top+ch.height/2, n=8;
+  const host=$(".phone"); const {cx,cy}=fxCenter(0.5), n=8;
   for(let i=0;i<n;i++){ const e=document.createElement("div"); e.className="fx"; e.textContent=set[i%set.length];
     const ang=(Math.PI*2*i)/n+(st.total%7)*0.3, dist=80+(i%3)*24;
     e.style.left=cx+"px"; e.style.top=cy+"px";
@@ -1375,7 +1404,7 @@ function updateButtonVis(){
 function renderParent(){
   $("#pBites").textContent=meal.bites; $("#pTotal").textContent=st.total; $("#pBest").textContent=st.best;
   const sec=meal.active?Math.floor((Date.now()-meal.startTs)/1000):0; $("#pTime").textContent=Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
-  $("#rewardDesc").textContent=st.rewardMode==="grow"?"キャラを そだてる":"ことばで ほめる（育成なし）"; $("#rewardToggle").classList.toggle("on",st.rewardMode==="grow");
+  $("#rewardDesc").textContent=st.rewardMode==="grow"?"ゲームで スタンプを あつめる":"ことばで ほめる（ゲームなし）"; $("#rewardToggle").classList.toggle("on",st.rewardMode==="grow");
   $("#camModeDesc").textContent=st.camMode?"オン（画面を触らずに記録）":"オフ（ボタンで記録）"; $("#camToggle").classList.toggle("on",st.camMode);
   $("#btnDesc").textContent=st.showButton?"いつも表示":"カメラが使えない時だけ表示"; $("#btnToggle").classList.toggle("on",st.showButton);
   $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
@@ -1490,6 +1519,7 @@ function loop(){
 }
 
 /* ---------- boot ---------- */
+if(!SHOW_PET) $(".phone").classList.add("no-pet");   // 育成キャラをトップから隠す
 renderChar(); renderGame(); save(); renderParent(); updateButtonVis(); applyGestureUI();
 document.addEventListener("click",resumeAudio,{once:true});
 if(st.camMode) startCamera(); else { camFailed=false; updateButtonVis(); }
