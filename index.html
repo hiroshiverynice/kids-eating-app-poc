@@ -745,15 +745,61 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   55%  { transform: scale(1.35) rotate(6deg); opacity: 1 }
   100% { transform: scale(1) rotate(0) }
 }
-.gf-fish   { background: linear-gradient(180deg, #EAF6FF, #9AD5F0) }
-.gf-rocket { background: linear-gradient(180deg, #2B2A5C, #7E6BC0) }
-.gf-rocket .gf-head { color: #FFF6DC; opacity: .95 }
-.gf-rocket .gf-title { color: #FFF6DC }
-.gf-flower { background: linear-gradient(180deg, #FFEDF4, #FFC4DC) }
-.gf-dress  { background: linear-gradient(180deg, #F6EAFF, #D9BDFF) }
-.gf-cake   { background: linear-gradient(180deg, #FFF1E0, #FFCBA4) }
-.gf-animal { background: linear-gradient(180deg, #EDF9E2, #BCE6A6) }
-.gf-car    { background: linear-gradient(180deg, #EDF1FA, #B8C7E8) }
+/* ===== ミニゲーム別テーマ配色（切替が一目でわかる） ===== */
+.gf-fishing   { background: linear-gradient(180deg, #DFF3FF, #7FC4E8) }
+.gf-fireworks { background: linear-gradient(180deg, #10123A, #2A2A66) }
+.gf-fossil    { background: linear-gradient(180deg, #F3E4C6, #D9B276) }
+.gf-tower     { background: linear-gradient(180deg, #22224E, #6A79C8) }
+.gf-board     { background: linear-gradient(180deg, #E6F7E0, #ADD79B) }
+.gf-race      { background: linear-gradient(180deg, #EAF7D8, #C4E48C) }
+.gf-robot     { background: linear-gradient(180deg, #E9EDFA, #A9B8E6) }
+.gf-fireworks .gf-head,.gf-fireworks .gf-title,.gf-tower .gf-head,.gf-tower .gf-title { color: #FFF6DC }
+.gf-fireworks .gf-head,.gf-tower .gf-head { opacity: .95 }
+
+/* ===== あそびの場 共通ステージ ===== */
+.gf-stage { position: relative; min-height: 150px; border-radius: 16px; overflow: hidden }
+
+/* 🎣 ぬしつり */
+.gf-stage.fishing { display: flex; flex-direction: column }
+.fishing .pond { flex: 1; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(255,255,255,.5), transparent 70%); }
+.fishing .catch { font-size: 60px; line-height: 1; filter: drop-shadow(0 6px 10px rgba(20,60,90,.35)) }
+.fishing .catch.pop { animation: gfpop .6s var(--spring) }
+.fishing .bucket { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; padding: 8px 6px;
+  background: rgba(255,255,255,.35); font-size: 20px; min-height: 40px }
+/* 🎆 はなび */
+.gf-stage.fireworks { }
+.fireworks .fw { position: absolute; transform: translate(-50%,-50%); font-size: 26px; animation: fwpop .7s var(--spring) }
+@keyframes fwpop { 0%{transform:translate(-50%,-50%) scale(.1);opacity:0} 60%{transform:translate(-50%,-50%) scale(1.3);opacity:1} 100%{transform:translate(-50%,-50%) scale(1)} }
+/* 🦖 かせきパーク */
+.fossil .reveal-pic { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 110px; line-height: 1 }
+.fossil .reveal-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4,1fr); grid-template-rows: repeat(5,1fr) }
+.fossil .cover { background: linear-gradient(160deg,#C8A063,#A87C40); border: 1px solid rgba(120,80,30,.35); transition: transform .35s var(--out), opacity .35s }
+.fossil .cover.off { transform: scale(.2) rotate(20deg); opacity: 0; pointer-events: none }
+/* 🚀 ロケットタワー */
+.gf-stage.tower { display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px }
+.tower .tower-col { display: flex; flex-direction: column; align-items: center }
+.tower .block { font-size: 30px; line-height: .9 }
+.tower .block.pop { animation: dropin .5s var(--spring) }
+@keyframes dropin { 0%{transform:translateY(-40px) scale(1.2);opacity:0} 70%{transform:translateY(4px)} 100%{transform:translateY(0)} }
+/* 🗺️ たんけんマップ */
+.gf-stage.board { display: flex; flex-direction: column; gap: 8px; padding: 10px }
+.board .dice { text-align: center; font-size: 34px; line-height: 1 }
+.board .board-path { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center }
+.board .btile { width: 26px; height: 26px; border-radius: 7px; background: rgba(255,255,255,.5);
+  display: flex; align-items: center; justify-content: center; font-size: 16px }
+.board .btile.here { background: #fff; box-shadow: 0 2px 6px rgba(60,80,30,.3); transform: scale(1.15) }
+/* 🏁 どうぶつレース */
+.gf-stage.race { display: flex; flex-direction: column; justify-content: center; gap: 7px; padding: 10px 8px }
+.race .lane { position: relative; height: 26px; border-radius: 999px; background: rgba(255,255,255,.4) }
+.race .run { position: absolute; top: 50%; transform: translate(-50%,-50%); font-size: 22px; transition: left .4s var(--out); z-index: 2 }
+.race .goal { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 16px; opacity: .7 }
+/* 🤖 びっくりロボ */
+.gf-stage.robot { display: flex; align-items: center; justify-content: center }
+.robot .robo { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-content: center;
+  max-width: 200px; font-size: 30px; line-height: 1 }
+.robot .robo .pop { animation: dropin .5s var(--spring); display: inline-block }
 /* 画面が短い端末（iPhone SE等）: キャラを少し小さくして、カメラ・ボタン・あそびの場を全部収める */
 @media (max-height: 720px) {
   .char { width: 150px; height: 150px }
@@ -763,7 +809,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   .prompt-big { font-size: 16px; line-height: 1.4 }
   .fallback { padding: 13px 20px; font-size: 20px }
   .cam-card { width: min(52%, 168px) }
-  .gf-cell { height: 26px; font-size: 17px }
+  .gf-stage { min-height: 128px }
   .gf-title { font-size: 20px; margin-bottom: 9px }
 }
 .cam-card { flex: 0 0 auto }
@@ -836,7 +882,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
     <div class="game-field" id="gameField">
       <div class="gf-title" id="gfTitle">…</div>
       <div class="gf-head"><span id="gfSub">きょうの あそび</span><span id="gfCount">0 / 20</span></div>
-      <div class="gf-track" id="gfTrack"></div>
+      <div class="gf-stage" id="gfStage"></div>
     </div>
     <p class="prompt-big" id="prompt">ごはんを たべたら おててを かざしてね ✋</p>
 
@@ -878,8 +924,8 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   <div class="ov-back" id="giftBack" style="display:none">
     <div class="ov-card">
       <div class="big" id="boardBig">📔</div>
-      <h3 id="boardTitle">コレクション</h3>
-      <p><span id="boardFill">0</span> / 20　（コンプリート <span id="boardsDone">0</span>）</p>
+      <h3 id="boardTitle">クリア ずかん</h3>
+      <p>あそびを <span id="boardFill">0</span>かい クリアしたよ！</p>
       <div class="board-grid" id="boardGrid"></div>
       <p style="font-size:12px;margin-top:12px">ぜんぶで <span id="giftTotal">0</span>こ あつめたよ！</p>
     </div>
@@ -964,65 +1010,157 @@ const RARE    = ["💎","👑","🏆","🦄","🌟"]; // 7口ごと
 const EFFECTS = [["✨","⭐","🌟"],["🎉","🎊","🎈"],["💛","🧡","💫"],["🌈","☁️","⚡"],["🌸","🌷","🌼"]];
 const CHEERS  = ["たべたね！","えらいね！","じょうずー！","もぐもぐ！","やったね！","おいしい！","ナイス！"];
 
-/* きょうの あそび: 1日1つ・一口=1手番で進む。子どもは操作しない（食事を止めない）。
-   確率で当たる要素（スロット/ガチャ等）は入れない。日替わりは抽選ではなく日付順の巡回。 */
+/* ===== きょうの あそび（ミニゲーム）=====
+   設計原則: 一口=1ターン。子どもは操作しない（食事を止めない）。
+   各ゲームは「メカニクスも快感も別物」。ゲーム内のランダム性(サイコロ/大物/レア)はOK＝
+   ドキドキを生む。ただしテーマとしての賭博(スロット/ガチャ/賭け)はNG、失敗・罰・後退で泣く演出もNG。
+   レアは基礎確率は低いが口数で上がり、ゴールでは必ず当たる（天井＝毎食かならず盛り上がる）。
+   一流ゲームデザイナー3名の企画会議（2026-07-24）の成果を統合。 */
+const RNG = {
+  pick(a){ return a[Math.floor(Math.random()*a.length)]; },
+  int(a,b){ return a+Math.floor(Math.random()*(b-a+1)); },
+  chance(p){ return Math.random()<p; }
+};
+function shuffled(n){ const a=[...Array(n).keys()]; for(let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
 const GAMES = [
-  { id:"fish",   icon:"🎣", name:"おさかなつり",     verb:"つれた！",       field:"すいそう",
-    done:"すいそうが いっぱいに なった！",
-    items:["🐟","🐠","🦐","🐡","🦑","🐙","🦀","🐚","🦞","🐳","🌊","⭐","🐬","🪸","🦭","🐢","🍤","🪼","🦈","🧜"],
-    rare:["🐋","🦈","🐙","🐬","👑"] },
-  { id:"rocket", icon:"🚀", name:"ロケット",         verb:"すすんだ！",     field:"うちゅうへの みち", fill:"up",
-    done:"うちゅうに とうちゃく！",
-    items:["🌱","🏠","🌳","🏢","🎈","🕊️","☁️","🌤️","✈️","🌈","⛅","🪁","🌥️","🚁","🌙","⭐","✨","🛰️","🪐","🌌"],
-    rare:["☄️","🛸","🪐","🌟","👨‍🚀"] },
-  { id:"flower", icon:"🌷", name:"おはなばたけ",     verb:"さいた！",       field:"はなばたけ",
-    done:"はなかんむりが できた！",
-    items:["🌱","🌿","🍀","🌷","🌻","🌼","🌸","🌺","💐","🪻","🌹","🪷","🏵️","🍃","🌾","🥀","🌵","🎍","🪴","🌳"],
-    rare:["🦋","🐝","🍄","🌈","👑"] },
-  { id:"dress",  icon:"👗", name:"おきがえモグ",     verb:"みつけた！",     field:"クローゼット",
-    done:"おしゃれ かんせい！",
-    items:["🎀","👒","🧢","👑","🕶️","🧣","👗","👚","👖","🥻","👜","🎒","👠","👟","🥾","🧤","💍","⌚","🌂","💄"],
-    rare:["👑","💎","🦄","✨","🪄"] },
-  { id:"cake",   icon:"🍰", name:"ケーキづくり",     verb:"のせた！",       field:"ケーキ",
-    done:"ケーキが できた！",
-    items:["🥣","🥛","🥚","🧈","🍫","🍓","🫐","🍒","🥝","🍊","🍑","🍌","🥥","🍮","🧁","🍪","🍬","🍭","🕯️","🎂"],
-    rare:["🎂","🍨","🧁","🍯","👑"] },
-  { id:"animal", icon:"🐾", name:"どうぶつパレード", verb:"なかまが きた！", field:"パレード",
-    done:"パレード かんせい！",
-    items:["🐣","🐥","🐰","🐱","🐶","🐹","🐭","🦔","🐿️","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐧","🦉"],
-    rare:["🦁","🐘","🦒","🦄","🐼"] },
-  { id:"car",    icon:"🚗", name:"のりものきち",     verb:"やってきた！",   field:"のりものきち",
-    done:"きちが かんせい！",
-    items:["🚗","🚙","🚕","🚌","🚐","🛻","🚚","🚛","🚜","🚑","🚒","🚓","🏍️","🛵","🚲","🛴","⛵","🚤","🚂","🚁"],
-    rare:["🏎️","🚂","🚁","🚀","🛸"] }
+  /* 1. ぬしつり — 毎口ごほうびの"大きさ"が変動、まれに「ぬし」 */
+  { id:"fishing", name:"ぬしつり", icon:"🎣", cls:"gf-fishing", sub:"おおものを つろう！",
+    init(){ return { caught:[], last:"🎣", nushi:false }; },
+    status(g){ return "🪣 "+g.caught.length+" / 12"; },
+    bite(g,n){
+      let emoji,label,rare=false;
+      if(g.caught.length>=11 || RNG.chance(0.01+n*0.03)){ emoji="🐋"; label="ぬしだ！！"; rare=true; g.nushi=true; }
+      else { const r=Math.random();
+        if(r<0.50){ emoji=RNG.pick(["🐟","🐠"]); label="つれた！"; }
+        else if(r<0.78){ emoji=RNG.pick(["🐠","🦐","🐡"]); label="ちゅうくらい！"; }
+        else if(r<0.93){ emoji=RNG.pick(["🐡","🦑","🦀","🐙"]); label="おおもの！"; }
+        else { emoji=RNG.pick(["🐬","🦭","🐢"]); label="レア！"; rare=true; } }
+      g.caught.push(emoji); g.last=emoji; return {emoji,label,rare};
+    },
+    done(g){ return g.nushi || g.caught.length>=12; },
+    finale(g){ return {icon: g.nushi?"🐋":"🐟", title: g.nushi?"ぬしを つったよ！":"バケツ いっぱい！", msg:"ずかんに いれたよ"}; },
+    draw(g,host,pop){ host.className="gf-stage fishing";
+      host.innerHTML='<div class="pond"><div class="catch'+(pop?" pop":"")+'">'+g.last+'</div></div>'+
+        '<div class="bucket">'+g.caught.map(f=>"<span>"+f+"</span>").join("")+'</div>'; } },
+
+  /* 2. はなびたいかい — まれにスターマインで一口が連鎖爆発 */
+  { id:"fireworks", name:"はなびたいかい", icon:"🎆", cls:"gf-fireworks", sub:"よぞらを いっぱいに！",
+    init(){ return { count:0, sky:[] }; },
+    status(g){ return "🎆 "+Math.min(g.count,20)+" / 20"; },
+    bite(g,n){
+      let chain=1,label="ドン！",rare=false,emoji="🎆";
+      if(g.count>=19 || RNG.chance(0.06+n*0.01)){ chain=RNG.int(3,7); label="スターマイン！！"; rare=true; }
+      else { const r=Math.random();
+        if(r<0.62){ emoji="🎆"; } else if(r<0.84){ emoji="🎇"; label="おおきい！"; }
+        else { emoji=RNG.pick(["⭐","💗","🌟"]); label="かたち はなび！"; rare=true; } }
+      for(let i=0;i<chain;i++){ g.sky.push({x:RNG.int(8,92),y:RNG.int(8,60),e:emoji}); g.count++; }
+      return {emoji,label,rare};
+    },
+    done(g){ return g.count>=20; },
+    finale(g){ return {icon:"🎆", title:"フィナーレ！", msg:"よぞらが はなびで いっぱい！"}; },
+    draw(g,host){ host.className="gf-stage fireworks";
+      host.innerHTML=g.sky.slice(-42).map(f=>'<span class="fw" style="left:'+f.x+'%;top:'+f.y+'%">'+f.e+'</span>').join(""); } },
+
+  /* 3. かせきパーク — 一口で1マス発掘、隠れ絵がだんだん現れる正体当て */
+  { id:"fossil", name:"かせきパーク", icon:"🦖", cls:"gf-fossil", sub:"なにが でるかな？",
+    pool:["🦕","🦖","🐋","🚀","🏰","🐉","🦣","🐘","🦈","🌋"],
+    init(){ return { target: RNG.pick(this.pool), opened:0, order: shuffled(20) }; },
+    status(g){ return "⛏️ "+g.opened+" / 20"; },
+    bite(g,n){ g.opened=Math.min(20,g.opened+1);
+      let emoji="⛏️",label="ほれた！",rare=false;
+      if(RNG.chance(0.08)){ emoji=RNG.pick(["💎","🪙","💠"]); label="たからも！"; rare=true; }
+      return {emoji,label,rare}; },
+    done(g){ return g.opened>=20; },
+    finale(g){ return {icon:g.target, title:"はっけん！", msg:"かせきを ずかんに いれたよ"}; },
+    draw(g,host){ host.className="gf-stage fossil";
+      const open=new Set(g.order.slice(0,g.opened)); let cells="";
+      for(let i=0;i<20;i++){ cells+='<div class="cover'+(open.has(i)?" off":"")+'"></div>'; }
+      host.innerHTML='<div class="reveal-pic">'+g.target+'</div><div class="reveal-grid">'+cells+'</div>'; } },
+
+  /* 4. ロケットタワー — 一口でブロックが積まれ塔が縦に伸びる */
+  { id:"tower", name:"ロケットタワー", icon:"🚀", cls:"gf-tower", sub:"うちゅうまで つもう！",
+    init(){ return { blocks:[], h:0 }; },
+    status(g){ return "🏗️ たかさ "+g.h; },
+    bite(g,n){ let add=1,label="つんだ！",rare=false,emoji=RNG.pick(["🧱","🟦","🟧","🟩","🟪","🟨","🎁"]);
+      if(g.h>=17){ emoji="🚀"; label="うちゅうへ！"; rare=true; }
+      else if(RNG.chance(0.08)){ add=2; emoji="🌸"; label="バネブロック！＋2"; rare=true; }
+      for(let i=0;i<add;i++){ g.blocks.push({e:emoji,dx:RNG.int(-16,16)}); g.h++; }
+      return {emoji,label,rare}; },
+    done(g){ return g.h>=18; },
+    finale(g){ return {icon:"🚀", title:"うちゅうに とうちゃく！", msg:"ロケット はっしゃ！"}; },
+    draw(g,host,pop){ host.className="gf-stage tower";
+      const b=g.blocks.slice(-9);
+      host.innerHTML='<div class="tower-col">'+b.map((bl,i)=>'<div class="block'+(pop&&i===b.length-1?" pop":"")+'" style="margin-left:'+bl.dx+'px">'+bl.e+'</div>').reverse().join("")+'</div>'; } },
+
+  /* 5. たんけんマップ — 一口でサイコロ(1〜3)、分かれ道すごろく＋ワープ */
+  { id:"board", name:"たんけんマップ", icon:"🗺️", cls:"gf-board", sub:"サイコロで すすもう！",
+    init(){ return { pos:0, dice:0 }; },
+    status(g){ return "🚩 "+Math.min(g.pos,24)+" / 24"; },
+    bite(g,n){ const step=RNG.int(1,3); g.dice=step; g.pos+=step;
+      let label="サイコロ "+step+"！",rare=false,emoji=["","⚀","⚁","⚂"][step];
+      if(g.pos<24 && RNG.chance(0.12)){ const w=RNG.int(3,5); g.pos+=w; label="ワープ！ ＋"+w; rare=true; emoji="🌀"; }
+      if(g.pos>24) g.pos=24;
+      return {emoji,label,rare}; },
+    done(g){ return g.pos>=24; },
+    finale(g){ return {icon:"🏰", title:"おしろに ついた！", msg:"たからばこ ゲット！"}; },
+    draw(g,host){ host.className="gf-stage board";
+      const n=20, here=Math.round(g.pos/24*n); let cells="";
+      for(let i=0;i<=n;i++){ cells+='<div class="btile'+(i===here?" here":"")+'">'+(i===here?"🐥":(i===n?"🏰":""))+'</div>'; }
+      host.innerHTML='<div class="dice">'+(g.dice?["","⚀","⚁","⚂"][g.dice]:"🎲")+'</div><div class="board-path">'+cells+'</div>'; } },
+
+  /* 6. どうぶつレース — 自分＋動物3匹の並走、抜きつ抜かれつ（必ず1着以上） */
+  { id:"race", name:"どうぶつレース", icon:"🏁", cls:"gf-race", sub:"1ばんを めざそう！",
+    init(){ return { me:0, rivals:[0,0,0] }; },
+    status(g){ return "🏁 "+Math.min(g.me,30)+" / 30"; },
+    bite(g,n){ const behind = g.me < Math.max(...g.rivals);
+      const step=RNG.int(1,4)+(behind?1:0); g.me+=step;
+      g.rivals=g.rivals.map(v=> Math.min(28, v+RNG.int(0,2)));   // ライバルはゴール手前で足踏み（必ず勝てる）
+      if(g.me>30) g.me=30;
+      return {emoji:"💨", label: behind?"おいぬけ！":"ダッシュ！", rare:false}; },
+    done(g){ return g.me>=30; },
+    finale(g){ return {icon:"🥇", title:"ゴール！ 1ちゃく！", msg:"メダル ゲット！"}; },
+    draw(g,host){ host.className="gf-stage race";
+      const lane=(w,v)=>'<div class="lane"><span class="goal">🏁</span><span class="run" style="left:'+Math.min(96,v/30*96)+'%">'+w+'</span></div>';
+      host.innerHTML=lane("🐥",g.me)+g.rivals.map((v,i)=>lane(["🐢","🐰","🦊"][i],v)).join(""); } },
+
+  /* 7. びっくりロボ — 一口でパーツが合体、世界に1台のロボ完成（まれにレアパーツ） */
+  { id:"robot", name:"びっくりロボ", icon:"🤖", cls:"gf-robot", sub:"せかいに 1だいの ロボ！",
+    slots:[["🦿","🦵","🛞"],["🟦","🟥","🟩","🟨"],["💪","🦾"],["🎒","🌂","🎈"],["🤖","😺","🐻","👾"],["📡","🎀","👑"],["🚀","🔥","🦋","⭐"]],
+    init(){ return { parts:[] }; },
+    status(g){ return "🔩 "+g.parts.length+" / 18"; },
+    bite(g,n){ const slot=this.slots[g.parts.length%this.slots.length];
+      let emoji=RNG.pick(slot),label="ガッチャン！",rare=false;
+      if(RNG.chance(0.05)){ emoji="🌈"; label="にじいろパーツ！"; rare=true; }
+      else if(RNG.chance(0.05)){ emoji="👑"; label="きんいろパーツ！"; rare=true; }
+      g.parts.push(emoji); return {emoji,label,rare}; },
+    done(g){ return g.parts.length>=18; },
+    finale(g){ return {icon:"🤖", title:"ロボ かんせい！", msg:"せかいに 1だいだけ！"}; },
+    draw(g,host,pop){ host.className="gf-stage robot";
+      const p=g.parts.slice(-12);
+      host.innerHTML='<div class="robo">'+p.map((x,i)=>(pop&&i===p.length-1)?'<span class="pop">'+x+'</span>':'<span>'+x+'</span>').join("")+'</div>'; } }
 ];
+
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function todaysGame(){
   if(st.gamePick && st.gamePick!=="auto"){ const g=GAMES.find(x=>x.id===st.gamePick); if(g) return g; }
   return GAMES[((dayKey()%GAMES.length)+GAMES.length)%GAMES.length];   // 抽選ではなく日付順の巡回（1週間で1巡）
 }
-/* あそびが変わったら盤はまっさらから（1日で終わる区切り） */
+/* あそびが変わったら、そのゲームの状態を新規に（1食で完結する区切り） */
 function ensureGame(){
   const g=todaysGame();
-  if(st.gameId!==g.id){ st.gameId=g.id; st.board=[]; }
+  if(st.gameId!==g.id || !st.gs){ st.gameId=g.id; st.gs=g.init(); st.gsN=0; }
   return g;
 }
-/* あそびの場を描き直す（pop=最後の1個をポンと出す） */
+/* あそびの場を描き直す（pop=最後の1手をポンと見せる） */
 function renderGame(pop){
   const g=ensureGame();
   $("#gfTitle").textContent=g.icon+" "+g.name;
-  $("#gameField").className="game-field gf-"+g.id;
-  const board=st.board||[];
-  $("#gfCount").textContent=board.length+" / 20";
-  const tr=$("#gfTrack"); tr.innerHTML="";
-  const cells=[];
-  for(let i=0;i<20;i++){ const c=document.createElement("div"); c.className="gf-cell"; cells.push(c); tr.appendChild(c); }
-  board.slice(0,20).forEach((it,i)=>{
-    const pos = g.fill==="up" ? (1-Math.floor(i/10))*10+(i%10) : i;   // ロケットは下の段から
-    const c=cells[pos]; if(!c) return;
-    c.classList.add("on"); c.textContent=it;
-    if(pop && i===board.length-1) c.classList.add("pop");
-  });
+  $("#gfSub").textContent=g.sub;
+  $("#gfCount").textContent=g.status(st.gs);
+  $("#gameField").className="game-field "+g.cls;
+  $("#giftCount").textContent=(st.zukan||[]).length;
+  g.draw(st.gs,$("#gfStage"),pop);
   return g;
 }
 
@@ -1036,7 +1174,7 @@ const GESTURES = {
 
 const KEY="sodateru_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null }; }
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[] }; }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return Object.assign(base(),d); }catch(e){} return base(); }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
 let st=load();
@@ -1218,7 +1356,7 @@ ${eye(60, 57, 9)}
 /* ---------- render ---------- */
 function renderChar(){
   $("#collCount").textContent=st.coll.length;
-  $("#giftCount").textContent=st.fedCount||0;
+  $("#giftCount").textContent=(st.zukan||[]).length;   // 📔=クリアした あそびの数（ずかん）
   if(!SHOW_PET) return;                             // 育成キャラをトップに出さない時は描かない
   const f=FORMS[st.stageIdx];
   $("#char").innerHTML=buildMascot(f.variant);
@@ -1234,19 +1372,19 @@ function registerBite(){
   praise(CHEERS[st.total % CHEERS.length]);
 
   if(st.rewardMode==="grow"){
-    const g=renderGame();                           // きょうのあそび（一口=1手番）
-    const rareSet=g.rare||RARE, itemSet=g.items||COLLECT;
-    const rare=(st.total%7===0);
-    st.board=st.board||[];
-    const item=rare ? rareSet[Math.floor((st.total-7)/7)%rareSet.length]
-                    : itemSet[st.board.length%itemSet.length];
-    st.fedCount=(st.fedCount||0)+1; st.board.push(item);
-    getReveal(item, rare, g.verb);                  // 大きく「つれた！」等（約1.5秒はっきり見せる）
-    setTimeout(()=>{ if(SHOW_PET) feedAnim(item); else soundEat(); renderGame(true); }, rare?1900:1400); // 子が見たあと あそびの場に1つ増える
-    $("#giftCount").textContent=st.fedCount;
+    const game=ensureGame();                        // きょうのミニゲーム（一口=1ターン）
+    st.gsN=(st.gsN||0)+1;
+    const ev=game.bite(st.gs,st.gsN);               // ゲーム状態を1手すすめ、演出用イベントを得る
+    st.fedCount=(st.fedCount||0)+1;
+    getReveal(ev.emoji, ev.rare, ev.label);         // 大きく「つれた！」「スターマイン！」等を約1.5秒見せる
+    setTimeout(()=>{ if(SHOW_PET) feedAnim(ev.emoji); else soundEat(); renderGame(true); }, ev.rare?1900:1400);
     const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
-    if(st.board.length>=20){ st.boardsDone=(st.boardsDone||0)+1; st.board=[]; burst(EFFECTS[2]);
-      showEvolveEmoji(g.icon,g.done,"20こ あつめたよ！ すごい！"); praise(g.done+" やったね！"); }
+    if(game.done(st.gs)){                            // 1食のなかで何回でも完結できる（完結ごとに図鑑へ）
+      const f=game.finale(st.gs);
+      (st.zukan=st.zukan||[]).push(f.icon);
+      setTimeout(()=>{ burst(EFFECTS[2]); showEvolveEmoji(f.icon,f.title,f.msg); praise(f.title+" やったね！"); }, ev.rare?2050:1600);
+      st.gs=game.init(); st.gsN=0;                   // 次の1回を新規スタート
+    }
   }else{
     const c=$("#char"); c.classList.remove("chomp"); void c.offsetWidth; c.classList.add("chomp");
   }
@@ -1316,17 +1454,15 @@ function showEvolveEmoji(emoji,title,msg){
   clearTimeout(showEvolveEmoji._t); showEvolveEmoji._t=setTimeout(()=>b.style.display="none",2300); b.onclick=()=>b.style.display="none";
 }
 function showBoard(){
-  const g=renderGame(); const board=st.board||[]; const grid=$("#boardGrid"); grid.innerHTML="";
-  $("#boardBig").textContent=g.icon; $("#boardTitle").textContent=g.name;
-  const cells=[]; for(let i=0;i<20;i++){ const c=document.createElement("div"); c.className="bcell empty"; cells.push(c); grid.appendChild(c); }
-  board.slice(0,20).forEach((it,i)=>{
-    // ロケットは下から上へ積み上げる
-    const pos = g.fill==="up" ? (3-Math.floor(i/5))*5+(i%5) : i;
-    const c=cells[pos]; if(c){ c.className="bcell"; c.textContent=it; }
-  });
-  $("#boardFill").textContent=board.length;
-  $("#boardsDone").textContent=st.boardsDone||0;
-  $("#giftTotal").textContent=st.fedCount||0;
+  // 📔 ずかん: クリアした あそびを あつめる（釣ったぬし・完成ロボ・見つけたかせき等）
+  const zk=st.zukan||[]; const grid=$("#boardGrid"); grid.innerHTML="";
+  $("#boardBig").textContent="📔"; $("#boardTitle").textContent="クリア ずかん";
+  const show=zk.slice(-20);
+  for(let i=0;i<20;i++){ const c=document.createElement("div");
+    if(show[i]){ c.className="bcell"; c.textContent=show[i]; } else { c.className="bcell empty"; }
+    grid.appendChild(c); }
+  $("#boardFill").textContent=zk.length;
+  $("#giftTotal").textContent=zk.length;
   const b=$("#giftBack"); b.style.display="grid"; b.onclick=()=>b.style.display="none";
 }
 
@@ -1384,7 +1520,7 @@ function endMeal(){ if(!meal.active) return; clearInterval(meal.tickId); meal.ac
   const rec=n>st.best&&n>0; if(n>st.best) st.best=n; save();
   $("#sumMsg").textContent="きょうは "+n+"こ ひとくち できたね！";
   $("#sumRec").textContent=rec?"🎉 しんきろく！":(st.best>0?"さいこう記録: "+st.best+"こ":"");
-  $("#sumColl").textContent=st.coll.slice(-8).join(" ");
+  $("#sumColl").textContent=(st.zukan||[]).slice(-8).join(" ");
   if(n>0){ $("#sumBack").style.display="grid"; praise(rec?"しんきろく！すごい！":"ごちそうさま！"); }
   const sb=$("#sumBack"); clearTimeout(endMeal._t); endMeal._t=setTimeout(()=>sb.style.display="none",3200); sb.onclick=()=>sb.style.display="none"; renderParent(); }
 
@@ -1402,7 +1538,7 @@ function updateButtonVis(){
 function renderParent(){
   $("#pBites").textContent=meal.bites; $("#pTotal").textContent=st.total; $("#pBest").textContent=st.best;
   const sec=meal.active?Math.floor((Date.now()-meal.startTs)/1000):0; $("#pTime").textContent=Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
-  $("#rewardDesc").textContent=st.rewardMode==="grow"?"ゲームで スタンプを あつめる":"ことばで ほめる（ゲームなし）"; $("#rewardToggle").classList.toggle("on",st.rewardMode==="grow");
+  $("#rewardDesc").textContent=st.rewardMode==="grow"?"ミニゲームで あそぶ":"ことばで ほめる（ゲームなし）"; $("#rewardToggle").classList.toggle("on",st.rewardMode==="grow");
   $("#camModeDesc").textContent=st.camMode?"オン（画面を触らずに記録）":"オフ（ボタンで記録）"; $("#camToggle").classList.toggle("on",st.camMode);
   $("#btnDesc").textContent=st.showButton?"いつも表示":"カメラが使えない時だけ表示"; $("#btnToggle").classList.toggle("on",st.showButton);
   $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
