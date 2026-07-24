@@ -687,6 +687,23 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   box-shadow: 0 2px 6px rgba(0,0,0,.22);
 }
 .toggle.on::after { left: 25px }
+.game-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: center;
+  margin: 2px auto 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--disp);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.game-chip b { color: var(--ink); font-size: 14px }
 .gchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px }
 .gchips button {
   font-family: var(--disp);
@@ -753,6 +770,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="prog-cap" id="progCap">たべると そだつよ</div>
     </div>
 
+    <div class="game-chip" id="gameChip">きょうの あそび　<b id="gameChipName">…</b></div>
     <p class="prompt-big" id="prompt">ごはんを たべたら ボタンを おしてね 🥄</p>
 
     <div class="cam-card" id="camCard">
@@ -792,8 +810,8 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 
   <div class="ov-back" id="giftBack" style="display:none">
     <div class="ov-card">
-      <div class="big">📔</div>
-      <h3>コレクション</h3>
+      <div class="big" id="boardBig">📔</div>
+      <h3 id="boardTitle">コレクション</h3>
       <p><span id="boardFill">0</span> / 20　（コンプリート <span id="boardsDone">0</span>）</p>
       <div class="board-grid" id="boardGrid"></div>
       <p style="font-size:12px;margin-top:12px">ぜんぶで <span id="giftTotal">0</span>こ あつめたよ！</p>
@@ -814,6 +832,16 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="prow">
         <div><div class="lab">カメラで手かざし検知</div><div class="desc" id="camModeDesc">オン（画面を触らずに記録）</div></div>
         <div class="toggle on" id="camToggle" role="switch" aria-checked="true"></div>
+      </div>
+      <div class="prow">
+        <div style="flex:1">
+          <div class="lab">きょうの あそび</div>
+          <div class="desc" id="gameDesc">日替わり（毎日ちがう・1週間で1巡）</div>
+          <div class="gchips" id="gameChips">
+            <button data-p="auto">🗓 日替わり</button>
+          </div>
+          <div class="desc" style="margin-top:8px">あそびを かえると コレクション盤は まっさらから始まります（集めた累計は消えません）</div>
+        </div>
       </div>
       <div class="prow" id="gestRow">
         <div style="flex:1">
@@ -868,6 +896,55 @@ const RARE    = ["💎","👑","🏆","🦄","🌟"]; // 7口ごと
 const EFFECTS = [["✨","⭐","🌟"],["🎉","🎊","🎈"],["💛","🧡","💫"],["🌈","☁️","⚡"],["🌸","🌷","🌼"]];
 const CHEERS  = ["たべたね！","えらいね！","じょうずー！","もぐもぐ！","やったね！","おいしい！","ナイス！"];
 
+/* きょうの あそび: 1日1つ・一口=1手番で進む。子どもは操作しない（食事を止めない）。
+   確率で当たる要素（スロット/ガチャ等）は入れない。日替わりは抽選ではなく日付順の巡回。 */
+const GAMES = [
+  { id:"fish",   icon:"🎣", name:"おさかなつり",     verb:"つれた！",       field:"すいそう",
+    done:"すいそうが いっぱいに なった！",
+    items:["🐟","🐠","🦐","🐡","🦑","🐙","🦀","🐚","🦞","🐳","🌊","⭐","🐬","🪸","🦭","🐢","🍤","🪼","🦈","🧜"],
+    rare:["🐋","🦈","🐙","🐬","👑"] },
+  { id:"rocket", icon:"🚀", name:"ロケット",         verb:"すすんだ！",     field:"うちゅうへの みち", fill:"up",
+    done:"うちゅうに とうちゃく！",
+    items:["🌱","🏠","🌳","🏢","🎈","🕊️","☁️","🌤️","✈️","🌈","⛅","🪁","🌥️","🚁","🌙","⭐","✨","🛰️","🪐","🌌"],
+    rare:["☄️","🛸","🪐","🌟","👨‍🚀"] },
+  { id:"flower", icon:"🌷", name:"おはなばたけ",     verb:"さいた！",       field:"はなばたけ",
+    done:"はなかんむりが できた！",
+    items:["🌱","🌿","🍀","🌷","🌻","🌼","🌸","🌺","💐","🪻","🌹","🪷","🏵️","🍃","🌾","🥀","🌵","🎍","🪴","🌳"],
+    rare:["🦋","🐝","🍄","🌈","👑"] },
+  { id:"dress",  icon:"👗", name:"おきがえモグ",     verb:"みつけた！",     field:"クローゼット",
+    done:"おしゃれ かんせい！",
+    items:["🎀","👒","🧢","👑","🕶️","🧣","👗","👚","👖","🥻","👜","🎒","👠","👟","🥾","🧤","💍","⌚","🌂","💄"],
+    rare:["👑","💎","🦄","✨","🪄"] },
+  { id:"cake",   icon:"🍰", name:"ケーキづくり",     verb:"のせた！",       field:"ケーキ",
+    done:"ケーキが できた！",
+    items:["🥣","🥛","🥚","🧈","🍫","🍓","🫐","🍒","🥝","🍊","🍑","🍌","🥥","🍮","🧁","🍪","🍬","🍭","🕯️","🎂"],
+    rare:["🎂","🍨","🧁","🍯","👑"] },
+  { id:"animal", icon:"🐾", name:"どうぶつパレード", verb:"なかまが きた！", field:"パレード",
+    done:"パレード かんせい！",
+    items:["🐣","🐥","🐰","🐱","🐶","🐹","🐭","🦔","🐿️","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐧","🦉"],
+    rare:["🦁","🐘","🦒","🦄","🐼"] },
+  { id:"car",    icon:"🚗", name:"のりものきち",     verb:"やってきた！",   field:"のりものきち",
+    done:"きちが かんせい！",
+    items:["🚗","🚙","🚕","🚌","🚐","🛻","🚚","🚛","🚜","🚑","🚒","🚓","🏍️","🛵","🚲","🛴","⛵","🚤","🚂","🚁"],
+    rare:["🏎️","🚂","🚁","🚀","🛸"] }
+];
+function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
+function todaysGame(){
+  if(st.gamePick && st.gamePick!=="auto"){ const g=GAMES.find(x=>x.id===st.gamePick); if(g) return g; }
+  return GAMES[((dayKey()%GAMES.length)+GAMES.length)%GAMES.length];   // 抽選ではなく日付順の巡回（1週間で1巡）
+}
+/* あそびが変わったら盤はまっさらから（1日で終わる区切り） */
+function ensureGame(){
+  const g=todaysGame();
+  if(st.gameId!==g.id){ st.gameId=g.id; st.board=[]; }
+  return g;
+}
+function renderGame(){
+  const g=ensureGame();
+  $("#gameChipName").textContent=g.icon+" "+g.name;
+  return g;
+}
+
 /* あいずのジェスチャー: 手が写っているだけでカウントすると誤検知するので、意図的な形だけを拾う */
 const GESTURES = {
   peace:{ label:"✌️ ピース", prompt:"ごはんを たべたら ピース ✌️", hint:"ピース してね ✌️" },
@@ -878,7 +955,7 @@ const GESTURES = {
 
 const KEY="sodateru_tap_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace" }; }
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace", gamePick:"auto", gameId:null }; }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return Object.assign(base(),d); }catch(e){} return base(); }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
 let st=load();
@@ -1072,16 +1149,19 @@ function registerBite(){
   praise(CHEERS[st.total % CHEERS.length]);
 
   if(st.rewardMode==="grow"){
+    const g=renderGame();                           // きょうのあそび（一口=1手番）
+    const rareSet=g.rare||RARE, itemSet=g.items||COLLECT;
     const rare=(st.total%7===0);
-    const item=rare ? RARE[Math.floor((st.total-7)/7)%RARE.length]
-                    : COLLECT[(st.total-1)%COLLECT.length];
-    st.fedCount=(st.fedCount||0)+1; (st.board=st.board||[]).push(item);
-    getReveal(item, rare);                          // 大きく「ゲット！」（約1.5秒はっきり見せる）
+    st.board=st.board||[];
+    const item=rare ? rareSet[Math.floor((st.total-7)/7)%rareSet.length]
+                    : itemSet[st.board.length%itemSet.length];
+    st.fedCount=(st.fedCount||0)+1; st.board.push(item);
+    getReveal(item, rare, g.verb);                  // 大きく「つれた！」等（約1.5秒はっきり見せる）
     setTimeout(()=>feedAnim(item), rare?1900:1400); // 子が見たあとに モグが食べる
     $("#giftCount").textContent=st.fedCount;
     const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
     if(st.board.length>=20){ st.boardsDone=(st.boardsDone||0)+1; st.board=[]; burst(EFFECTS[2]);
-      showEvolveEmoji("📔","ボード コンプリート！","20こ あつめたよ！ すごい！"); praise("ボードコンプリート！やったね！"); }
+      showEvolveEmoji(g.icon,g.done,"20こ あつめたよ！ すごい！"); praise(g.done+" やったね！"); }
   }else{
     const c=$("#char"); c.classList.remove("chomp"); void c.offsetWidth; c.classList.add("chomp");
   }
@@ -1116,11 +1196,11 @@ function feedAnim(food){
   const c=$("#char"); c.classList.remove("chomp"); void c.offsetWidth; c.classList.add("chomp");
   soundEat();
 }
-function getReveal(item, rare){
+function getReveal(item, rare, verb){
   const host=$(".phone"), hb=host.getBoundingClientRect(), ch=$("#char").getBoundingClientRect();
   const cx=ch.left-hb.left+ch.width/2, cy=ch.top-hb.top+ch.height*0.34;
   const card=document.createElement("div"); card.className="get-card"+(rare?" rare":"");
-  card.innerHTML='<div class="gi">'+item+'</div><div class="gl">'+(rare?"レア！ ✨":"ゲット！")+'</div>';
+  card.innerHTML='<div class="gi">'+item+'</div><div class="gl">'+(rare?"レア！ ✨":(verb||"ゲット！"))+'</div>';
   card.style.left=cx+"px"; card.style.top=cy+"px";
   host.appendChild(card); setTimeout(()=>card.remove(), rare?2700:2100);
   if(rare){ soundRare(); burst(EFFECTS[1]); } else soundGet();
@@ -1145,10 +1225,14 @@ function showEvolveEmoji(emoji,title,msg){
   clearTimeout(showEvolveEmoji._t); showEvolveEmoji._t=setTimeout(()=>b.style.display="none",2300); b.onclick=()=>b.style.display="none";
 }
 function showBoard(){
-  const board=st.board||[]; const grid=$("#boardGrid"); grid.innerHTML="";
-  for(let i=0;i<20;i++){ const c=document.createElement("div");
-    if(board[i]){ c.className="bcell"; c.textContent=board[i]; } else { c.className="bcell empty"; }
-    grid.appendChild(c); }
+  const g=renderGame(); const board=st.board||[]; const grid=$("#boardGrid"); grid.innerHTML="";
+  $("#boardBig").textContent=g.icon; $("#boardTitle").textContent=g.name;
+  const cells=[]; for(let i=0;i<20;i++){ const c=document.createElement("div"); c.className="bcell empty"; cells.push(c); grid.appendChild(c); }
+  board.slice(0,20).forEach((it,i)=>{
+    // ロケットは下から上へ積み上げる
+    const pos = g.fill==="up" ? (3-Math.floor(i/5))*5+(i%5) : i;
+    const c=cells[pos]; if(c){ c.className="bcell"; c.textContent=it; }
+  });
   $("#boardFill").textContent=board.length;
   $("#boardsDone").textContent=st.boardsDone||0;
   $("#giftTotal").textContent=st.fedCount||0;
@@ -1227,6 +1311,11 @@ function renderParent(){
   $("#camModeDesc").textContent=st.camMode?"オン（画面を触らずに記録）":"オフ（ボタンで記録）"; $("#camToggle").classList.toggle("on",st.camMode);
   $("#btnDesc").textContent=st.showButton?"いつも表示":"カメラが使えない時だけ表示"; $("#btnToggle").classList.toggle("on",st.showButton);
   $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
+  const cur=todaysGame();
+  $("#gameDesc").textContent = st.gamePick==="auto"
+    ? "日替わり（毎日ちがう・1週間で1巡）／きょうは "+cur.icon+" "+cur.name
+    : "いつも "+cur.icon+" "+cur.name;
+  $("#gameChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.p===(st.gamePick||"auto")));
   const g=GESTURES[st.gesture]||GESTURES.peace;
   const row=$("#gestRow"); if(row) row.style.display=st.camMode?"":"none";
   if($("#gestDesc")){
@@ -1251,9 +1340,13 @@ $("#rewardToggle").onclick=()=>{ st.rewardMode=st.rewardMode==="grow"?"praise":"
 $("#btnToggle").onclick=()=>{ st.showButton=!st.showButton; save(); renderParent(); updateButtonVis(); };
 $("#bgmToggle").onclick=()=>{ st.bgm=!st.bgm; save(); renderParent(); st.bgm? startBGM():stopBGM(); };
 $("#camToggle").onclick=()=>{ st.camMode=!st.camMode; save(); renderParent(); updateButtonVis(); applyGestureUI(); st.camMode? startCamera():stopCamera(); };
+/* あそび選択チップを組み立てる（日替わり＋全ゲーム） */
+GAMES.forEach(g=>{ const b=document.createElement("button"); b.dataset.p=g.id; b.textContent=g.icon+" "+g.name; $("#gameChips").appendChild(b); });
+$("#gameChips").onclick=e=>{ const b=e.target.closest("button[data-p]"); if(!b) return;
+  st.gamePick=b.dataset.p; renderGame(); save(); renderParent(); };   // renderGame内で盤をリセットしてから保存する
 $("#gestChips").onclick=e=>{ const b=e.target.closest("button[data-g]"); if(!b) return;
   st.gesture=b.dataset.g; save(); renderParent(); applyGestureUI(); detState="IDLE"; gHist.length=0; setRing(0); };
-$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm,gs=st.gesture; st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; st.gesture=gs; save(); meal.bites=0; renderChar(); renderParent(); } };
+$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm,gs=st.gesture,gp=st.gamePick; st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; st.gesture=gs; st.gamePick=gp; save(); meal.bites=0; renderChar(); renderGame(); renderParent(); } };
 
 /* ---------- camera + hand detection ---------- */
 let handLandmarker=null, stream=null, rafId=null, camReady=false;
@@ -1328,7 +1421,7 @@ function loop(){
 }
 
 /* ---------- boot ---------- */
-renderChar(); renderParent(); updateButtonVis(); applyGestureUI();
+renderChar(); renderGame(); save(); renderParent(); updateButtonVis(); applyGestureUI();
 document.addEventListener("click",resumeAudio,{once:true});
 if(st.camMode) startCamera(); else { camFailed=false; updateButtonVis(); }
 </script>
