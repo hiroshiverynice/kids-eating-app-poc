@@ -687,23 +687,70 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   box-shadow: 0 2px 6px rgba(0,0,0,.22);
 }
 .toggle.on::after { left: 25px }
-.game-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  align-self: center;
-  margin: 2px auto 0;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: var(--surface);
-  border: 1.5px solid var(--line);
+/* あそびの場: ゲームごとに色も中身も変わる（切り替えたことが一目でわかる） */
+.game-field {
+  flex: 0 0 auto;
+  align-self: stretch;
+  margin: 4px 14px 0;
+  padding: 8px 10px 10px;
+  border-radius: 18px;
+  border: 1.5px solid rgba(255,255,255,.5);
   box-shadow: var(--shadow-sm);
-  font-family: var(--disp);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink-soft);
+  background: linear-gradient(180deg, #EAF6FF, #BFE3F7);
+  transition: background .35s var(--out);
 }
-.game-chip b { color: var(--ink); font-size: 14px }
+.gf-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--disp);
+  font-size: 12px;
+  font-weight: 700;
+  color: #3A2A18;
+  opacity: .85;
+  margin-bottom: 6px;
+}
+.gf-track { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px }
+.gf-cell {
+  height: 22px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.35);
+  border: 1px solid rgba(255,255,255,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+}
+.gf-cell.on { background: rgba(255,255,255,.82); box-shadow: 0 2px 5px rgba(60,30,0,.14) }
+.gf-cell.pop { animation: gfpop .6s var(--spring) }
+@keyframes gfpop {
+  0%   { transform: scale(.2) rotate(-18deg); opacity: 0 }
+  55%  { transform: scale(1.35) rotate(6deg); opacity: 1 }
+  100% { transform: scale(1) rotate(0) }
+}
+.gf-fish   { background: linear-gradient(180deg, #EAF6FF, #9AD5F0) }
+.gf-rocket { background: linear-gradient(180deg, #2B2A5C, #7E6BC0) }
+.gf-rocket .gf-head { color: #FFF6DC; opacity: .95 }
+.gf-flower { background: linear-gradient(180deg, #FFEDF4, #FFC4DC) }
+.gf-dress  { background: linear-gradient(180deg, #F6EAFF, #D9BDFF) }
+.gf-cake   { background: linear-gradient(180deg, #FFF1E0, #FFCBA4) }
+.gf-animal { background: linear-gradient(180deg, #EDF9E2, #BCE6A6) }
+.gf-car    { background: linear-gradient(180deg, #EDF1FA, #B8C7E8) }
+/* 画面が短い端末（iPhone SE等）: キャラを少し小さくして、カメラ・ボタン・あそびの場を全部収める */
+@media (max-height: 720px) {
+  .char { width: 150px; height: 150px }
+  .char-wrap::before { width: 220px; height: 220px }
+  .char-wrap { gap: 6px }
+  .stage { gap: 6px; padding: 10px 16px 12px }
+  .prompt-big { font-size: 16px; line-height: 1.4 }
+  .fallback { padding: 13px 20px; font-size: 20px }
+  .cam-card { width: min(52%, 168px) }
+  .gf-cell { height: 20px }
+}
+.cam-card { flex: 0 0 auto }
+/* カメラ枠と「たべた」ボタンが両方出る時は、枠を小さくして下のバーを画面内に保つ */
+.phone.btnvis .cam-card { width: min(40%, 132px) }
 .gchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px }
 .gchips button {
   font-family: var(--disp);
@@ -768,7 +815,10 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="prog-cap" id="progCap">たべると そだつよ</div>
     </div>
 
-    <div class="game-chip" id="gameChip">きょうの あそび　<b id="gameChipName">…</b></div>
+    <div class="game-field" id="gameField">
+      <div class="gf-head"><span id="gameChipName">…</span><span id="gfCount">0 / 20</span></div>
+      <div class="gf-track" id="gfTrack"></div>
+    </div>
     <p class="prompt-big" id="prompt">ごはんを たべたら おててを かざしてね ✋</p>
 
     <div class="cam-card" id="camCard">
@@ -878,7 +928,8 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 </div>
 
 <script type="module">
-import { HandLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+/* MediaPipeはカメラを使う時だけ読み込む（トップレベルimportだとCDNが遅い/圏外のときアプリ全体が起動しない） */
+const MP_URL="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 
 /* ---------- growth model: a cute sprout pet grows, then blooms into a collected flower ---------- */
 const FORMS = [
@@ -937,9 +988,22 @@ function ensureGame(){
   if(st.gameId!==g.id){ st.gameId=g.id; st.board=[]; }
   return g;
 }
-function renderGame(){
+/* あそびの場を描き直す（pop=最後の1個をポンと出す） */
+function renderGame(pop){
   const g=ensureGame();
   $("#gameChipName").textContent=g.icon+" "+g.name;
+  $("#gameField").className="game-field gf-"+g.id;
+  const board=st.board||[];
+  $("#gfCount").textContent=board.length+" / 20";
+  const tr=$("#gfTrack"); tr.innerHTML="";
+  const cells=[];
+  for(let i=0;i<20;i++){ const c=document.createElement("div"); c.className="gf-cell"; cells.push(c); tr.appendChild(c); }
+  board.slice(0,20).forEach((it,i)=>{
+    const pos = g.fill==="up" ? (1-Math.floor(i/10))*10+(i%10) : i;   // ロケットは下の段から
+    const c=cells[pos]; if(!c) return;
+    c.classList.add("on"); c.textContent=it;
+    if(pop && i===board.length-1) c.classList.add("pop");
+  });
   return g;
 }
 
@@ -1155,7 +1219,7 @@ function registerBite(){
                     : itemSet[st.board.length%itemSet.length];
     st.fedCount=(st.fedCount||0)+1; st.board.push(item);
     getReveal(item, rare, g.verb);                  // 大きく「つれた！」等（約1.5秒はっきり見せる）
-    setTimeout(()=>feedAnim(item), rare?1900:1400); // 子が見たあとに モグが食べる
+    setTimeout(()=>{ feedAnim(item); renderGame(true); }, rare?1900:1400); // 子が見たあとに モグが食べて、あそびの場に1つ増える
     $("#giftCount").textContent=st.fedCount;
     const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
     if(st.board.length>=20){ st.boardsDone=(st.boardsDone||0)+1; st.board=[]; burst(EFFECTS[2]);
@@ -1299,6 +1363,10 @@ function endMeal(){ if(!meal.active) return; clearInterval(meal.tickId); meal.ac
 function updateButtonVis(){
   const show = st.showButton || camFailed || !st.camMode;
   $("#fallback").classList.toggle("hide", !show);
+  const camUsable = st.camMode && !camFailed;
+  $("#camCard").style.display = camUsable ? "" : "none";   // 使えないカメラ枠は場所を空ける
+  $(".phone").classList.toggle("btnvis", show && camUsable);
+  applyGestureUI();                                        // カメラが使えない時はボタン案内に切り替える
 }
 
 /* ---------- parent panel ---------- */
@@ -1324,7 +1392,7 @@ function renderParent(){
 /* 子ども画面の文言をジェスチャーに合わせる */
 function applyGestureUI(){
   const g=GESTURES[st.gesture]||GESTURES.peace;
-  $("#prompt").textContent = st.camMode ? g.prompt : "ごはんを たべたら ボタンを おしてね 👆";
+  $("#prompt").textContent = (st.camMode && !camFailed) ? g.prompt : "ごはんを たべたら ボタンを おしてね 👆";
   if(camReady && detState!=="DETECTING") camHint(g.hint);
 }
 function resumeAudio(){ try{ audioCtx&&audioCtx.state==="suspended"&&audioCtx.resume(); }catch(e){} startBGM(); }
@@ -1383,7 +1451,8 @@ async function startCamera(){
   camFailed=false; $("#camOff").style.display="none"; camBadge("じゅんび中…");
   try{
     if(!handLandmarker){
-      const vision=await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+      const { HandLandmarker, FilesetResolver } = await import(MP_URL);
+      const vision=await FilesetResolver.forVisionTasks(MP_URL+"/wasm");
       handLandmarker=await HandLandmarker.createFromOptions(vision,{
         baseOptions:{ modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task", delegate:"GPU" },
         runningMode:"VIDEO", numHands:1 });
