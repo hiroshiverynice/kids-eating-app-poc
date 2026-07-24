@@ -687,6 +687,19 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   box-shadow: 0 2px 6px rgba(0,0,0,.22);
 }
 .toggle.on::after { left: 25px }
+.gchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px }
+.gchips button {
+  font-family: var(--disp);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.gchips button.on { border-color: var(--leaf); background: var(--leaf); color: #fff }
 .pclose {
   width: 100%;
   margin-top: 18px;
@@ -800,6 +813,18 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
         <div><div class="lab">カメラで手かざし検知</div><div class="desc" id="camModeDesc">オン（画面を触らずに記録）</div></div>
         <div class="toggle on" id="camToggle" role="switch" aria-checked="true"></div>
       </div>
+      <div class="prow" id="gestRow">
+        <div style="flex:1">
+          <div class="lab">あいずの ジェスチャー</div>
+          <div class="desc" id="gestDesc">✌️ ピース</div>
+          <div class="gchips" id="gestChips">
+            <button data-g="peace">✌️ ピース</button>
+            <button data-g="good">👍 グッド</button>
+            <button data-g="open">✋ パー</button>
+            <button data-g="any">🖐 どれでも</button>
+          </div>
+        </div>
+      </div>
       <div class="prow">
         <div><div class="lab">「たべた」ボタンを出す</div><div class="desc" id="btnDesc">カメラが使えない時だけ表示</div></div>
         <div class="toggle" id="btnToggle" role="switch" aria-checked="false"></div>
@@ -841,9 +866,17 @@ const RARE    = ["💎","👑","🏆","🦄","🌟"]; // 7口ごと
 const EFFECTS = [["✨","⭐","🌟"],["🎉","🎊","🎈"],["💛","🧡","💫"],["🌈","☁️","⚡"],["🌸","🌷","🌼"]];
 const CHEERS  = ["たべたね！","えらいね！","じょうずー！","もぐもぐ！","やったね！","おいしい！","ナイス！"];
 
+/* あいずのジェスチャー: 手が写っているだけでカウントすると誤検知するので、意図的な形だけを拾う */
+const GESTURES = {
+  peace:{ label:"✌️ ピース", prompt:"ごはんを たべたら ピース ✌️", hint:"ピース してね ✌️" },
+  good: { label:"👍 グッド", prompt:"ごはんを たべたら グッド 👍", hint:"グッド してね 👍" },
+  open: { label:"✋ パー",   prompt:"ごはんを たべたら パー ✋",   hint:"パー してね ✋" },
+  any:  { label:"🖐 どれでも", prompt:"ごはんを たべたら おててを かざしてね ✋", hint:"おててを かざしてね" }
+};
+
 const KEY="sodateru_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true }; }
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace" }; }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return Object.assign(base(),d); }catch(e){} return base(); }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
 let st=load();
@@ -1192,6 +1225,18 @@ function renderParent(){
   $("#camModeDesc").textContent=st.camMode?"オン（画面を触らずに記録）":"オフ（ボタンで記録）"; $("#camToggle").classList.toggle("on",st.camMode);
   $("#btnDesc").textContent=st.showButton?"いつも表示":"カメラが使えない時だけ表示"; $("#btnToggle").classList.toggle("on",st.showButton);
   $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
+  const g=GESTURES[st.gesture]||GESTURES.peace;
+  const row=$("#gestRow"); if(row) row.style.display=st.camMode?"":"none";
+  if($("#gestDesc")){
+    $("#gestDesc").textContent=g.label+(st.gesture==="any"?"（手が見えたら記録・誤検知しやすい）":"（この形の時だけ記録）");
+    $("#gestChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.g===st.gesture));
+  }
+}
+/* 子ども画面の文言をジェスチャーに合わせる */
+function applyGestureUI(){
+  const g=GESTURES[st.gesture]||GESTURES.peace;
+  $("#prompt").textContent = st.camMode ? g.prompt : "ごはんを たべたら ボタンを おしてね 👆";
+  if(camReady && detState!=="DETECTING") camHint(g.hint);
 }
 function resumeAudio(){ try{ audioCtx&&audioCtx.state==="suspended"&&audioCtx.resume(); }catch(e){} startBGM(); }
 $("#fallback").onclick=()=>{ resumeAudio(); registerBite(); };
@@ -1203,13 +1248,39 @@ $("#parentBack").addEventListener("click",e=>{ if(e.target.id==="parentBack") $(
 $("#rewardToggle").onclick=()=>{ st.rewardMode=st.rewardMode==="grow"?"praise":"grow"; save(); renderParent(); };
 $("#btnToggle").onclick=()=>{ st.showButton=!st.showButton; save(); renderParent(); updateButtonVis(); };
 $("#bgmToggle").onclick=()=>{ st.bgm=!st.bgm; save(); renderParent(); st.bgm? startBGM():stopBGM(); };
-$("#camToggle").onclick=()=>{ st.camMode=!st.camMode; save(); renderParent(); updateButtonVis(); st.camMode? startCamera():stopCamera(); };
-$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm; st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; save(); meal.bites=0; renderChar(); renderParent(); } };
+$("#camToggle").onclick=()=>{ st.camMode=!st.camMode; save(); renderParent(); updateButtonVis(); applyGestureUI(); st.camMode? startCamera():stopCamera(); };
+$("#gestChips").onclick=e=>{ const b=e.target.closest("button[data-g]"); if(!b) return;
+  st.gesture=b.dataset.g; save(); renderParent(); applyGestureUI(); detState="IDLE"; gHist.length=0; setRing(0); };
+$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm,gs=st.gesture; st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; st.gesture=gs; save(); meal.bites=0; renderChar(); renderParent(); } };
 
 /* ---------- camera + hand detection ---------- */
 let handLandmarker=null, stream=null, rafId=null, camReady=false;
 let detState="IDLE", holdStart=0, absentSince=0;
 const HOLD_MS=550, COOLDOWN_MS=1100, RING_LEN=339;
+
+/* ---------- gesture classifier (21 landmarks) ---------- */
+const gHist=[]; const G_WIN=5, G_NEED=3;   // 5フレーム中3フレーム一致でブレを吸収
+function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+function fingersOf(lm){
+  const w=lm[0];
+  const ext=(tip,pip)=> dist(w,lm[tip]) > dist(w,lm[pip])*1.12;  // 指先が付け根より遠い=伸びている
+  // 親指は手のひら中心からの距離で判定（にぎると内側に入る）
+  const c={ x:(lm[0].x+lm[5].x+lm[17].x)/3, y:(lm[0].y+lm[5].y+lm[17].y)/3 };
+  return { thumb: dist(lm[4],c) > dist(lm[3],c)*1.10,
+           index: ext(8,6), middle: ext(12,10), ring: ext(16,14), pinky: ext(20,18) };
+}
+function matchGesture(lm, g){
+  if(g==="any") return true;
+  const f=fingersOf(lm), palm=dist(lm[5],lm[17])||0.001;
+  if(g==="peace") return f.index && f.middle && !f.ring && !f.pinky && dist(lm[8],lm[12]) > palm*0.45; // V字に開いている
+  if(g==="good"){                                                    // 親指が上＋こぶしより明確に突き出ている
+    const hs=dist(lm[0],lm[9])||0.001, above=Math.min(lm[8].y,lm[12].y,lm[16].y,lm[20].y)-lm[4].y;
+    return f.thumb && !f.index && !f.middle && !f.ring && !f.pinky
+        && (lm[0].y-lm[4].y) > hs*0.5 && above > hs*0.25;             // スプーン把持の親指と区別
+  }
+  if(g==="open")  return f.thumb && f.index && f.middle && f.ring && f.pinky;
+  return true;
+}
 function setRing(pct){ $("#ring").style.strokeDashoffset=RING_LEN*(1-pct); }
 function camBadge(t){ $("#camBadge").textContent=t; }
 function camHint(t){ $("#camHint").textContent=t; }
@@ -1226,7 +1297,7 @@ async function startCamera(){
     }
     stream=await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user", width:640, height:480 }, audio:false });
     const v=$("#cam"); v.srcObject=stream; await v.play();
-    camReady=true; camBadge("👀 みてるよ"); camHint("おててを かざしてね"); detState="IDLE"; updateButtonVis(); loop();
+    camReady=true; camBadge("👀 みてるよ"); camHint((GESTURES[st.gesture]||GESTURES.peace).hint); detState="IDLE"; gHist.length=0; updateButtonVis(); loop();
   }catch(e){
     camReady=false; camFailed=true; $("#camOff").style.display="block";
     $("#camOff").innerHTML=(location.protocol==="file:")?"カメラは https か localhost で<br>ためせます":"カメラが つかえません<br>ボタンで きろくしてね";
@@ -1237,21 +1308,25 @@ function stopCamera(){ camReady=false; if(rafId) cancelAnimationFrame(rafId);
   if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
   $("#cam").srcObject=null; $("#camOff").style.display="block"; camBadge("カメラ オフ"); camHint(""); setRing(0); }
 function loop(){
-  if(!camReady) return; const v=$("#cam"); let present=false;
+  if(!camReady) return; const v=$("#cam"); let raw=false;
+  const gk=GESTURES[st.gesture]?st.gesture:"peace";
   try{ if(v.readyState>=2 && handLandmarker){ const res=handLandmarker.detectForVideo(v, performance.now());
-    present=!!(res && res.landmarks && res.landmarks.length>0); } }catch(e){}
+    const lm=res && res.landmarks && res.landmarks[0];
+    raw = !!lm && matchGesture(lm, gk); } }catch(e){}
+  gHist.push(raw?1:0); if(gHist.length>G_WIN) gHist.shift();
+  const present = gHist.reduce((a,b)=>a+b,0) >= G_NEED;
   const nowT=performance.now();
   if(detState==="IDLE"){ if(present){ detState="DETECTING"; holdStart=nowT; soundSeen(); } else setRing(0); }
   else if(detState==="DETECTING"){ if(!present){ detState="IDLE"; setRing(0); }
     else{ const p=Math.min(1,(nowT-holdStart)/HOLD_MS); setRing(p); camHint("そのまま…");
       if(p>=1){ detState="COUNTED"; absentSince=0; setRing(1); camHint("できた！ ✨"); resumeAudio(); soundRecognized(); registerBite(); } } }
   else if(detState==="COUNTED"){ if(!present){ if(!absentSince) absentSince=nowT;
-      if(nowT-absentSince>=COOLDOWN_MS){ detState="IDLE"; setRing(0); camHint("おててを かざしてね"); } } else absentSince=0; }
+      if(nowT-absentSince>=COOLDOWN_MS){ detState="IDLE"; setRing(0); camHint(GESTURES[gk].hint); } } else absentSince=0; }
   rafId=requestAnimationFrame(loop);
 }
 
 /* ---------- boot ---------- */
-renderChar(); renderParent(); updateButtonVis();
+renderChar(); renderParent(); updateButtonVis(); applyGestureUI();
 document.addEventListener("click",resumeAudio,{once:true});
 if(st.camMode) startCamera(); else { camFailed=false; updateButtonVis(); }
 </script>
