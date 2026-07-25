@@ -98,11 +98,12 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 }
 .stage {
   flex: 1;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 14px 20px 20px;
-  gap: 10px;
+  padding: 10px 12px 12px;
+  gap: 8px;
   overflow: hidden;
   background: radial-gradient(ellipse 88% 52% at 50% -2%, var(--surface-2) 0%, transparent 70%);
 }
@@ -238,27 +239,21 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   position: relative;
   z-index: 1;
 }
-.prompt-big {
-  font-family: var(--disp);
-  font-size: 18px;
-  font-weight: 600;
-  text-align: center;
-  text-wrap: balance;
-  margin: 0;
-  color: var(--ink-soft);
-  line-height: 1.6;
-}
+.prompt-big { display: none }   /* ゲーム画面を広く使うため非表示（合図はカメラバブルのラベルで示す） */
+/* カメラは右下の小さなバブル（ゲーム画面を広く使う） */
 .cam-card {
-  width: min(60%, 214px);
-  position: relative;
-  aspect-ratio: 4/3;
-  border-radius: 20px;
+  position: absolute;
+  right: 12px;
+  bottom: 84px;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
   overflow: hidden;
   background: var(--surface-2);
-  box-shadow: 0 6px 18px rgba(80,38,4,.12), inset 0 0 0 1.5px var(--line);
+  box-shadow: 0 6px 18px rgba(10,40,70,.28), inset 0 0 0 2px rgba(255,255,255,.6);
   display: grid;
   place-items: center;
-  margin-top: 0;
+  z-index: 30;
 }
 #cam {
   position: absolute;
@@ -273,16 +268,16 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   text-align: center;
   color: var(--ink-soft);
   font-family: var(--disp);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 14px;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 4px;
   z-index: 2;
-  line-height: 1.55;
+  line-height: 1.3;
 }
 .ring {
   position: absolute;
-  width: 86px;
-  height: 86px;
+  width: 90px;
+  height: 90px;
   z-index: 3;
   pointer-events: none;
 }
@@ -297,33 +292,21 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   transition: stroke-dashoffset .1s linear;
   filter: drop-shadow(0 0 5px var(--leaf));
 }
+/* バブル下の小さなラベル（ピースしてね 等） */
 .cam-hint {
   position: absolute;
-  bottom: 7px;
-  left: 0;
-  right: 0;
+  bottom: -19px;
+  left: -30px;
+  right: -30px;
   text-align: center;
   z-index: 4;
   font-family: var(--disp);
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 1px 6px rgba(0,0,0,.65);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+  text-shadow: 0 1px 4px rgba(255,255,255,.9);
 }
-.cam-badge {
-  position: absolute;
-  top: 7px;
-  left: 7px;
-  z-index: 4;
-  font-size: 10px;
-  font-family: var(--disp);
-  font-weight: 700;
-  background: rgba(0,0,0,.54);
-  color: #fff;
-  padding: 3px 8px;
-  border-radius: 999px;
-  letter-spacing: .04em;
-}
+.cam-badge { display: none }
 .fallback {
   width: min(82%, 310px);
   padding: 19px 24px;
@@ -692,10 +675,12 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .no-pet #collBadge { display: none }   /* 🌸開花図鑑は育成の指標なので隠す（📔スタンプ累計は残す） */
 /* あそびの場: 画面の主役。ゲームごとに色も中身も変わる（切り替えたことが一目でわかる） */
 .game-field {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   align-self: stretch;
-  margin: 10px 14px 0;
-  padding: 16px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  margin: 4px 8px 0;
+  padding: 12px 12px 14px;
   border-radius: 24px;
   border: 1.5px solid rgba(255,255,255,.5);
   box-shadow: var(--shadow);
@@ -745,76 +730,89 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   55%  { transform: scale(1.35) rotate(6deg); opacity: 1 }
   100% { transform: scale(1) rotate(0) }
 }
-/* ===== ミニゲーム別テーマ配色（切替が一目でわかる） ===== */
-.gf-fishing   { background: linear-gradient(180deg, #DFF3FF, #7FC4E8) }
-.gf-fireworks { background: linear-gradient(180deg, #10123A, #2A2A66) }
-.gf-fossil    { background: linear-gradient(180deg, #F3E4C6, #D9B276) }
-.gf-tower     { background: linear-gradient(180deg, #22224E, #6A79C8) }
-.gf-board     { background: linear-gradient(180deg, #E6F7E0, #ADD79B) }
-.gf-race      { background: linear-gradient(180deg, #EAF7D8, #C4E48C) }
-.gf-robot     { background: linear-gradient(180deg, #E9EDFA, #A9B8E6) }
-.gf-fireworks .gf-head,.gf-fireworks .gf-title,.gf-tower .gf-head,.gf-tower .gf-title { color: #FFF6DC }
-.gf-fireworks .gf-head,.gf-tower .gf-head { opacity: .95 }
+/* ===== ミニゲーム別テーマ配色 ===== */
+.gf-fishing { background: linear-gradient(180deg, #BFE7FF, #5FA9D8) }
+.gf-race    { background: linear-gradient(180deg, #BFE6FF 0%, #8FD0F0 38%, #86C85A 39%, #62A83E 100%) }
+.gf-board   { background: linear-gradient(180deg, #E4F6D6, #A7D98A) }
+.gf-fishing .gf-title,.gf-fishing .gf-head { color:#0C3B5E }
+.gf-race .gf-title,.gf-race .gf-head { color:#124B12 }
 
-/* ===== あそびの場 共通ステージ ===== */
-.gf-stage { position: relative; min-height: 150px; border-radius: 16px; overflow: hidden }
+/* ===== あそびの場 共通ステージ（画面の主役・大きく） ===== */
+.gf-stage { flex:1 1 auto; position: relative; border-radius: 16px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,.35) }
+.fx-p { position:absolute; pointer-events:none; z-index:9; font-size:14px; will-change:transform,opacity }
+@keyframes partOut { from{transform:translate(-50%,-50%) scale(.4);opacity:1} to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1);opacity:0} }
+@keyframes shakeit { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-7px)} 35%{transform:translateX(6px)} 55%{transform:translateX(-5px)} 75%{transform:translateX(4px)} }
+.gf-stage.shake { animation: shakeit .5s }
 
-/* 🎣 ぬしつり */
-.gf-stage.fishing { display: flex; flex-direction: column }
-.fishing .pond { flex: 1; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(255,255,255,.5), transparent 70%); }
-.fishing .catch { font-size: 60px; line-height: 1; filter: drop-shadow(0 6px 10px rgba(20,60,90,.35)) }
-.fishing .catch.pop { animation: gfpop .6s var(--spring) }
-.fishing .bucket { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; padding: 8px 6px;
-  background: rgba(255,255,255,.35); font-size: 20px; min-height: 40px }
-/* 🎆 はなび */
-.gf-stage.fireworks { }
-.fireworks .fw { position: absolute; transform: translate(-50%,-50%); font-size: 26px; animation: fwpop .7s var(--spring) }
-@keyframes fwpop { 0%{transform:translate(-50%,-50%) scale(.1);opacity:0} 60%{transform:translate(-50%,-50%) scale(1.3);opacity:1} 100%{transform:translate(-50%,-50%) scale(1)} }
-/* 🦖 かせきパーク */
-.fossil .reveal-pic { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 110px; line-height: 1 }
-.fossil .reveal-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4,1fr); grid-template-rows: repeat(5,1fr) }
-.fossil .cover { background: linear-gradient(160deg,#C8A063,#A87C40); border: 1px solid rgba(120,80,30,.35); transition: transform .35s var(--out), opacity .35s }
-.fossil .cover.off { transform: scale(.2) rotate(20deg); opacity: 0; pointer-events: none }
-/* 🚀 ロケットタワー */
-.gf-stage.tower { display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px }
-.tower .tower-col { display: flex; flex-direction: column; align-items: center }
-.tower .block { font-size: 30px; line-height: .9 }
-.tower .block.pop { animation: dropin .5s var(--spring) }
-@keyframes dropin { 0%{transform:translateY(-40px) scale(1.2);opacity:0} 70%{transform:translateY(4px)} 100%{transform:translateY(0)} }
-/* 🗺️ たんけんマップ */
-.gf-stage.board { display: flex; flex-direction: column; gap: 8px; padding: 10px }
-.board .dice { text-align: center; font-size: 34px; line-height: 1 }
-.board .board-path { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center }
-.board .btile { width: 26px; height: 26px; border-radius: 7px; background: rgba(255,255,255,.5);
-  display: flex; align-items: center; justify-content: center; font-size: 16px }
-.board .btile.here { background: #fff; box-shadow: 0 2px 6px rgba(60,80,30,.3); transform: scale(1.15) }
-/* 🏁 どうぶつレース */
-.gf-stage.race { display: flex; flex-direction: column; justify-content: center; gap: 7px; padding: 10px 8px }
-.race .lane { position: relative; height: 26px; border-radius: 999px; background: rgba(255,255,255,.4) }
-.race .run { position: absolute; top: 50%; transform: translate(-50%,-50%); font-size: 22px; transition: left .4s var(--out); z-index: 2 }
-.race .goal { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 16px; opacity: .7 }
-/* 🤖 びっくりロボ */
-.gf-stage.robot { display: flex; align-items: center; justify-content: center }
-.robot .robo { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-content: center;
-  max-width: 200px; font-size: 30px; line-height: 1 }
-.robot .robo .pop { animation: dropin .5s var(--spring); display: inline-block }
+/* ---------- 🎣 ぬしつり ---------- */
+.gf-stage.fishing { display:flex; flex-direction:column;
+  background: linear-gradient(180deg,#AEE0FF 0%,#4FA3D6 55%,#2E7EB4 100%) }
+.fishing .water { position:relative; flex:1; overflow:hidden }
+.fishing .wave { position:absolute; left:-25%; right:-25%; height:22px; border-radius:50%;
+  background:rgba(255,255,255,.18); animation: waveM 3.5s linear infinite }
+.fishing .wave.w2 { top:26%; animation-duration:5s; opacity:.7 }
+.fishing .wave.w3 { top:52%; animation-duration:4.2s; opacity:.5 }
+@keyframes waveM { from{transform:translateX(-30px)} to{transform:translateX(30px)} }
+.fishing .rod { position:absolute; top:-2px; left:50%; width:2px; height:42%; background:rgba(255,255,255,.75); transform:translateX(-50%) }
+.fishing .bobber { position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); font-size:26px; z-index:4; animation: bob 1.7s ease-in-out infinite }
+@keyframes bob { 0%,100%{top:39%} 50%{top:43%} }
+.fishing .bobber.dip { animation: dipA .5s var(--out) }
+@keyframes dipA { 0%{top:39%} 45%{top:58%} 100%{top:39%} }
+.fishing .catch { position:absolute; left:50%; top:33%; transform:translate(-50%,-50%) scale(0); font-size:76px; z-index:5;
+  filter: drop-shadow(0 8px 12px rgba(10,50,80,.4)); line-height:1 }
+.fishing .catch.show { animation: reelUp .75s var(--spring) forwards }
+.fishing .catch.big.show { animation: reelBig .8s var(--spring) forwards }
+@keyframes reelUp { 0%{transform:translate(-50%,55%) scale(.3);opacity:0} 55%{transform:translate(-50%,-58%) scale(1.15);opacity:1} 100%{transform:translate(-50%,-50%) scale(1)} }
+@keyframes reelBig { 0%{transform:translate(-50%,60%) scale(.4);opacity:0} 45%{transform:translate(-50%,-64%) scale(1.5)}  70%{transform:translate(-50%,-46%) scale(1.25)} 100%{transform:translate(-50%,-50%) scale(1.3)} }
+.fishing .tank { display:flex; align-items:center; gap:1px; overflow-x:auto; overflow-y:hidden; padding:6px 8px; min-height:52px;
+  background: linear-gradient(180deg, rgba(180,230,255,.55), rgba(120,190,235,.55)); box-shadow: inset 0 3px 6px rgba(0,40,70,.18) }
+.fishing .tank span { font-size:26px; flex:0 0 auto; animation: gfpop .4s var(--spring) }
+.fishing .tank .lbl { font-size:11px; color:#0C3B5E; font-family:var(--disp); font-weight:700; opacity:.7; margin-right:4px }
+@keyframes gfpop { 0%{transform:scale(.2) rotate(-16deg);opacity:0} 55%{transform:scale(1.3) rotate(5deg);opacity:1} 100%{transform:scale(1)} }
+
+/* ---------- 🏁 どうぶつレース ---------- */
+.gf-stage.race { display:flex; flex-direction:column }
+.race .crowd { height:18px; font-size:13px; letter-spacing:-1px; text-align:center; overflow:hidden; opacity:.85 }
+.race .crowd.cheer { animation: cheerB .5s }
+@keyframes cheerB { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+.race .track { flex:1; display:flex; flex-direction:column; justify-content:center; gap:6px; padding:4px 6px }
+.race .lane { position:relative; height:30px; border-radius:8px;
+  background: repeating-linear-gradient(90deg,#C99457 0 18px,#BC8548 18px 36px); box-shadow: inset 0 -3px 0 rgba(0,0,0,.12) }
+.race .lane .finish { position:absolute; right:6px; top:2px; bottom:2px; width:12px; border-radius:2px;
+  background: repeating-linear-gradient(45deg,#2b2b2b 0 4px,#fff 4px 8px) }
+.race .runner { position:absolute; top:50%; left:4%; transform:translate(-50%,-50%); font-size:24px; z-index:3;
+  transition: left .5s cubic-bezier(.25,1.3,.5,1) }
+.race .runner.me { filter: drop-shadow(0 0 5px #FFC83D) }
+.race .runner.dash { animation: dashA .5s }
+@keyframes dashA { 0%{transform:translate(-50%,-50%) scaleX(1)} 30%{transform:translate(-58%,-50%) scaleX(1.5)} 100%{transform:translate(-50%,-50%) scaleX(1)} }
+.race .speed { position:absolute; top:50%; height:3px; width:16px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.9)); border-radius:2px; transform:translateY(-50%); animation: speedA .5s forwards; z-index:2 }
+@keyframes speedA { from{opacity:.9;transform:translate(0,-50%)} to{opacity:0;transform:translate(-22px,-50%)} }
+
+/* ---------- 🗺️ たんけんマップ ---------- */
+.gf-stage.board { display:flex; flex-direction:column }
+.board .top { display:flex; align-items:center; justify-content:center; gap:12px; padding:6px 0 2px; min-height:44px }
+.board .dice3d { font-size:38px; line-height:1 }
+.board .dice3d.roll { animation: diceR .7s }
+@keyframes diceR { 0%{transform:rotate(0) scale(1)} 25%{transform:rotate(120deg) scale(1.25)} 50%{transform:rotate(230deg) scale(.85)} 75%{transform:rotate(330deg) scale(1.2)} 100%{transform:rotate(360deg) scale(1)} }
+.board .diceval { font-family:var(--disp); font-weight:800; font-size:22px; color:#124B12 }
+.board .path { flex:1; position:relative; margin:2px 4px 4px }
+.board .tile { position:absolute; width:32px; height:32px; margin:-16px 0 0 -16px; border-radius:9px;
+  display:flex; align-items:center; justify-content:center; font-size:17px; background:#fff; box-shadow:0 2px 4px rgba(30,60,20,.22) }
+.board .tile.warp { background:#CDB6FF } .board .tile.treasure{ background:#FFE188 } .board .tile.friend{ background:#FFC2D8 }
+.board .tile.goal { width:46px; height:46px; margin:-23px 0 0 -23px; font-size:28px; background:#FFCF5E; box-shadow:0 4px 10px rgba(120,80,0,.35) }
+.board .dot { position:absolute; width:6px;height:6px; margin:-3px 0 0 -3px; border-radius:50%; background:rgba(255,255,255,.7) }
+.board .piece { position:absolute; margin:-18px 0 0 -16px; font-size:28px; z-index:6; transition: left .32s var(--spring), top .32s var(--spring) }
+.board .piece.hop { animation: hopA .32s }
+@keyframes hopA { 50%{ margin-top:-32px } }
+.board .follow { position:absolute; margin:-13px 0 0 -12px; font-size:19px; z-index:5; transition: left .32s var(--out), top .32s var(--out); opacity:.95 }
 /* 画面が短い端末（iPhone SE等）: キャラを少し小さくして、カメラ・ボタン・あそびの場を全部収める */
 @media (max-height: 720px) {
-  .char { width: 150px; height: 150px }
-  .char-wrap::before { width: 220px; height: 220px }
-  .char-wrap { gap: 6px }
-  .stage { gap: 6px; padding: 10px 16px 12px }
-  .prompt-big { font-size: 16px; line-height: 1.4 }
-  .fallback { padding: 13px 20px; font-size: 20px }
-  .cam-card { width: min(52%, 168px) }
-  .gf-stage { min-height: 128px }
-  .gf-title { font-size: 20px; margin-bottom: 9px }
+  .stage { gap: 5px; padding: 8px 10px 10px }
+  .fallback { padding: 12px 20px; font-size: 19px }
+  .cam-card { width: 66px; height: 66px; bottom: 78px }
+  .ring { width: 78px; height: 78px }
+  .gf-title { font-size: 19px; margin-bottom: 7px }
 }
-.cam-card { flex: 0 0 auto }
-/* カメラ枠と「たべた」ボタンが両方出る時は、枠を小さくして下のバーを画面内に保つ */
-.phone.btnvis .cam-card { width: min(40%, 132px) }
 .gchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px }
 .gchips button {
   font-family: var(--disp);
@@ -1021,125 +1019,144 @@ const RNG = {
   int(a,b){ return a+Math.floor(Math.random()*(b-a+1)); },
   chance(p){ return Math.random()<p; }
 };
-function shuffled(n){ const a=[...Array(n).keys()]; for(let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+/* 演出パーティクル（水しぶき・きらきら・砂ぼこり） */
+function fxBurst(host, xPct, yPct, chars, n){
+  for(let i=0;i<n;i++){ const e=document.createElement("span"); e.className="fx-p"; e.textContent=chars[i%chars.length];
+    e.style.left=xPct+"%"; e.style.top=yPct+"%";
+    const ang=Math.random()*Math.PI*2, d=22+Math.random()*46;
+    e.style.setProperty("--dx",(Math.cos(ang)*d).toFixed(0)+"px");
+    e.style.setProperty("--dy",(Math.sin(ang)*d-12).toFixed(0)+"px");
+    e.style.animation="partOut .7s ease-out forwards";
+    host.appendChild(e); setTimeout(()=>e.remove(),720); }
+}
 
-const GAMES = [
-  /* 1. ぬしつり — 毎口ごほうびの"大きさ"が変動、まれに「ぬし」 */
-  { id:"fishing", name:"ぬしつり", icon:"🎣", cls:"gf-fishing", sub:"おおものを つろう！",
-    init(){ return { caught:[], last:"🎣", nushi:false }; },
-    status(g){ return "🪣 "+g.caught.length+" / 12"; },
-    bite(g,n){
-      let emoji,label,rare=false;
-      if(g.caught.length>=11 || RNG.chance(0.01+n*0.03)){ emoji="🐋"; label="ぬしだ！！"; rare=true; g.nushi=true; }
-      else { const r=Math.random();
-        if(r<0.50){ emoji=RNG.pick(["🐟","🐠"]); label="つれた！"; }
-        else if(r<0.78){ emoji=RNG.pick(["🐠","🦐","🐡"]); label="ちゅうくらい！"; }
-        else if(r<0.93){ emoji=RNG.pick(["🐡","🦑","🦀","🐙"]); label="おおもの！"; }
-        else { emoji=RNG.pick(["🐬","🦭","🐢"]); label="レア！"; rare=true; } }
-      g.caught.push(emoji); g.last=emoji; return {emoji,label,rare};
-    },
-    done(g){ return g.nushi || g.caught.length>=12; },
-    finale(g){ return {icon: g.nushi?"🐋":"🐟", title: g.nushi?"ぬしを つったよ！":"バケツ いっぱい！", msg:"ずかんに いれたよ"}; },
-    draw(g,host,pop){ host.className="gf-stage fishing";
-      host.innerHTML='<div class="pond"><div class="catch'+(pop?" pop":"")+'">'+g.last+'</div></div>'+
-        '<div class="bucket">'+g.caught.map(f=>"<span>"+f+"</span>").join("")+'</div>'; } },
+/* ===== ゲーム1: 🎣 ぬしつり（Animal Crossing/釣り堀 参照）===== */
+const FISH_GOAL=12;
+const FISHING = {
+  id:"fishing", name:"ぬしつり", icon:"🎣", cls:"gf-fishing", sub:"おおものを つろう！",
+  bgm:[0,4,7,4,0,7,9,7,4,0,-3,0],
+  init(){ return { caught:[], nushi:false }; },
+  status(g){ return "🪣 "+g.caught.length+" / "+FISH_GOAL; },
+  bite(g,n){
+    let emoji,label,rare=false,big=false;
+    if(g.caught.length>=FISH_GOAL-1 || RNG.chance(0.012+n*0.03)){ emoji="🐋"; label="ぬしだ！！"; rare=true; big=true; g.nushi=true; }
+    else { const r=Math.random();
+      if(r<0.48){ emoji=RNG.pick(["🐟","🐠"]); label="つれた！"; }
+      else if(r<0.76){ emoji=RNG.pick(["🐠","🦐","🐡"]); label="ちゅうくらい！"; }
+      else if(r<0.92){ emoji=RNG.pick(["🐡","🦑","🦀","🐙"]); label="おおもの！"; big=true; }
+      else { emoji=RNG.pick(["🐬","🦭","🐢"]); label="レア！"; rare=true; } }
+    g.caught.push(emoji);
+    return {emoji,label,rare,big};
+  },
+  done(g){ return g.nushi || g.caught.length>=FISH_GOAL; },
+  finale(g){ return {icon:g.nushi?"🐋":"🐟", title:g.nushi?"ぬしを つったよ！":"バケツ いっぱい！", msg:"ずかんに いれたよ"}; },
+  enter(host,g){ host.className="gf-stage fishing";
+    host.innerHTML='<div class="water"><div class="wave"></div><div class="wave w2"></div><div class="wave w3"></div>'+
+      '<div class="rod"></div><div class="bobber">🔴</div><div class="catch"></div></div>'+
+      '<div class="tank"><span class="lbl">バケツ</span>'+g.caught.map(f=>"<span>"+f+"</span>").join("")+'</div>';
+    const tk=host.querySelector(".tank"); tk.scrollLeft=tk.scrollWidth; },
+  act(host,g,ev){
+    const bob=host.querySelector(".bobber"), cat=host.querySelector(".catch"), tank=host.querySelector(".tank");
+    bob.classList.remove("dip"); void bob.offsetWidth; bob.classList.add("dip"); sfxPlip();
+    setTimeout(()=>{
+      cat.textContent=ev.emoji; cat.className="catch"+(ev.big?" big":""); void cat.offsetWidth; cat.classList.add("show");
+      fxBurst(host,50,42, ev.big?["💦","💧","✨","🌊"]:["💦","💧"], ev.big?16:8);
+      if(ev.big){ host.classList.remove("shake"); void host.offsetWidth; host.classList.add("shake"); setTimeout(()=>host.classList.remove("shake"),520); sfxBoss(); }
+      else if(ev.rare){ soundRare(); } else sfxSplash();
+      const s=document.createElement("span"); s.textContent=ev.emoji; tank.appendChild(s); tank.scrollLeft=tank.scrollWidth;
+    }, 470);
+  }
+};
 
-  /* 2. はなびたいかい — まれにスターマインで一口が連鎖爆発 */
-  { id:"fireworks", name:"はなびたいかい", icon:"🎆", cls:"gf-fireworks", sub:"よぞらを いっぱいに！",
-    init(){ return { count:0, sky:[] }; },
-    status(g){ return "🎆 "+Math.min(g.count,20)+" / 20"; },
-    bite(g,n){
-      let chain=1,label="ドン！",rare=false,emoji="🎆";
-      if(g.count>=19 || RNG.chance(0.06+n*0.01)){ chain=RNG.int(3,7); label="スターマイン！！"; rare=true; }
-      else { const r=Math.random();
-        if(r<0.62){ emoji="🎆"; } else if(r<0.84){ emoji="🎇"; label="おおきい！"; }
-        else { emoji=RNG.pick(["⭐","💗","🌟"]); label="かたち はなび！"; rare=true; } }
-      for(let i=0;i<chain;i++){ g.sky.push({x:RNG.int(8,92),y:RNG.int(8,60),e:emoji}); g.count++; }
-      return {emoji,label,rare};
-    },
-    done(g){ return g.count>=20; },
-    finale(g){ return {icon:"🎆", title:"フィナーレ！", msg:"よぞらが はなびで いっぱい！"}; },
-    draw(g,host){ host.className="gf-stage fireworks";
-      host.innerHTML=g.sky.slice(-42).map(f=>'<span class="fw" style="left:'+f.x+'%;top:'+f.y+'%">'+f.e+'</span>').join(""); } },
+/* ===== ゲーム2: 🏁 どうぶつレース（競馬/マリオカート ゴール 参照）===== */
+const RACE_GOAL=30;
+const RACE = {
+  id:"race", name:"どうぶつレース", icon:"🏁", cls:"gf-race", sub:"1ばんを めざそう！",
+  bgm:[0,0,4,4,7,7,4,2,0,0,7,7,9,9,7,4],
+  init(){ return { me:0, rivals:[0,0,0] }; },
+  status(g){ return "🏁 "+Math.min(g.me,RACE_GOAL)+" / "+RACE_GOAL; },
+  bite(g,n){
+    const behind = g.me < Math.max(...g.rivals);
+    const step=RNG.int(1,4)+(behind?1:0); g.me=Math.min(RACE_GOAL,g.me+step);
+    g.rivals=g.rivals.map(v=>Math.min(RACE_GOAL-2, v+RNG.int(0,2)));   // ライバルはゴール手前で足踏み＝必ず勝てる
+    return { me:g.me, rivals:g.rivals.slice(), overtook: behind && g.me>=Math.max(...g.rivals) };
+  },
+  done(g){ return g.me>=RACE_GOAL; },
+  finale(g){ return {icon:"🥇", title:"ゴール！ 1ちゃく！", msg:"きんメダル ゲット！"}; },
+  enter(host,g){ host.className="gf-stage race";
+    const lanes=[["🐥","me"],["🐢","rival"],["🐰","rival"],["🦊","rival"]];
+    let h='<div class="crowd">🙌👏🎉👏🙌👏🎉👏🙌</div><div class="track">';
+    lanes.forEach((L,i)=>{ const v=i===0?g.me:g.rivals[i-1];
+      h+='<div class="lane"><div class="finish"></div><span class="runner '+L[1]+'" style="left:'+Math.min(96,v/RACE_GOAL*96)+'%">'+L[0]+'</span></div>'; });
+    host.innerHTML=h+"</div>"; },
+  act(host,g,ev){
+    const me=host.querySelector(".runner.me");
+    const lp=Math.min(96,ev.me/RACE_GOAL*96); me.style.left=lp+"%";
+    me.classList.remove("dash"); void me.offsetWidth; me.classList.add("dash");
+    // スピード線＋砂ぼこり
+    const lane=me.parentElement; const sp=document.createElement("div"); sp.className="speed"; sp.style.left=Math.max(2,lp-6)+"%"; lane.appendChild(sp); setTimeout(()=>sp.remove(),520);
+    fxBurst(host, lp, 38, ["💨"], 3);
+    const rr=host.querySelectorAll(".runner.rival");
+    ev.rivals.forEach((v,i)=>{ if(rr[i]) rr[i].style.left=Math.min(96,v/RACE_GOAL*96)+"%"; });
+    if(ev.overtook){ sfxWhoosh(true); const c=host.querySelector(".crowd"); c.classList.remove("cheer"); void c.offsetWidth; c.classList.add("cheer"); }
+    else sfxWhoosh(false);
+  }
+};
 
-  /* 3. かせきパーク — 一口で1マス発掘、隠れ絵がだんだん現れる正体当て */
-  { id:"fossil", name:"かせきパーク", icon:"🦖", cls:"gf-fossil", sub:"なにが でるかな？",
-    pool:["🦕","🦖","🐋","🚀","🏰","🐉","🦣","🐘","🦈","🌋"],
-    init(){ return { target: RNG.pick(this.pool), opened:0, order: shuffled(20) }; },
-    status(g){ return "⛏️ "+g.opened+" / 20"; },
-    bite(g,n){ g.opened=Math.min(20,g.opened+1);
-      let emoji="⛏️",label="ほれた！",rare=false;
-      if(RNG.chance(0.08)){ emoji=RNG.pick(["💎","🪙","💠"]); label="たからも！"; rare=true; }
-      return {emoji,label,rare}; },
-    done(g){ return g.opened>=20; },
-    finale(g){ return {icon:g.target, title:"はっけん！", msg:"かせきを ずかんに いれたよ"}; },
-    draw(g,host){ host.className="gf-stage fossil";
-      const open=new Set(g.order.slice(0,g.opened)); let cells="";
-      for(let i=0;i<20;i++){ cells+='<div class="cover'+(open.has(i)?" off":"")+'"></div>'; }
-      host.innerHTML='<div class="reveal-pic">'+g.target+'</div><div class="reveal-grid">'+cells+'</div>'; } },
+/* ===== ゲーム3: 🗺️ たんけんマップ（マリオパーティ/桃鉄 参照）===== */
+const BN=15;
+const BTILES=["s","n","n","friend","n","warp","n","n","n","treasure","n","friend","n","n","goal"];
+function bcoord(i){ const cols=5, row=Math.floor(i/cols); let c=i%cols; if(row%2===1) c=cols-1-c;
+  return { x:12+c*(76/(cols-1)), y:20+row*31 }; }   // 3段のヘビ道
+const BOARD = {
+  id:"board", name:"たんけんマップ", icon:"🗺️", cls:"gf-board", sub:"サイコロで すすもう！",
+  bgm:[0,2,4,5,7,5,4,2,0,7,5,4,2,0],
+  init(){ return { pos:0, friends:[], treasure:0 }; },
+  status(g){ return "🚩 "+g.pos+" / "+(BN-1); },
+  bite(g,n){
+    const dice=RNG.int(1,3), from=g.pos; let to=Math.min(BN-1, from+dice), warpAt=-1;
+    if(BTILES[to]==="warp" && to<BN-1){ warpAt=to; to=Math.min(BN-1,to+3); }
+    g.pos=to; const tile=BTILES[to];
+    if(tile==="treasure") g.treasure=(g.treasure||0)+1;
+    if(tile==="friend") (g.friends=g.friends||[]).push(RNG.pick(["🐰","🐱","🐶","🐻","🦊","🐥","🐸","🐼"]));
+    return {dice,from,to,warpAt,tile};
+  },
+  done(g){ return g.pos>=BN-1; },
+  finale(g){ return {icon:"🏰", title:"おしろに ついた！", msg:"たからばこ ゲット！ なかま "+((g.friends||[]).length)+"ひき"}; },
+  _tiles(){ let h=""; // 道のドット
+    for(let i=0;i<BN-1;i++){ const a=bcoord(i),b=bcoord(i+1); for(let k=1;k<4;k++){ const x=a.x+(b.x-a.x)*k/4, y=a.y+(b.y-a.y)*k/4; h+='<div class="dot" style="left:'+x+'%;top:'+y+'%"></div>'; } }
+    for(let i=0;i<BN;i++){ const c=bcoord(i), t=BTILES[i];
+      const cls=t==="goal"?"tile goal":t==="warp"?"tile warp":t==="treasure"?"tile treasure":t==="friend"?"tile friend":"tile";
+      const ic=t==="goal"?"🏰":t==="warp"?"🌀":t==="treasure"?"🎁":t==="friend"?"🐾":(i===0?"🏁":"");
+      h+='<div class="'+cls+'" style="left:'+c.x+'%;top:'+c.y+'%">'+ic+'</div>'; }
+    return h; },
+  enter(host,g){ host.className="gf-stage board";
+    host.innerHTML='<div class="top"><div class="dice3d">🎲</div><div class="diceval">サイコロを ふろう</div></div>'+
+      '<div class="path">'+this._tiles()+'<div class="piece">🐥</div></div>';
+    const pc=host.querySelector(".piece"), c=bcoord(g.pos); pc.style.left=c.x+"%"; pc.style.top=c.y+"%"; },
+  act(host,g,ev){
+    const dice=host.querySelector(".dice3d"), dval=host.querySelector(".diceval"), pc=host.querySelector(".piece");
+    dice.classList.remove("roll"); void dice.offsetWidth; dice.classList.add("roll"); sfxDice();
+    const faces=["⚀","⚁","⚂","⚃","⚄","⚅"]; let s=0;
+    const spin=setInterval(()=>{ dice.textContent=faces[Math.floor(Math.random()*6)];
+      if(++s>6){ clearInterval(spin); dice.textContent=faces[ev.dice-1]; dval.textContent=ev.dice+"！"; hop(ev.from); } }, 85);
+    function place(i){ const c=bcoord(i); pc.style.left=c.x+"%"; pc.style.top=c.y+"%";
+      pc.classList.remove("hop"); void pc.offsetWidth; pc.classList.add("hop"); sfxHop(); }
+    function hop(cur){
+      if(cur>=ev.to){ landed(); return; }
+      const nxt=cur+1; place(nxt);
+      if(nxt===ev.warpAt){ const c=bcoord(nxt); fxBurst(host,c.x,c.y,["🌀","✨"],10); sfxWarp(); }
+      setTimeout(()=>hop(nxt), 300);
+    }
+    function landed(){ const c=bcoord(ev.to);
+      if(ev.tile==="treasure"){ fxBurst(host,c.x,c.y,["💎","🪙","✨"],12); soundGet(); }
+      else if(ev.tile==="friend"){ fxBurst(host,c.x,c.y,["💛","✨"],8); soundGet(); }
+    }
+  }
+};
 
-  /* 4. ロケットタワー — 一口でブロックが積まれ塔が縦に伸びる */
-  { id:"tower", name:"ロケットタワー", icon:"🚀", cls:"gf-tower", sub:"うちゅうまで つもう！",
-    init(){ return { blocks:[], h:0 }; },
-    status(g){ return "🏗️ たかさ "+g.h; },
-    bite(g,n){ let add=1,label="つんだ！",rare=false,emoji=RNG.pick(["🧱","🟦","🟧","🟩","🟪","🟨","🎁"]);
-      if(g.h>=17){ emoji="🚀"; label="うちゅうへ！"; rare=true; }
-      else if(RNG.chance(0.08)){ add=2; emoji="🌸"; label="バネブロック！＋2"; rare=true; }
-      for(let i=0;i<add;i++){ g.blocks.push({e:emoji,dx:RNG.int(-16,16)}); g.h++; }
-      return {emoji,label,rare}; },
-    done(g){ return g.h>=18; },
-    finale(g){ return {icon:"🚀", title:"うちゅうに とうちゃく！", msg:"ロケット はっしゃ！"}; },
-    draw(g,host,pop){ host.className="gf-stage tower";
-      const b=g.blocks.slice(-9);
-      host.innerHTML='<div class="tower-col">'+b.map((bl,i)=>'<div class="block'+(pop&&i===b.length-1?" pop":"")+'" style="margin-left:'+bl.dx+'px">'+bl.e+'</div>').reverse().join("")+'</div>'; } },
+const GAMES = [FISHING, RACE, BOARD];
 
-  /* 5. たんけんマップ — 一口でサイコロ(1〜3)、分かれ道すごろく＋ワープ */
-  { id:"board", name:"たんけんマップ", icon:"🗺️", cls:"gf-board", sub:"サイコロで すすもう！",
-    init(){ return { pos:0, dice:0 }; },
-    status(g){ return "🚩 "+Math.min(g.pos,24)+" / 24"; },
-    bite(g,n){ const step=RNG.int(1,3); g.dice=step; g.pos+=step;
-      let label="サイコロ "+step+"！",rare=false,emoji=["","⚀","⚁","⚂"][step];
-      if(g.pos<24 && RNG.chance(0.12)){ const w=RNG.int(3,5); g.pos+=w; label="ワープ！ ＋"+w; rare=true; emoji="🌀"; }
-      if(g.pos>24) g.pos=24;
-      return {emoji,label,rare}; },
-    done(g){ return g.pos>=24; },
-    finale(g){ return {icon:"🏰", title:"おしろに ついた！", msg:"たからばこ ゲット！"}; },
-    draw(g,host){ host.className="gf-stage board";
-      const n=20, here=Math.round(g.pos/24*n); let cells="";
-      for(let i=0;i<=n;i++){ cells+='<div class="btile'+(i===here?" here":"")+'">'+(i===here?"🐥":(i===n?"🏰":""))+'</div>'; }
-      host.innerHTML='<div class="dice">'+(g.dice?["","⚀","⚁","⚂"][g.dice]:"🎲")+'</div><div class="board-path">'+cells+'</div>'; } },
-
-  /* 6. どうぶつレース — 自分＋動物3匹の並走、抜きつ抜かれつ（必ず1着以上） */
-  { id:"race", name:"どうぶつレース", icon:"🏁", cls:"gf-race", sub:"1ばんを めざそう！",
-    init(){ return { me:0, rivals:[0,0,0] }; },
-    status(g){ return "🏁 "+Math.min(g.me,30)+" / 30"; },
-    bite(g,n){ const behind = g.me < Math.max(...g.rivals);
-      const step=RNG.int(1,4)+(behind?1:0); g.me+=step;
-      g.rivals=g.rivals.map(v=> Math.min(28, v+RNG.int(0,2)));   // ライバルはゴール手前で足踏み（必ず勝てる）
-      if(g.me>30) g.me=30;
-      return {emoji:"💨", label: behind?"おいぬけ！":"ダッシュ！", rare:false}; },
-    done(g){ return g.me>=30; },
-    finale(g){ return {icon:"🥇", title:"ゴール！ 1ちゃく！", msg:"メダル ゲット！"}; },
-    draw(g,host){ host.className="gf-stage race";
-      const lane=(w,v)=>'<div class="lane"><span class="goal">🏁</span><span class="run" style="left:'+Math.min(96,v/30*96)+'%">'+w+'</span></div>';
-      host.innerHTML=lane("🐥",g.me)+g.rivals.map((v,i)=>lane(["🐢","🐰","🦊"][i],v)).join(""); } },
-
-  /* 7. びっくりロボ — 一口でパーツが合体、世界に1台のロボ完成（まれにレアパーツ） */
-  { id:"robot", name:"びっくりロボ", icon:"🤖", cls:"gf-robot", sub:"せかいに 1だいの ロボ！",
-    slots:[["🦿","🦵","🛞"],["🟦","🟥","🟩","🟨"],["💪","🦾"],["🎒","🌂","🎈"],["🤖","😺","🐻","👾"],["📡","🎀","👑"],["🚀","🔥","🦋","⭐"]],
-    init(){ return { parts:[] }; },
-    status(g){ return "🔩 "+g.parts.length+" / 18"; },
-    bite(g,n){ const slot=this.slots[g.parts.length%this.slots.length];
-      let emoji=RNG.pick(slot),label="ガッチャン！",rare=false;
-      if(RNG.chance(0.05)){ emoji="🌈"; label="にじいろパーツ！"; rare=true; }
-      else if(RNG.chance(0.05)){ emoji="👑"; label="きんいろパーツ！"; rare=true; }
-      g.parts.push(emoji); return {emoji,label,rare}; },
-    done(g){ return g.parts.length>=18; },
-    finale(g){ return {icon:"🤖", title:"ロボ かんせい！", msg:"せかいに 1だいだけ！"}; },
-    draw(g,host,pop){ host.className="gf-stage robot";
-      const p=g.parts.slice(-12);
-      host.innerHTML='<div class="robo">'+p.map((x,i)=>(pop&&i===p.length-1)?'<span class="pop">'+x+'</span>':'<span>'+x+'</span>').join("")+'</div>'; } }
-];
 
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function todaysGame(){
@@ -1152,17 +1169,20 @@ function ensureGame(){
   if(st.gameId!==g.id || !st.gs){ st.gameId=g.id; st.gs=g.init(); st.gsN=0; }
   return g;
 }
-/* あそびの場を描き直す（pop=最後の1手をポンと見せる） */
-function renderGame(pop){
+/* あそびの場をまるごと組み立て直す（ロード時・切替時・完結後） */
+let curGameId=null;
+function renderGame(){
   const g=ensureGame();
   $("#gfTitle").textContent=g.icon+" "+g.name;
   $("#gfSub").textContent=g.sub;
   $("#gfCount").textContent=g.status(st.gs);
   $("#gameField").className="game-field "+g.cls;
   $("#giftCount").textContent=(st.zukan||[]).length;
-  g.draw(st.gs,$("#gfStage"),pop);
+  g.enter($("#gfStage"),st.gs);            // 現在の状態でシーンを構築
+  if(curGameId!==g.id){ curGameId=g.id; setBGM(g.bgm); }   // ゲームごとにBGMを切替
   return g;
 }
+function updateHud(g){ $("#gfCount").textContent=g.status(st.gs); $("#giftCount").textContent=(st.zukan||[]).length; }
 
 /* あいずのジェスチャー: 手が写っているだけでカウントすると誤検知するので、意図的な形だけを拾う */
 const GESTURES = {
@@ -1369,23 +1389,25 @@ function renderChar(){
 function registerBite(){
   if(!meal.active) startMeal();
   st.total++; meal.bites++; st.stageProg++;
-  praise(CHEERS[st.total % CHEERS.length]);
 
   if(st.rewardMode==="grow"){
     const game=ensureGame();                        // きょうのミニゲーム（一口=1ターン）
     st.gsN=(st.gsN||0)+1;
     const ev=game.bite(st.gs,st.gsN);               // ゲーム状態を1手すすめ、演出用イベントを得る
     st.fedCount=(st.fedCount||0)+1;
-    getReveal(ev.emoji, ev.rare, ev.label);         // 大きく「つれた！」「スターマイン！」等を約1.5秒見せる
-    setTimeout(()=>{ if(SHOW_PET) feedAnim(ev.emoji); else soundEat(); renderGame(true); }, ev.rare?1900:1400);
+    game.act($("#gfStage"),st.gs,ev);               // ゲームごとの作り込み演出＋効果音（シーンを更新）
+    updateHud(game);
     const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
+    if(ev.rare) chime();
     if(game.done(st.gs)){                            // 1食のなかで何回でも完結できる（完結ごとに図鑑へ）
       const f=game.finale(st.gs);
       (st.zukan=st.zukan||[]).push(f.icon);
-      setTimeout(()=>{ burst(EFFECTS[2]); showEvolveEmoji(f.icon,f.title,f.msg); praise(f.title+" やったね！"); }, ev.rare?2050:1600);
+      setTimeout(()=>{ showEvolveEmoji(f.icon,f.title,f.msg); speak(f.title); }, 1400);
       st.gs=game.init(); st.gsN=0;                   // 次の1回を新規スタート
+      setTimeout(()=>{ renderGame(); }, 2600);       // 完結演出のあと新しいシーンを構築
     }
   }else{
+    praise(CHEERS[st.total % CHEERS.length]);        // ことばで ほめるモード
     const c=$("#char"); c.classList.remove("chomp"); void c.offsetWidth; c.classList.add("chomp");
   }
 
@@ -1501,14 +1523,35 @@ function soundRare(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.curr
   [784,988,1319,1568].forEach((f,i)=>tone(f,t+i*0.08,0.16,'triangle',0.12)); }
 function soundFanfare(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                            // 進化・コンプリートのファンファーレ
   [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,t+i*0.11,0.22,'triangle',0.11)); }
+/* ---------- ゲーム用のにぎやかな効果音（WebAudio・外部ファイル無し）---------- */
+function noise(at,dur,peak,hp){ try{ ensureAudio(); if(!audioCtx) return;
+  const n=Math.floor(audioCtx.sampleRate*dur), buf=audioCtx.createBuffer(1,n,audioCtx.sampleRate), d=buf.getChannelData(0);
+  for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
+  const src=audioCtx.createBufferSource(); src.buffer=buf;
+  const g=audioCtx.createGain(); g.gain.setValueAtTime(peak||0.12,at); g.gain.exponentialRampToValueAtTime(0.0001,at+dur);
+  const f=audioCtx.createBiquadFilter(); f.type="highpass"; f.frequency.value=hp||600;
+  src.connect(f); f.connect(g); g.connect(audioCtx.destination); src.start(at); src.stop(at+dur+0.02);
+}catch(e){} }
+function sfxPlip(){ ensureAudio(); if(!audioCtx) return; tone(660,audioCtx.currentTime,0.06,'sine',0.10); }               // ウキ「ピクッ」
+function sfxSplash(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; noise(t,0.18,0.14,900); tone(520,t,0.10,'sine',0.08); } // 水しぶき
+function sfxBoss(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                       // ぬし登場
+  noise(t,0.4,0.2,300); tone(110,t,0.5,'sine',0.16); [523,659,784,1046].forEach((f,i)=>tone(f,t+0.15+i*0.09,0.24,'triangle',0.12)); }
+function sfxWhoosh(over){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; noise(t,0.16,0.10,1200);         // ダッシュ／追い抜き
+  if(over){ tone(660,t,0.10,'square',0.08); tone(990,t+0.08,0.14,'square',0.08); } }
+function sfxDice(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; for(let i=0;i<6;i++) tone(300+Math.random()*200,t+i*0.08,0.05,'square',0.06); } // サイコロ転がり
+function sfxHop(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; tone(700,t,0.05,'triangle',0.09); tone(1046,t+0.05,0.07,'triangle',0.08); } // ぴょん
+function sfxWarp(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; [400,600,900,1300].forEach((f,i)=>tone(f,t+i*0.05,0.12,'sine',0.10)); } // ワープ
+
+/* ---------- 手の認識音 + ゲームごとのBGM（WebAudio）---------- */
 let bgm={on:false,id:null,i:0};
-const BGM_SEQ=[0,4,7,9,7,4,0,-3,0,4,7,12,9,7,4,2]; // やさしい長調ペンタトニック
+let curBGM=[0,4,7,9,7,4,0,-3]; // 既定（やさしい長調）
+function setBGM(seq){ if(seq&&seq.length){ curBGM=seq; bgm.i=0; } }
 function bgmStep(){ if(!bgm.on||!audioCtx) return; const t=audioCtx.currentTime;
-  const semi=BGM_SEQ[bgm.i%BGM_SEQ.length], hz=261.63*Math.pow(2,semi/12);
-  tone(hz,t,0.40,'triangle',0.045);
-  if(bgm.i%4===0) tone(hz/2,t,0.85,'sine',0.04);   // やわらかいベース
+  const semi=curBGM[bgm.i%curBGM.length], hz=261.63*Math.pow(2,semi/12);
+  tone(hz,t,0.40,'triangle',0.05);
+  if(bgm.i%4===0) tone(hz/2,t,0.85,'sine',0.045);   // やわらかいベース
   bgm.i++; }
-function startBGM(){ if(bgm.on||!st.bgm) return; if(!ensureAudio()) return; bgm.on=true; bgm.id=setInterval(bgmStep,440); bgmStep(); }
+function startBGM(){ if(bgm.on||!st.bgm) return; if(!ensureAudio()) return; bgm.on=true; bgm.id=setInterval(bgmStep,430); bgmStep(); }
 function stopBGM(){ bgm.on=false; if(bgm.id){ clearInterval(bgm.id); bgm.id=null; } }
 
 /* ---------- meal ---------- */
