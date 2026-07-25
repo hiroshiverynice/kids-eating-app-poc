@@ -805,6 +805,38 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .board .piece.hop { animation: hopA .32s }
 @keyframes hopA { 50%{ margin-top:-32px } }
 .board .follow { position:absolute; margin:-13px 0 0 -12px; font-size:19px; z-index:5; transition: left .32s var(--out), top .32s var(--out); opacity:.95 }
+.board .bfriends { display:flex; gap:1px; font-size:18px; max-width:38%; overflow:hidden }
+.board .bfriends .lbl { font-size:11px; font-family:var(--disp); font-weight:800; color:#124B12; opacity:.7; align-self:center; margin-right:2px }
+.board .bfriends span { animation: gfpop .4s var(--spring) }
+
+/* 🎣 釣り: 釣果の名札（余韻）＋バケツ見出し */
+.fishing .fishcard { position:absolute; left:50%; top:57%; transform:translate(-50%,0) scale(.8); opacity:0;
+  background:rgba(255,255,255,.94); color:#0C3B5E; font-family:var(--disp); font-weight:800; font-size:15px;
+  padding:6px 15px; border-radius:999px; box-shadow:0 5px 12px rgba(10,50,80,.28); white-space:nowrap; z-index:6 }
+.fishing .fishcard.show { animation: cardIn .45s var(--spring) forwards }
+.fishing .fishcard b { color:#E0561E }
+@keyframes cardIn { to{ opacity:1; transform:translate(-50%,0) scale(1) } }
+.fishing .tankbar { display:flex; justify-content:space-between; align-items:center; padding:5px 12px 2px;
+  font-family:var(--disp); font-weight:800; font-size:12px; color:#0C3B5E; background:rgba(180,230,255,.5) }
+
+/* ---------- 🍰 スイーツデコ（女の子向け・コレクション）---------- */
+.gf-sweets { background: linear-gradient(180deg,#FFE7F2,#FFC1DE) }
+.gf-sweets .gf-title,.gf-sweets .gf-head { color:#8E2E5B }
+.gf-stage.sweets { display:flex; flex-direction:column;
+  background: linear-gradient(180deg,#FFF0F7 0%,#FFD6EA 60%,#FBC0DD 100%) }
+.sweets .cakearea { flex:1; position:relative; display:flex; align-items:center; justify-content:center }
+.sweets .cakebase { font-size:96px; line-height:1; filter: drop-shadow(0 8px 12px rgba(150,40,90,.28)); z-index:1 }
+.sweets .cakebase.wob { animation: wobA .4s }
+@keyframes wobA { 0%,100%{transform:scale(1)} 40%{transform:scale(1.08) rotate(-3deg)} }
+.sweets .tops { position:absolute; inset:0; z-index:2 }
+.sweets .tops .top { position:absolute; transform:translate(-50%,-50%); font-size:26px }
+.sweets .tops .top.pop { animation: gfpop .45s var(--spring) }
+.sweets .shelfbar { padding:4px 12px 0; font-family:var(--disp); font-weight:800; font-size:12px; color:#8E2E5B }
+.sweets .shelf { display:flex; align-items:center; gap:2px; overflow-x:auto; overflow-y:hidden; padding:4px 10px 8px; min-height:50px;
+  background:rgba(255,255,255,.4); box-shadow: inset 0 3px 6px rgba(150,40,90,.14) }
+.sweets .shelf span { font-size:30px; flex:0 0 auto }
+.sweets .shelf .newcake { animation: gfpop .5s var(--spring) }
+
 /* 画面が短い端末（iPhone SE等）: キャラを少し小さくして、カメラ・ボタン・あそびの場を全部収める */
 @media (max-height: 720px) {
   .stage { gap: 5px; padding: 8px 10px 10px }
@@ -1030,40 +1062,52 @@ function fxBurst(host, xPct, yPct, chars, n){
     host.appendChild(e); setTimeout(()=>e.remove(),720); }
 }
 
-/* ===== ゲーム1: 🎣 ぬしつり（Animal Crossing/釣り堀 参照）===== */
-const FISH_GOAL=12;
+/* ===== ゲーム1: 🎣 ぬしつり（あつ森/釣り堀 参照・魚の種類豊富＋余韻）===== */
+const FISH_GOAL=14;
+const FISH_TIERS = {
+  small:{ label:"つれた！", cm:[3,12],  list:[["🐠","きんぎょ"],["🐟","めだか"],["🐟","ふな"],["🐠","たなご"],["🐟","どじょう"],["🐟","わかさぎ"]] },
+  mid:  { label:"いいサイズ！", cm:[12,35], list:[["🐟","あじ"],["🐟","さば"],["🐠","たい"],["🐟","いわし"],["🐟","さんま"],["🐟","さけ"],["🐠","ます"],["🐟","にしん"]] },
+  big:  { label:"おおもの！", cm:[35,95], big:true, list:[["🐟","まぐろ"],["🐟","かつお"],["🐙","たこ"],["🦑","いか"],["🦀","かに"],["🐡","ふぐ"],["🦐","えび"],["🐟","ひらめ"],["🦞","いせえび"]] },
+  rare: { label:"レア！ ✨", cm:[40,120], rare:true, list:[["🐬","いるか"],["🐢","うみがめ"],["🦦","らっこ"],["🦭","あざらし"],["🪼","くらげ"],["🐧","ペンギン"],["🦈","こざめ"]] },
+  nushi:{ label:"ぬしだ！！", cm:[150,340], rare:true, big:true, list:[["🐋","おおくじら"],["🦈","ぬしザメ"],["🐋","シャチ"]] }
+};
 const FISHING = {
   id:"fishing", name:"ぬしつり", icon:"🎣", cls:"gf-fishing", sub:"おおものを つろう！",
-  bgm:[0,4,7,4,0,7,9,7,4,0,-3,0],
-  init(){ return { caught:[], nushi:false }; },
+  init(){ return { caught:[], seen:[], nushi:false, best:0 }; },
   status(g){ return "🪣 "+g.caught.length+" / "+FISH_GOAL; },
   bite(g,n){
-    let emoji,label,rare=false,big=false;
-    if(g.caught.length>=FISH_GOAL-1 || RNG.chance(0.012+n*0.03)){ emoji="🐋"; label="ぬしだ！！"; rare=true; big=true; g.nushi=true; }
-    else { const r=Math.random();
-      if(r<0.48){ emoji=RNG.pick(["🐟","🐠"]); label="つれた！"; }
-      else if(r<0.76){ emoji=RNG.pick(["🐠","🦐","🐡"]); label="ちゅうくらい！"; }
-      else if(r<0.92){ emoji=RNG.pick(["🐡","🦑","🦀","🐙"]); label="おおもの！"; big=true; }
-      else { emoji=RNG.pick(["🐬","🦭","🐢"]); label="レア！"; rare=true; } }
-    g.caught.push(emoji);
-    return {emoji,label,rare,big};
+    let tier;
+    if(g.caught.length>=FISH_GOAL-1 || RNG.chance(0.012+n*0.03)){ tier="nushi"; g.nushi=true; }
+    else { const r=Math.random(); tier = r<0.40?"small": r<0.70?"mid": r<0.90?"big":"rare"; }
+    const T=FISH_TIERS[tier], f=RNG.pick(T.list), cm=RNG.int(T.cm[0],T.cm[1]);
+    const isNew = !g.seen.includes(f[1]); if(isNew) g.seen.push(f[1]);
+    if(cm>g.best) g.best=cm;
+    g.caught.push(f[0]);
+    return { emoji:f[0], fname:f[1], cm, rare:!!T.rare, big:!!T.big, isNew, label:T.label, say:T.label };
   },
   done(g){ return g.nushi || g.caught.length>=FISH_GOAL; },
-  finale(g){ return {icon:g.nushi?"🐋":"🐟", title:g.nushi?"ぬしを つったよ！":"バケツ いっぱい！", msg:"ずかんに いれたよ"}; },
+  finale(g){ return {icon:g.nushi?"🐋":"🐟", title:g.nushi?"ぬしを つったよ！":"バケツ いっぱい！",
+    msg:"さかな "+g.caught.length+"ひき／さいだい "+g.best+"cm！"}; },
   enter(host,g){ host.className="gf-stage fishing";
     host.innerHTML='<div class="water"><div class="wave"></div><div class="wave w2"></div><div class="wave w3"></div>'+
-      '<div class="rod"></div><div class="bobber">🔴</div><div class="catch"></div></div>'+
-      '<div class="tank"><span class="lbl">バケツ</span>'+g.caught.map(f=>"<span>"+f+"</span>").join("")+'</div>';
+      '<div class="rod"></div><div class="bobber">🔴</div><div class="catch"></div><div class="fishcard"></div></div>'+
+      '<div class="tankbar"><span>🪣 バケツ</span><span class="tankcount">'+g.caught.length+'ひき</span></div>'+
+      '<div class="tank">'+g.caught.map(f=>"<span>"+f+"</span>").join("")+'</div>';
     const tk=host.querySelector(".tank"); tk.scrollLeft=tk.scrollWidth; },
   act(host,g,ev){
-    const bob=host.querySelector(".bobber"), cat=host.querySelector(".catch"), tank=host.querySelector(".tank");
+    const bob=host.querySelector(".bobber"), cat=host.querySelector(".catch"),
+          plate=host.querySelector(".fishcard"), tank=host.querySelector(".tank"), cnt=host.querySelector(".tankcount");
     bob.classList.remove("dip"); void bob.offsetWidth; bob.classList.add("dip"); sfxPlip();
     setTimeout(()=>{
       cat.textContent=ev.emoji; cat.className="catch"+(ev.big?" big":""); void cat.offsetWidth; cat.classList.add("show");
+      // 名札（余韻）: 何を釣ったか＋サイズ が しばらく残る
+      plate.innerHTML=ev.emoji+" "+ev.fname+" "+ev.cm+"cm！"+(ev.isNew?' <b>はじめて✨</b>':"");
+      plate.classList.remove("show"); void plate.offsetWidth; plate.classList.add("show");
       fxBurst(host,50,42, ev.big?["💦","💧","✨","🌊"]:["💦","💧"], ev.big?16:8);
       if(ev.big){ host.classList.remove("shake"); void host.offsetWidth; host.classList.add("shake"); setTimeout(()=>host.classList.remove("shake"),520); sfxBoss(); }
       else if(ev.rare){ soundRare(); } else sfxSplash();
       const s=document.createElement("span"); s.textContent=ev.emoji; tank.appendChild(s); tank.scrollLeft=tank.scrollWidth;
+      cnt.textContent=g.caught.length+"ひき";
     }, 470);
   }
 };
@@ -1079,7 +1123,8 @@ const RACE = {
     const behind = g.me < Math.max(...g.rivals);
     const step=RNG.int(1,4)+(behind?1:0); g.me=Math.min(RACE_GOAL,g.me+step);
     g.rivals=g.rivals.map(v=>Math.min(RACE_GOAL-2, v+RNG.int(0,2)));   // ライバルはゴール手前で足踏み＝必ず勝てる
-    return { me:g.me, rivals:g.rivals.slice(), overtook: behind && g.me>=Math.max(...g.rivals) };
+    const overtook = behind && g.me>=Math.max(...g.rivals);
+    return { me:g.me, rivals:g.rivals.slice(), overtook, say: overtook?"おいぬいた！":RNG.pick(["ダッシュ！","はやい！","がんばれ！","いいぞー！","びゅーん！"]) };
   },
   done(g){ return g.me>=RACE_GOAL; },
   finale(g){ return {icon:"🥇", title:"ゴール！ 1ちゃく！", msg:"きんメダル ゲット！"}; },
@@ -1119,7 +1164,8 @@ const BOARD = {
     g.pos=to; const tile=BTILES[to];
     if(tile==="treasure") g.treasure=(g.treasure||0)+1;
     if(tile==="friend") (g.friends=g.friends||[]).push(RNG.pick(["🐰","🐱","🐶","🐻","🦊","🐥","🐸","🐼"]));
-    return {dice,from,to,warpAt,tile};
+    const say = tile==="warp"?"ワープ！": tile==="treasure"?"たからだ！": tile==="friend"?"なかまが きた！": ("サイコロ "+dice+"！");
+    return {dice,from,to,warpAt,tile,say};
   },
   done(g){ return g.pos>=BN-1; },
   finale(g){ return {icon:"🏰", title:"おしろに ついた！", msg:"たからばこ ゲット！ なかま "+((g.friends||[]).length)+"ひき"}; },
@@ -1131,7 +1177,9 @@ const BOARD = {
       h+='<div class="'+cls+'" style="left:'+c.x+'%;top:'+c.y+'%">'+ic+'</div>'; }
     return h; },
   enter(host,g){ host.className="gf-stage board";
-    host.innerHTML='<div class="top"><div class="dice3d">🎲</div><div class="diceval">サイコロを ふろう</div></div>'+
+    const fr=g.friends||[];
+    host.innerHTML='<div class="top"><div class="dice3d">🎲</div><div class="diceval">サイコロを ふろう</div>'+
+      '<div class="bfriends"><span class="lbl">なかま</span>'+fr.map(f=>"<span>"+f+"</span>").join("")+'</div></div>'+
       '<div class="path">'+this._tiles()+'<div class="piece">🐥</div></div>';
     const pc=host.querySelector(".piece"), c=bcoord(g.pos); pc.style.left=c.x+"%"; pc.style.top=c.y+"%"; },
   act(host,g,ev){
@@ -1150,12 +1198,56 @@ const BOARD = {
     }
     function landed(){ const c=bcoord(ev.to);
       if(ev.tile==="treasure"){ fxBurst(host,c.x,c.y,["💎","🪙","✨"],12); soundGet(); }
-      else if(ev.tile==="friend"){ fxBurst(host,c.x,c.y,["💛","✨"],8); soundGet(); }
+      else if(ev.tile==="friend"){ fxBurst(host,c.x,c.y,["💛","✨"],8); soundGet();
+        const bf=host.querySelector(".bfriends"); const fr=g.friends||[]; if(bf&&fr.length){ const s=document.createElement("span"); s.textContent=fr[fr.length-1]; bf.appendChild(s); } }
     }
   }
 };
 
-const GAMES = [FISHING, RACE, BOARD];
+/* ===== ゲーム4: 🍰 スイーツデコ（女の子向け・どうぶつの森/クッキングゲーム参照・コレクション）===== */
+const SWEET_TOPS=[["🍓","いちご"],["🫐","ブルーベリー"],["🍒","さくらんぼ"],["🍫","チョコ"],["🥝","キウイ"],["🍑","もも"],["⭐","おほし"],["💗","ハート"],["🌸","おはな"],["🍬","キャンディ"],["🧁","カップケーキ"],["🍭","ペロペロ"],["🍊","みかん"],["🥥","ココナッツ"]];
+const SWEET_RARE=[["👑","おうかん"],["💎","ダイヤ"],["🌈","にじ"],["🦄","ユニコーン"]];
+const CAKES=["🍰","🎂","🧁","🍮","🍩","🥧"];
+const SWEET_PER=6, SWEET_GOAL=3;   // 6かざりで1ケーキ完成、3ケーキで1食ぶん
+const SWEETS = {
+  id:"sweets", name:"スイーツデコ", icon:"🍰", cls:"gf-sweets", sub:"ケーキを かざろう！",
+  init(){ return { tops:[], cake:RNG.pick(CAKES), shelf:[] }; },
+  status(g){ return "🧁 ケーキ "+g.shelf.length+" / "+SWEET_GOAL; },
+  bite(g,n){
+    let emoji,name,rare=false;
+    if(RNG.chance(0.10)){ const t=RNG.pick(SWEET_RARE); emoji=t[0]; name=t[1]; rare=true; }
+    else { const t=RNG.pick(SWEET_TOPS); emoji=t[0]; name=t[1]; }
+    g.tops.push(emoji);
+    let complete=false, finished=null;
+    if(g.tops.length>=SWEET_PER){ finished=g.cake; g.shelf.push(finished); g.tops=[]; g.cake=RNG.pick(CAKES); complete=true; }
+    return { emoji, name, rare, complete, finished, cake:g.cake, label:name, say: complete?"ケーキ かんせい！":(name+"！") };
+  },
+  done(g){ return g.shelf.length>=SWEET_GOAL; },
+  finale(g){ return {icon:"🎂", title:"スイーツやさん かんせい！", msg:"ケーキ "+g.shelf.length+"こ できたよ！"}; },
+  _top(t,i){ const ang=i*2.39, r=16+(i%3)*11; return '<span class="top" style="left:'+(50+Math.cos(ang)*r).toFixed(1)+'%;top:'+(46+Math.sin(ang)*r*0.72).toFixed(1)+'%">'+t+'</span>'; },
+  enter(host,g){ host.className="gf-stage sweets";
+    host.innerHTML='<div class="cakearea"><div class="cakebase">'+g.cake+'</div><div class="tops">'+
+      g.tops.map((t,i)=>this._top(t,i)).join("")+'</div></div>'+
+      '<div class="shelfbar">できた ケーキ</div><div class="shelf">'+g.shelf.map(c=>"<span>"+c+"</span>").join("")+'</div>';
+    const sh=host.querySelector(".shelf"); sh.scrollLeft=sh.scrollWidth; },
+  act(host,g,ev){
+    const cakebase=host.querySelector(".cakebase"), tops=host.querySelector(".tops"), shelf=host.querySelector(".shelf");
+    if(!ev.complete){
+      const i=g.tops.length-1, ang=i*2.39, r=16+(i%3)*11;
+      const s=document.createElement("span"); s.className="top pop"; s.textContent=ev.emoji;
+      s.style.left=(50+Math.cos(ang)*r).toFixed(1)+"%"; s.style.top=(46+Math.sin(ang)*r*0.72).toFixed(1)+"%";
+      tops.appendChild(s);
+      cakebase.classList.remove("wob"); void cakebase.offsetWidth; cakebase.classList.add("wob");
+      if(ev.rare){ fxBurst(host,50,45,["✨","💖","⭐"],12); soundRare(); } else sfxDeco();
+    } else {
+      fxBurst(host,50,42,["✨","🎉","💖","⭐","🍬"],18); soundFanfare();
+      const fc=document.createElement("span"); fc.className="newcake"; fc.textContent=ev.finished; shelf.appendChild(fc); shelf.scrollLeft=shelf.scrollWidth;
+      cakebase.textContent=ev.cake; tops.innerHTML="";   // つぎの まっさらな ケーキ
+    }
+  }
+};
+
+const GAMES = [FISHING, SWEETS, RACE, BOARD];
 
 
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
@@ -1179,7 +1271,7 @@ function renderGame(){
   $("#gameField").className="game-field "+g.cls;
   $("#giftCount").textContent=(st.zukan||[]).length;
   g.enter($("#gfStage"),st.gs);            // 現在の状態でシーンを構築
-  if(curGameId!==g.id){ curGameId=g.id; setBGM(g.bgm); }   // ゲームごとにBGMを切替
+  if(curGameId!==g.id){ curGameId=g.id; setBGM(g.id); }   // ゲームごとにBGMを切替
   return g;
 }
 function updateHud(g){ $("#gfCount").textContent=g.status(st.gs); $("#giftCount").textContent=(st.zukan||[]).length; }
@@ -1398,6 +1490,7 @@ function registerBite(){
     game.act($("#gfStage"),st.gs,ev);               // ゲームごとの作り込み演出＋効果音（シーンを更新）
     updateHud(game);
     const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
+    speak(Math.random()<0.55 ? (ev.say||"やったね！") : RNG.pick(CHEERS));   // 一口ごとに 喋って応援
     if(ev.rare) chime();
     if(game.done(st.gs)){                            // 1食のなかで何回でも完結できる（完結ごとに図鑑へ）
       const f=game.finale(st.gs);
@@ -1541,17 +1634,33 @@ function sfxWhoosh(over){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.
 function sfxDice(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; for(let i=0;i<6;i++) tone(300+Math.random()*200,t+i*0.08,0.05,'square',0.06); } // サイコロ転がり
 function sfxHop(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; tone(700,t,0.05,'triangle',0.09); tone(1046,t+0.05,0.07,'triangle',0.08); } // ぴょん
 function sfxWarp(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; [400,600,900,1300].forEach((f,i)=>tone(f,t+i*0.05,0.12,'sine',0.10)); } // ワープ
+function sfxDeco(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; tone(880,t,0.06,'triangle',0.10); tone(1318,t+0.05,0.10,'triangle',0.09); } // デコ「ぽん♪」
 
-/* ---------- 手の認識音 + ゲームごとのBGM（WebAudio）---------- */
-let bgm={on:false,id:null,i:0};
-let curBGM=[0,4,7,9,7,4,0,-3]; // 既定（やさしい長調）
-function setBGM(seq){ if(seq&&seq.length){ curBGM=seq; bgm.i=0; } }
-function bgmStep(){ if(!bgm.on||!audioCtx) return; const t=audioCtx.currentTime;
-  const semi=curBGM[bgm.i%curBGM.length], hz=261.63*Math.pow(2,semi/12);
-  tone(hz,t,0.40,'triangle',0.05);
-  if(bgm.i%4===0) tone(hz/2,t,0.85,'sine',0.045);   // やわらかいベース
+/* ---------- ゲームごとのBGM（WebAudio・メロディ＋ベース、それぞれ別の曲）---------- */
+/* mel=メロディ(半音・nullは休符)、bass=2ステップごとの低音、ms=テンポ */
+const BGMS = {
+  fishing: { ms:470, // おだやかな 水辺のワルツ風
+    mel:[7,9,12,9, 7,4,7,null, 9,11,12,11, 9,7,4,null, 7,9,12,14, 12,11,9,7, 5,7,9,7, 4,2,0,null],
+    bass:[0,7,-3,5, 0,7,5,0] },
+  sweets: { ms:430, // かわいい きらきらメロディ（高め）
+    mel:[12,16,19,16, 14,17,14,null, 12,16,19,21, 19,16,14,12, 11,14,17,14, 12,16,12,null, 9,12,16,12, 11,7,null,null],
+    bass:[0,5,7,5, -1,4,7,0] },
+  race: { ms:300, // げんきな マーチ（速い）
+    mel:[0,4,7,7, 4,0,4,7, 5,9,12,12, 9,5,9,12, 7,11,14,14, 11,7,11,14, 12,7,4,7, 12,7,4,0],
+    bass:[0,0,7,7, 5,5,0,0] },
+  board: { ms:360, // ぼうけんの わくわくメロディ
+    mel:[0,4,7,4, 5,9,5,2, 7,11,7,4, 9,5,2,0, 4,7,9,11, 9,7,4,2, 0,4,2,-1, 0,null,null,null],
+    bass:[0,5,7,5, 3,7,0,0] }
+};
+let bgm={on:false,id:null,i:0}, curB=BGMS.fishing;
+function setBGM(id){ const b=BGMS[id]; if(!b) return; curB=b; bgm.i=0;
+  if(bgm.on){ clearInterval(bgm.id); bgm.id=setInterval(bgmStep,curB.ms); } }
+function bgmStep(){ if(!bgm.on||!audioCtx) return; const t=audioCtx.currentTime, dur=curB.ms/1000;
+  const m=curB.mel[bgm.i%curB.mel.length];
+  if(m!=null){ const hz=261.63*Math.pow(2,m/12); tone(hz,t,dur*0.92,'triangle',0.055); tone(hz*2,t,dur*0.4,'sine',0.012); }
+  if(bgm.i%2===0){ const b=curB.bass[(bgm.i/2)%curB.bass.length]; if(b!=null) tone(261.63*Math.pow(2,(b-12)/12),t,dur*1.7,'sine',0.05); }
   bgm.i++; }
-function startBGM(){ if(bgm.on||!st.bgm) return; if(!ensureAudio()) return; bgm.on=true; bgm.id=setInterval(bgmStep,430); bgmStep(); }
+function startBGM(){ if(bgm.on||!st.bgm) return; if(!ensureAudio()) return; bgm.on=true; bgm.id=setInterval(bgmStep,curB.ms); bgmStep(); }
 function stopBGM(){ bgm.on=false; if(bgm.id){ clearInterval(bgm.id); bgm.id=null; } }
 
 /* ---------- meal ---------- */
