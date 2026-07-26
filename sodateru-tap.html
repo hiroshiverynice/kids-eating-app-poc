@@ -837,6 +837,56 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .sweets .shelf span { font-size:30px; flex:0 0 auto }
 .sweets .shelf .newcake { animation: gfpop .5s var(--spring) }
 
+.newcake { animation: gfpop .5s var(--spring); display:inline-block }
+
+/* ---------- 🦖 かせきはっくつ ---------- */
+.gf-dig { background: linear-gradient(180deg,#EAD6AE,#C79B5A) }
+.gf-dig .gf-title,.gf-dig .gf-head { color:#5A3A18 }
+.gf-stage.dig { display:flex; flex-direction:column; background: linear-gradient(180deg,#F0DFBE,#CDA063) }
+.dig .digarea { flex:1; position:relative }
+.dig .digpic { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:118px; line-height:1 }
+.dig .digpic.reveal { animation: revealB .7s var(--spring) }
+@keyframes revealB { 0%{transform:scale(.6)} 50%{transform:scale(1.25) rotate(-4deg)} 100%{transform:scale(1)} }
+.dig .diggrid { position:absolute; inset:6px; display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(3,1fr); gap:3px }
+.dig .cover { background:linear-gradient(160deg,#B98A4E,#8F6631); border-radius:6px; box-shadow: inset 0 2px 3px rgba(255,255,255,.22); transition: transform .35s var(--out), opacity .35s }
+.dig .cover.off { transform: scale(.2) rotate(18deg); opacity:0; pointer-events:none }
+.dig .digcard { position:absolute; left:50%; bottom:8px; transform:translate(-50%,0) scale(.8); opacity:0;
+  background:rgba(255,255,255,.94); color:#5A3A18; font-family:var(--disp); font-weight:800; font-size:15px; padding:6px 15px; border-radius:999px; box-shadow:0 5px 12px rgba(90,58,24,.28); white-space:nowrap; z-index:6 }
+.dig .digcard.show { animation: cardIn .45s var(--spring) forwards }
+.dig .shelfbar { padding:4px 12px 0; font-family:var(--disp); font-weight:800; font-size:12px; color:#5A3A18 }
+.dig .shelf { display:flex; gap:2px; overflow-x:auto; overflow-y:hidden; padding:4px 10px 8px; min-height:48px; background:rgba(120,80,30,.16) }
+.dig .shelf span { font-size:30px; flex:0 0 auto }
+
+/* ---------- 🚀 うちゅうロケット ---------- */
+.gf-rocket { background: linear-gradient(180deg,#1A1740,#3A3A78) }
+.gf-rocket .gf-title,.gf-rocket .gf-head { color:#FFF6DC }
+.gf-stage.rocket { display:flex; flex-direction:column; background: linear-gradient(180deg,#0A0A2A 0%,#26265E 52%,#5A86C0 86%,#9AD0F0 100%) }
+.rocket .spacecol { flex:1; position:relative; overflow:hidden }
+.rocket .milestone { position:absolute; left:50%; transform:translateX(-50%); font-size:26px; opacity:.85 }
+.rocket .m1{ bottom:26% } .rocket .m2{ bottom:56% } .rocket .m3{ bottom:88% }
+.rocket .rocketship { position:absolute; left:50%; transform:translateX(-50%); font-size:46px; transition: bottom .5s cubic-bezier(.3,1.2,.5,1); z-index:3; filter: drop-shadow(0 0 8px rgba(255,200,120,.5)) }
+.rocket .rocketship.boost { animation: boostA .5s }
+@keyframes boostA { 0%{transform:translateX(-50%) scale(1)} 40%{transform:translateX(-50%) scale(1.16)} 100%{transform:translateX(-50%) scale(1)} }
+.rocket .rockhud { display:flex; justify-content:space-between; align-items:center; padding:5px 12px; font-family:var(--disp); font-weight:800; font-size:14px; color:#FFF6DC; background:rgba(0,0,0,.22) }
+.rocket .rockhud .planets span { font-size:20px; margin-left:2px }
+
+/* ---------- 🌷 おはなガーデン ---------- */
+.gf-garden { background: linear-gradient(180deg,#DFF3D0,#A8DC8A) }
+.gf-garden .gf-title,.gf-garden .gf-head { color:#2E6B2E }
+.gf-stage.garden { display:flex; flex-direction:column; background: linear-gradient(180deg,#CFF0FF 0%,#BEEBA0 34%,#8FCE6A 100%) }
+.garden .gardenbed { flex:1; position:relative; overflow:hidden }
+.garden .gflower { position:absolute; transform:translate(-50%,-50%); font-size:34px }
+.garden .gflower.pop { animation: gfpop .5s var(--spring) }
+.garden .gbug { position:absolute; font-size:24px; top:12%; z-index:4; animation: flutter 6s ease-in-out infinite }
+.garden .gbug.b0{ left:20% } .garden .gbug.b1{ left:55%; top:20%; animation-duration:7s } .garden .gbug.b2{ left:78%; top:8%; animation-duration:5s }
+@keyframes flutter { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-16px,-10px)} 50%{transform:translate(12px,8px)} 75%{transform:translate(-8px,6px)} }
+.garden .gcard { position:absolute; left:50%; bottom:8px; transform:translate(-50%,0) scale(.8); opacity:0;
+  background:rgba(255,255,255,.94); color:#2E6B2E; font-family:var(--disp); font-weight:800; font-size:15px; padding:6px 15px; border-radius:999px; box-shadow:0 5px 12px rgba(30,90,30,.24); white-space:nowrap; z-index:6 }
+.garden .gcard.show { animation: cardIn .45s var(--spring) forwards }
+.garden .shelfbar { padding:4px 12px 0; font-family:var(--disp); font-weight:800; font-size:12px; color:#2E6B2E }
+.garden .shelf { display:flex; gap:2px; overflow-x:auto; overflow-y:hidden; padding:4px 10px 8px; min-height:48px; background:rgba(46,107,46,.12) }
+.garden .shelf span { font-size:28px; flex:0 0 auto }
+
 /* 画面が短い端末（iPhone SE等）: キャラを少し小さくして、カメラ・ボタン・あそびの場を全部収める */
 @media (max-height: 720px) {
   .stage { gap: 5px; padding: 8px 10px 10px }
@@ -1053,6 +1103,7 @@ const RNG = {
   int(a,b){ return a+Math.floor(Math.random()*(b-a+1)); },
   chance(p){ return Math.random()<p; }
 };
+function shuffled(n){ const a=[...Array(n).keys()]; for(let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 /* 演出パーティクル（水しぶき・きらきら・砂ぼこり） */
 function fxBurst(host, xPct, yPct, chars, n){
   for(let i=0;i<n;i++){ const e=document.createElement("span"); e.className="fx-p"; e.textContent=chars[i%chars.length];
@@ -1249,7 +1300,122 @@ const SWEETS = {
   }
 };
 
-const GAMES = [FISHING, SWEETS, RACE, BOARD];
+/* ===== ゲーム5: 🦖 かせきはっくつ（発掘して恐竜リビール・恐竜図鑑）===== */
+const DINOS=[["🦖","ティラノ"],["🦕","トリケラ"],["🦕","ブラキオ"],["🦖","スピノ"],["🦕","ステゴ"],["🐊","モササウルス"],["🦣","マンモス"],["🐉","ドラゴン"],["🦈","メガロドン"]];
+const DIG_N=12, DIG_GOAL=3;
+const DIG = {
+  id:"dig", name:"かせきはっくつ", icon:"🦖", cls:"gf-dig", sub:"なにが でるかな？",
+  init(){ return { dino:RNG.pick(DINOS), order:shuffled(DIG_N), opened:0, found:[] }; },
+  status(g){ return "🦴 かせき "+g.found.length+" / "+DIG_GOAL; },
+  bite(g,n){
+    const tileIdx=g.order[g.opened]; g.opened++;
+    let gem = g.opened<DIG_N && RNG.chance(0.08);
+    let complete=false, finished=null;
+    if(g.opened>=DIG_N){ finished=g.dino; g.found.push(g.dino); complete=true; }
+    const ev={ tileIdx, gem, complete, finished, say: complete?(g.dino[1]+" はっけん！"): gem?"たからも！":"コツッ！", label: complete?g.dino[1]:"" };
+    if(complete){ g.dino=RNG.pick(DINOS); g.order=shuffled(DIG_N); g.opened=0; }
+    return ev;
+  },
+  done(g){ return g.found.length>=DIG_GOAL; },
+  finale(g){ return {icon:"🦖", title:"きょうりゅう はくぶつかん！", msg:"かせき "+g.found.length+"こ はっけん！"}; },
+  _grid(g){ const open=new Set(g.order.slice(0,g.opened)); let h="";
+    for(let i=0;i<DIG_N;i++) h+='<div class="cover'+(open.has(i)?" off":"")+'"></div>'; return h; },
+  enter(host,g){ host.className="gf-stage dig";
+    host.innerHTML='<div class="digarea"><div class="digpic">'+g.dino[0]+'</div><div class="diggrid">'+this._grid(g)+'</div><div class="digcard"></div></div>'+
+      '<div class="shelfbar">はっけん</div><div class="shelf">'+g.found.map(d=>"<span>"+d[0]+"</span>").join("")+'</div>'; },
+  act(host,g,ev){
+    const grid=host.querySelector(".diggrid"), card=host.querySelector(".digcard"), pic=host.querySelector(".digpic"), shelf=host.querySelector(".shelf");
+    const covers=grid.querySelectorAll(".cover"); if(covers[ev.tileIdx]) covers[ev.tileIdx].classList.add("off");
+    sfxDig();
+    if(ev.gem){ fxBurst(host,50,45,["💎","🪙","✨"],10); soundGet(); }
+    if(ev.complete){
+      pic.classList.remove("reveal"); void pic.offsetWidth; pic.classList.add("reveal");
+      card.innerHTML=ev.finished[0]+" "+ev.finished[1]+" はっけん！"; card.classList.remove("show"); void card.offsetWidth; card.classList.add("show");
+      fxBurst(host,50,42,["✨","🎉","🦴","⭐"],16); soundFanfare();
+      const s=document.createElement("span"); s.className="newcake"; s.textContent=ev.finished[0]; shelf.appendChild(s); shelf.scrollLeft=shelf.scrollWidth;
+      const self=this; setTimeout(()=>self.enter(host,g),1700);
+    }
+  }
+};
+
+/* ===== ゲーム6: 🚀 うちゅうロケット（上へ飛ばして惑星到達・惑星コレクション）===== */
+const ROCK_N=16, ROCK_GOAL=3;
+const PLANETS=["🌕","🪐","🔴","🟢","🔵","🟡","☄️","🌟"];
+const ROCKET = {
+  id:"rocket", name:"うちゅうロケット", icon:"🚀", cls:"gf-rocket", sub:"うちゅうへ とばそう！",
+  init(){ return { alt:0, stars:0, planets:[] }; },
+  status(g){ return "🚀 わくせい "+g.planets.length+" / "+ROCK_GOAL; },
+  bite(g,n){
+    let boost=1, big=false; const r=Math.random();
+    if(r<0.08){ boost=3; big=true; } else if(r<0.30){ boost=2; }
+    g.alt=Math.min(ROCK_N,g.alt+boost);
+    const star=RNG.chance(0.45); if(star) g.stars++;
+    let complete=false, planet=null;
+    if(g.alt>=ROCK_N){ planet=RNG.pick(PLANETS); g.planets.push(planet); complete=true; }
+    const ev={ alt:g.alt, big, star, complete, planet, say: complete?"わくせい とうちゃく！": big?"ブースト！": star?"スターゲット！":"ぐんぐん！" };
+    if(complete) g.alt=0;
+    return ev;
+  },
+  done(g){ return g.planets.length>=ROCK_GOAL; },
+  finale(g){ return {icon:"🚀", title:"うちゅう たんけん かんりょう！", msg:"わくせい "+g.planets.length+"こ とうちゃく！"}; },
+  _pos(alt){ return (4+alt/ROCK_N*100*0.86).toFixed(1); },
+  enter(host,g){ host.className="gf-stage rocket";
+    host.innerHTML='<div class="spacecol"><div class="milestone m1">☁️</div><div class="milestone m2">🌟</div><div class="milestone m3">🪐</div>'+
+      '<div class="rocketship" style="bottom:'+this._pos(g.alt)+'%">🚀</div></div>'+
+      '<div class="rockhud"><span class="stars">⭐ '+g.stars+'</span><span class="planets">'+g.planets.map(p=>"<span>"+p+"</span>").join("")+'</span></div>'; },
+  act(host,g,ev){
+    const ship=host.querySelector(".rocketship"); const b=this._pos(ev.alt); ship.style.bottom=b+"%";
+    ship.classList.remove("boost"); void ship.offsetWidth; ship.classList.add("boost");
+    fxBurst(host,50, Math.min(96,100-parseFloat(b)+4), ev.big?["🔥","💨","✨"]:["🔥","💨"], ev.big?10:5);
+    sfxBoost(ev.big);
+    host.querySelector(".rockhud .stars").textContent="⭐ "+g.stars;
+    if(ev.complete){
+      host.classList.remove("shake"); void host.offsetWidth; host.classList.add("shake"); setTimeout(()=>host.classList.remove("shake"),500);
+      fxBurst(host,50,20,["🪐","⭐","✨","🎉"],16); soundFanfare();
+      const pl=host.querySelector(".planets"); const s=document.createElement("span"); s.textContent=ev.planet; pl.appendChild(s);
+      const self=this; setTimeout(()=>self.enter(host,g),1700);
+    }
+  }
+};
+
+/* ===== ゲーム7: 🌷 おはなガーデン（花を咲かせ虫を呼ぶ・虫コレクション／女の子向け）===== */
+const GFLOWERS=[["🌷","チューリップ"],["🌻","ひまわり"],["🌸","さくら"],["🌺","ハイビスカス"],["🌼","マーガレット"],["🪷","はす"],["🌹","バラ"],["💮","うめ"]];
+const GBUGS=[["🦋","チョウチョ"],["🐝","はち"],["🐞","てんとうむし"],["🐛","いもむし"]];
+const GARD_GOAL=6;
+const GARDEN = {
+  id:"garden", name:"おはなガーデン", icon:"🌷", cls:"gf-garden", sub:"おはなで むしを よぼう！",
+  init(){ return { flowers:[], bugs:[] }; },
+  status(g){ return "🦋 なかよし "+g.bugs.length+" / "+GARD_GOAL; },
+  bite(g,n){
+    const f=RNG.pick(GFLOWERS); g.flowers.push(f[0]);
+    let bug=null, rare=false; const p=0.22+Math.min(0.25,g.flowers.length*0.02);
+    if(RNG.chance(p)){ if(RNG.chance(0.12)){ bug=["🌈","にじのチョウ"]; rare=true; } else bug=RNG.pick(GBUGS); g.bugs.push(bug[0]); }
+    return { emoji:f[0], fname:f[1], bug, rare, label:f[1], say: bug?(bug[1]+" が きた！"):(f[1]+" さいた！") };
+  },
+  done(g){ return g.bugs.length>=GARD_GOAL; },
+  finale(g){ return {icon:"🌸", title:"ガーデンパーティ！", msg:"むし "+g.bugs.length+"ひきと なかよし！"}; },
+  _fpos(i){ return { x:8+(i*61%84), y:32+(i*37%54) }; },
+  enter(host,g){ host.className="gf-stage garden";
+    host.innerHTML='<div class="gardenbed">'+
+      g.flowers.map((f,i)=>{ const p=this._fpos(i); return '<span class="gflower" style="left:'+p.x+'%;top:'+p.y+'%">'+f+'</span>'; }).join("")+
+      g.bugs.map((bg,i)=>'<span class="gbug b'+(i%3)+'">'+bg+'</span>').join("")+
+      '<div class="gcard"></div></div>'+
+      '<div class="shelfbar">なかよしの むし</div><div class="shelf">'+g.bugs.map(bg=>"<span>"+bg+"</span>").join("")+'</div>'; },
+  act(host,g,ev){
+    const bed=host.querySelector(".gardenbed"), card=host.querySelector(".gcard"), shelf=host.querySelector(".shelf");
+    const i=g.flowers.length-1, p=this._fpos(i);
+    const s=document.createElement("span"); s.className="gflower pop"; s.textContent=ev.emoji; s.style.left=p.x+"%"; s.style.top=p.y+"%"; bed.appendChild(s);
+    card.innerHTML=ev.emoji+" "+ev.fname+" さいた！"; card.classList.remove("show"); void card.offsetWidth; card.classList.add("show");
+    sfxBloom();
+    if(ev.bug){
+      const bi=g.bugs.length-1; const bb=document.createElement("span"); bb.className="gbug b"+(bi%3); bb.textContent=ev.bug[0]; bed.appendChild(bb);
+      fxBurst(host,p.x,p.y,["💛","✨"],8); ev.rare?soundRare():soundGet();
+      const sh=document.createElement("span"); sh.className="newcake"; sh.textContent=ev.bug[0]; shelf.appendChild(sh); shelf.scrollLeft=shelf.scrollWidth;
+    }
+  }
+};
+
+const GAMES = [FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
 
 
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
@@ -1637,6 +1803,11 @@ function sfxDice(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.curren
 function sfxHop(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; tone(700,t,0.05,'triangle',0.09); tone(1046,t+0.05,0.07,'triangle',0.08); } // ぴょん
 function sfxWarp(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; [400,600,900,1300].forEach((f,i)=>tone(f,t+i*0.05,0.12,'sine',0.10)); } // ワープ
 function sfxDeco(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; tone(880,t,0.06,'triangle',0.10); tone(1318,t+0.05,0.10,'triangle',0.09); } // デコ「ぽん♪」
+function sfxDig(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; tone(180,t,0.05,'square',0.10); noise(t,0.08,0.10,500); } // 発掘「コツッ」
+function sfxBoost(big){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; noise(t,big?0.35:0.2,big?0.16:0.10,300);   // ロケット噴射
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(big?880:520,t+(big?0.35:0.2));
+  g.gain.setValueAtTime(0.08,t); g.gain.exponentialRampToValueAtTime(0.0001,t+(big?0.4:0.24)); o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t+0.45); }
+function sfxBloom(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; tone(659,t,0.08,'sine',0.09); tone(988,t+0.06,0.12,'sine',0.08); } // 開花「ぽわん」
 
 /* ---------- ゲームごとのBGM（WebAudio・メロディ＋ベース、それぞれ別の曲）---------- */
 /* mel=メロディ(半音・nullは休符)、bass=2ステップごとの低音、ms=テンポ */
@@ -1652,7 +1823,16 @@ const BGMS = {
     bass:[0,0,7,7, 5,5,0,0] },
   board: { ms:360, // ぼうけんの わくわくメロディ
     mel:[0,4,7,4, 5,9,5,2, 7,11,7,4, 9,5,2,0, 4,7,9,11, 9,7,4,2, 0,4,2,-1, 0,null,null,null],
-    bass:[0,5,7,5, 3,7,0,0] }
+    bass:[0,5,7,5, 3,7,0,0] },
+  dig: { ms:400, // なぞめいた たんけんメロディ（短調ぎみ）
+    mel:[0,3,7,3, 5,8,5,2, 7,10,7,3, 8,5,3,0, 0,5,8,10, 8,7,5,3, 2,5,3,0, -2,0,null,null],
+    bass:[0,7,-4,3, 5,-4,0,0] },
+  rocket: { ms:340, // そうかいな うちゅうメロディ（高め・のびやか）
+    mel:[7,12,16,19, 16,12,14,null, 9,14,17,21, 17,14,12,9, 11,16,19,23, 19,16,14,11, 12,16,19,16, 12,7,null,null],
+    bass:[0,7,5,7, -2,5,0,0] },
+  garden: { ms:440, // やさしい おはなメロディ
+    mel:[4,7,9,7, 9,11,9,7, 5,9,11,9, 11,12,11,9, 7,9,11,14, 12,11,9,7, 5,7,9,7, 4,2,null,null],
+    bass:[0,5,-3,5, 2,7,0,0] }
 };
 let bgm={on:false,id:null,i:0}, curB=BGMS.fishing;
 function setBGM(id){ const b=BGMS[id]; if(!b) return; curB=b; bgm.i=0;
