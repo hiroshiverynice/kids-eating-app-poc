@@ -772,15 +772,25 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 
 /* ---------- 🏁 どうぶつレース ---------- */
 .gf-stage.race { display:flex; flex-direction:column }
+/* 情景: 空に雲、地平線(空と芝の境=約38.5%)に木と柵。トラックは必ず手前に描く */
+.race .scn { z-index:0 }
+.race .crowd, .race .track { position:relative; z-index:1 }
+.race .scn .cl { top:5%;  left:6%;  width:58px; opacity:.95 }
+.race .scn .c2 { top:14%; left:58%; width:44px; opacity:.85 }
+.race .scn .tr { bottom:61.5%; width:34px }
+.race .scn .r1 { left:3% }  .race .scn .r2 { left:22%; width:28px }
+.race .scn .r3 { right:5% } .race .scn .r4 { right:24%; width:26px }
+.race .scn .fn { bottom:60.5%; left:45%; width:54px; opacity:.9 }
 .race .crowd { height:18px; font-size:13px; letter-spacing:-1px; text-align:center; overflow:hidden; opacity:.85 }
 .race .crowd.cheer { animation: cheerB .5s }
 @keyframes cheerB { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-.race .track { flex:1; display:flex; flex-direction:column; justify-content:center; gap:6px; padding:4px 6px }
-.race .lane { position:relative; height:30px; border-radius:8px;
+/* トラックは下寄せ。地平線の木と柵が隠れず、間の芝が「野原」として見える */
+.race .track { flex:1; display:flex; flex-direction:column; justify-content:flex-end; gap:11px; padding:4px 6px 10px }
+.race .lane { position:relative; height:44px; border-radius:10px;
   background: repeating-linear-gradient(90deg,#C99457 0 18px,#BC8548 18px 36px); box-shadow: inset 0 -3px 0 rgba(0,0,0,.12) }
 .race .lane .finish { position:absolute; right:6px; top:2px; bottom:2px; width:12px; border-radius:2px;
   background: repeating-linear-gradient(45deg,#2b2b2b 0 4px,#fff 4px 8px) }
-.race .runner { position:absolute; top:50%; left:4%; transform:translate(-50%,-50%); font-size:24px; z-index:3;
+.race .runner { position:absolute; top:50%; left:4%; transform:translate(-50%,-50%); font-size:32px; z-index:3;
   transition: left .5s cubic-bezier(.25,1.3,.5,1) }
 .race .runner.me { filter: drop-shadow(0 0 5px #FFC83D) }
 .race .runner.dash { animation: dashA .5s }
@@ -796,6 +806,15 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 @keyframes diceR { 0%{transform:rotate(0) scale(1)} 25%{transform:rotate(120deg) scale(1.25)} 50%{transform:rotate(230deg) scale(.85)} 75%{transform:rotate(330deg) scale(1.2)} 100%{transform:rotate(360deg) scale(1)} }
 .board .diceval { font-family:var(--disp); font-weight:800; font-size:22px; color:#124B12 }
 .board .path { flex:1; position:relative; margin:2px 4px 4px }
+/* 情景: 島の雲と木。マス・コマより奥に置く */
+.board .scn { z-index:0 }
+.board .tile, .board .dot, .board .piece { z-index:2 }
+.board .scn .cl { top:3%;  left:4%;  width:52px; opacity:.85 }
+.board .scn .b2 { top:60%; right:3%; width:44px; opacity:.7 }
+.board .scn .bt { width:30px; opacity:.9 }
+.board .scn .b3 { top:14%; right:8%  } .board .scn .b4 { top:47%; left:2%; width:26px }
+.board .scn .b5 { bottom:2%; right:30%; width:24px }
+.board .tile.goal .castle { width:38px; height:auto; display:block }
 .board .tile { position:absolute; width:32px; height:32px; margin:-16px 0 0 -16px; border-radius:9px;
   display:flex; align-items:center; justify-content:center; font-size:17px; background:#fff; box-shadow:0 2px 4px rgba(30,60,20,.22) }
 .board .tile.warp { background:#CDB6FF } .board .tile.treasure{ background:#FFE188 } .board .tile.friend{ background:#FFC2D8 }
@@ -862,8 +881,16 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .gf-rocket .gf-title,.gf-rocket .gf-head { color:#FFF6DC }
 .gf-stage.rocket { display:flex; flex-direction:column; background: linear-gradient(180deg,#0A0A2A 0%,#26265E 52%,#5A86C0 86%,#9AD0F0 100%) }
 .rocket .spacecol { flex:1; position:relative; overflow:hidden }
-.rocket .milestone { position:absolute; left:50%; transform:translateX(-50%); font-size:26px; opacity:.85 }
-.rocket .m1{ bottom:26% } .rocket .m2{ bottom:56% } .rocket .m3{ bottom:88% }
+.rocket .milestone { position:absolute; left:50%; transform:translateX(-50%); font-size:26px; opacity:.9; display:block }
+.rocket .m1{ bottom:26%; width:56px } .rocket .m2{ bottom:56%; width:26px } .rocket .m3{ bottom:84%; width:62px }
+.rocket .milestone.fb { width:auto }
+/* うちゅうの飾り（流れない星と隕石） */
+.rocket .stx, .rocket .mtr { position:absolute; opacity:.8 }
+.rocket .x1 { top:14%; left:14%; width:11px } .rocket .x2 { top:30%; right:16%; width:15px }
+.rocket .x3 { top:46%; left:22%; width:9px }  .rocket .mtr { top:22%; right:9%; width:22px; opacity:.55 }
+/* 集めた惑星 */
+.rocket .rockhud .pl { width:24px; height:24px; display:inline-block; vertical-align:middle; margin-left:2px }
+.rocket .rockhud .pl.fb { width:auto; font-size:20px }
 .rocket .rocketship { position:absolute; left:50%; transform:translateX(-50%); font-size:46px; transition: bottom .5s cubic-bezier(.3,1.2,.5,1); z-index:3; filter: drop-shadow(0 0 8px rgba(255,200,120,.5)) }
 .rocket .rocketship.boost { animation: boostA .5s }
 @keyframes boostA { 0%{transform:translateX(-50%) scale(1)} 40%{transform:translateX(-50%) scale(1.16)} 100%{transform:translateX(-50%) scale(1)} }
@@ -875,6 +902,16 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .gf-garden .gf-title,.gf-garden .gf-head { color:#2E6B2E }
 .gf-stage.garden { display:flex; flex-direction:column; background: linear-gradient(180deg,#CFF0FF 0%,#BEEBA0 34%,#8FCE6A 100%) }
 .garden .gardenbed { flex:1; position:relative; overflow:hidden }
+/* 情景: 空の雲・奥の木・足元の草。花や虫より奥に置く */
+.garden .scn { z-index:0 }
+.garden .gflower, .garden .gbug, .garden .gcard { z-index:3 }
+.garden .scn .cl { top:4%;  left:5%;  width:54px; opacity:.9 }
+.garden .scn .g2 { top:11%; right:6%; width:42px; opacity:.75 }
+.garden .scn .gt { width:36px; opacity:.95 }
+.garden .scn .g3 { bottom:18%; left:2%  } .garden .scn .g4 { bottom:20%; right:3%; width:30px }
+.garden .scn .gg { bottom:0; width:22px; opacity:.9 }
+.garden .scn .s1 { left:14% } .garden .scn .s2 { left:38%; width:18px }
+.garden .scn .s3 { left:62% } .garden .scn .s4 { left:84%; width:16px }
 .garden .gflower { position:absolute; transform:translate(-50%,-50%); font-size:34px }
 .garden .gflower.pop { animation: gfpop .5s var(--spring) }
 .garden .gbug { position:absolute; font-size:24px; top:12%; z-index:4; animation: flutter 6s ease-in-out infinite }
@@ -886,6 +923,15 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .garden .shelfbar { padding:4px 12px 0; font-family:var(--disp); font-weight:800; font-size:12px; color:#2E6B2E }
 .garden .shelf { display:flex; gap:2px; overflow-x:auto; overflow-y:hidden; padding:4px 10px 8px; min-height:48px; background:rgba(46,107,46,.12) }
 .garden .shelf span { font-size:28px; flex:0 0 auto }
+
+/* ===== 情景レイヤー（CC0素材の背景。操作の邪魔をしない飾り専用） =====
+   Kenney "Background Elements"(CC0) の 雲・木・城・草・月 を各ゲームの奥に置く。
+   pointer-events:none なので、どこをタップしても記録の妨げにならない。 */
+.scn { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:1 }
+.scn img { position:absolute; display:block }
+.scn .cl { animation: drift 34s ease-in-out infinite alternate }
+.scn .cl2 { animation: drift 46s ease-in-out infinite alternate-reverse }
+@keyframes drift { from{transform:translateX(-9%)} to{transform:translateX(9%)} }
 
 /* ---------- ⚔️ もぐもぐクエスト（ひとくち＝1こうげき / ドラクエ風コマンドバトル）----------
    安全設計: てきは こうげきしてこない・HPは てきだけ・まけは 存在しない。
@@ -903,8 +949,16 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
     radial-gradient(1.6px 1.6px at 85% 24%, #CFE6FF, transparent),
     radial-gradient(1.6px 1.6px at 11% 36%, #fff, transparent),
     radial-gradient(1.6px 1.6px at 92% 46%, #fff, transparent) }
-.battle .ground { position:absolute; left:-10%; right:-10%; bottom:-14%; height:40%; border-radius:50% 50% 0 0;
+.battle .ground { position:absolute; left:-10%; right:-10%; bottom:-14%; height:40%; border-radius:50% 50% 0 0; z-index:2;
   background: linear-gradient(180deg,#3E3576,#2A2358); box-shadow: inset 0 3px 0 rgba(255,255,255,.14) }
+/* 夜の遠景: 月と、丘の向こうに立つ木・城のシルエット（丘に足元が隠れて奥行きが出る） */
+.battle .scn .moon { top:7%; right:11%; width:38px; opacity:.92 }
+.battle .scn .far { filter: brightness(.34) saturate(.35); opacity:.95 }
+.battle .scn .t1 { bottom:22%; left:5%;   width:46px }
+.battle .scn .t2 { bottom:23%; left:19%;  width:34px }
+.battle .scn .t3 { bottom:22%; right:7%;  width:42px }
+.battle .scn .t4 { bottom:24%; right:21%; width:30px }
+.battle .scn .cas { bottom:23%; left:43%; width:64px }
 .battle .ename { position:relative; z-index:5; font-family:var(--disp); font-weight:800; font-size:15px; color:#FFF3C4; text-shadow:0 2px 0 rgba(0,0,0,.45) }
 .battle .ename .bosslbl { color:#FFC83D }
 .battle .hpwrap { position:relative; z-index:5; width:66%; display:flex; align-items:center; gap:6px }
@@ -1251,7 +1305,16 @@ const RACE = {
   finale(g){ return {icon:"🥇", title:"ゴール！ 1ちゃく！", msg:"きんメダル ゲット！"}; },
   enter(host,g){ host.className="gf-stage race";
     const lanes=[["🐥","me"],["🐢","rival"],["🐰","rival"],["🦊","rival"]];
-    let h='<div class="crowd">🙌👏🎉👏🙌👏🎉👏🙌</div><div class="track">';
+    let h='<div class="scn">'+                                     // 空の雲と、地平線に立つ木・柵
+      '<img class="cl c1" src="'+SCN+'cloud1.png" alt="">'+
+      '<img class="cl2 c2" src="'+SCN+'cloud5.png" alt="">'+
+      '<img class="tr r1" src="'+SCN+'tree06.png" alt="">'+
+      '<img class="tr r2" src="'+SCN+'tree34.png" alt="">'+
+      '<img class="fn" src="'+SCN+'fence.png" alt="">'+
+      '<img class="tr r3" src="'+SCN+'tree05.png" alt="">'+
+      '<img class="tr r4" src="'+SCN+'tree13.png" alt="">'+
+      '</div>'+
+      '<div class="crowd">🙌👏🎉👏🙌👏🎉👏🙌</div><div class="track">';
     lanes.forEach((L,i)=>{ const v=i===0?g.me:g.rivals[i-1];
       h+='<div class="lane"><div class="finish"></div><span class="runner '+L[1]+'" style="left:'+Math.min(96,v/RACE_GOAL*96)+'%">'+L[0]+'</span></div>'; });
     host.innerHTML=h+"</div>"; },
@@ -1294,14 +1357,23 @@ const BOARD = {
     for(let i=0;i<BN-1;i++){ const a=bcoord(i),b=bcoord(i+1); for(let k=1;k<4;k++){ const x=a.x+(b.x-a.x)*k/4, y=a.y+(b.y-a.y)*k/4; h+='<div class="dot" style="left:'+x+'%;top:'+y+'%"></div>'; } }
     for(let i=0;i<BN;i++){ const c=bcoord(i), t=BTILES[i];
       const cls=t==="goal"?"tile goal":t==="warp"?"tile warp":t==="treasure"?"tile treasure":t==="friend"?"tile friend":"tile";
-      const ic=t==="goal"?"🏰":t==="warp"?"🌀":t==="treasure"?"🎁":t==="friend"?"🐾":(i===0?"🏁":"");
+      const ic=t==="goal"?('<img class="castle" src="'+SCN+'castle_grey.png" alt="おしろ">')
+              :t==="warp"?"🌀":t==="treasure"?"🎁":t==="friend"?"🐾":(i===0?"🏁":"");
       h+='<div class="'+cls+'" style="left:'+c.x+'%;top:'+c.y+'%">'+ic+'</div>'; }
     return h; },
   enter(host,g){ host.className="gf-stage board";
     const fr=g.friends||[];
     host.innerHTML='<div class="top"><div class="dice3d">🎲</div><div class="diceval">サイコロを ふろう</div>'+
       '<div class="bfriends"><span class="lbl">なかま</span>'+fr.map(f=>"<span>"+f+"</span>").join("")+'</div></div>'+
-      '<div class="path">'+this._tiles()+'<div class="piece">🐥</div></div>';
+      '<div class="path">'+
+        '<div class="scn">'+                                        // 冒険の島の情景（雲と木）
+          '<img class="cl b1" src="'+SCN+'cloud3.png" alt="">'+
+          '<img class="cl2 b2" src="'+SCN+'cloud7.png" alt="">'+
+          '<img class="bt b3" src="'+SCN+'tree34.png" alt="">'+
+          '<img class="bt b4" src="'+SCN+'tree06.png" alt="">'+
+          '<img class="bt b5" src="'+SCN+'tree13.png" alt="">'+
+        '</div>'+
+        this._tiles()+'<div class="piece">🐥</div></div>';
     const pc=host.querySelector(".piece"), c=bcoord(g.pos); pc.style.left=c.x+"%"; pc.style.top=c.y+"%"; },
   act(host,g,ev){
     const dice=host.querySelector(".dice3d"), dval=host.querySelector(".diceval"), pc=host.querySelector(".piece");
@@ -1408,7 +1480,8 @@ const DIG = {
 
 /* ===== ゲーム6: 🚀 うちゅうロケット（上へ飛ばして惑星到達・惑星コレクション）===== */
 const ROCK_N=16, ROCK_GOAL=3;
-const PLANETS=["🌕","🪐","🔴","🟢","🔵","🟡","☄️","🌟"];
+const PLANETS=["planet00","planet01","planet02","planet03","planet04","planet05","planet06","planet07","planet08","planet09"];
+function plaImg(id,cls){ return '<img class="'+cls+'" src="'+PLA+id+'.png" alt="わくせい" onerror="this.outerHTML=\'<span class=&quot;'+cls+' fb&quot;>🪐</span>\'">'; }
 const ROCKET = {
   id:"rocket", name:"うちゅうロケット", icon:"🚀", cls:"gf-rocket", sub:"うちゅうへ とばそう！",
   init(){ return { alt:0, stars:0, planets:[] }; },
@@ -1428,9 +1501,16 @@ const ROCKET = {
   finale(g){ return {icon:"🚀", title:"うちゅう たんけん かんりょう！", msg:"わくせい "+g.planets.length+"こ とうちゃく！"}; },
   _pos(alt){ return (4+alt/ROCK_N*100*0.86).toFixed(1); },
   enter(host,g){ host.className="gf-stage rocket";
-    host.innerHTML='<div class="spacecol"><div class="milestone m1">☁️</div><div class="milestone m2">🌟</div><div class="milestone m3">🪐</div>'+
+    host.innerHTML='<div class="spacecol">'+
+      '<img class="milestone m1" src="'+SCN+'cloud1.png" alt="">'+
+      '<img class="milestone m2" src="'+SCN+'star_large.png" alt="">'+
+      plaImg(PLANETS[(g.planets.length)%PLANETS.length],"milestone m3")+
+      '<img class="mtr" src="'+SCN+'meteor_detailedLarge.png" alt="">'+
+      '<img class="stx x1" src="'+SCN+'star_small.png" alt="">'+
+      '<img class="stx x2" src="'+SCN+'star_medium.png" alt="">'+
+      '<img class="stx x3" src="'+SCN+'star_small.png" alt="">'+
       '<div class="rocketship" style="bottom:'+this._pos(g.alt)+'%">🚀</div></div>'+
-      '<div class="rockhud"><span class="stars">⭐ '+g.stars+'</span><span class="planets">'+g.planets.map(p=>"<span>"+p+"</span>").join("")+'</span></div>'; },
+      '<div class="rockhud"><span class="stars">⭐ '+g.stars+'</span><span class="planets">'+g.planets.map(p=>plaImg(p,"pl")).join("")+'</span></div>'; },
   act(host,g,ev){
     const ship=host.querySelector(".rocketship"); const b=this._pos(ev.alt); ship.style.bottom=b+"%";
     ship.classList.remove("boost"); void ship.offsetWidth; ship.classList.add("boost");
@@ -1440,7 +1520,7 @@ const ROCKET = {
     if(ev.complete){
       host.classList.remove("shake"); void host.offsetWidth; host.classList.add("shake"); setTimeout(()=>host.classList.remove("shake"),500);
       fxBurst(host,50,20,["🪐","⭐","✨","🎉"],16); soundFanfare();
-      const pl=host.querySelector(".planets"); const s=document.createElement("span"); s.textContent=ev.planet; pl.appendChild(s);
+      host.querySelector(".planets").insertAdjacentHTML("beforeend", plaImg(ev.planet,"pl"));
       const self=this; setTimeout(()=>self.enter(host,g),1700);
     }
   }
@@ -1465,6 +1545,16 @@ const GARDEN = {
   _fpos(i){ return { x:8+(i*61%84), y:32+(i*37%54) }; },
   enter(host,g){ host.className="gf-stage garden";
     host.innerHTML='<div class="gardenbed">'+
+      '<div class="scn">'+                                          // 庭の情景（雲・奥の木・足元の草）
+        '<img class="cl g1" src="'+SCN+'cloud5.png" alt="">'+
+        '<img class="cl2 g2" src="'+SCN+'cloud1.png" alt="">'+
+        '<img class="gt g3" src="'+SCN+'tree34.png" alt="">'+
+        '<img class="gt g4" src="'+SCN+'tree06.png" alt="">'+
+        '<img class="gg s1" src="'+SCN+'grass2.png" alt="">'+
+        '<img class="gg s2" src="'+SCN+'grass4.png" alt="">'+
+        '<img class="gg s3" src="'+SCN+'grass6.png" alt="">'+
+        '<img class="gg s4" src="'+SCN+'grass2.png" alt="">'+
+      '</div>'+
       g.flowers.map((f,i)=>{ const p=this._fpos(i); return '<span class="gflower" style="left:'+p.x+'%;top:'+p.y+'%">'+f+'</span>'; }).join("")+
       g.bugs.map((bg,i)=>'<span class="gbug b'+(i%3)+'">'+bg+'</span>').join("")+
       '<div class="gcard"></div></div>'+
@@ -1496,6 +1586,8 @@ const GARDEN = {
    こわい目(おこり/psycho)と悲しい口は使っていない。×目は「たおれた瞬間＝目をまわす」用の
    _ko.png だけに使う。画像が出ない環境では絵文字にフォールバックする。 */
 const MON_DIR="assets/img/monsters/";
+const SCN="assets/img/scenery/";      // 情景素材（雲・木・城・草・月）
+const PLA="assets/img/planets/";      // 惑星
 const BTL_MONS = [
   ["puni","ぷにモン","🟦"],["awa","あわボール","⚪"],["kero","けろまる","🟩"],["hari","はりまる","🟨"],
   ["mofu","もふりん","🩷"],["piko","ぴこモン","🟦"],["tsuno","つのすけ","🟩"],["goma","ごまちゃん","🟫"],
@@ -1560,7 +1652,15 @@ const BATTLE = {
   enter(host,g){ host.className="gf-stage battle";
     const m=g.m, pct=Math.max(0,m.hp/m.max*100);
     host.innerHTML =
-      '<div class="ezone"><div class="stars"></div><div class="ground"></div>'+
+      '<div class="ezone"><div class="stars"></div>'+
+        '<div class="scn">'+
+          '<img class="moon" src="'+SCN+'moon_full.png" alt="">'+
+          '<img class="far t1" src="'+SCN+'tree10.png" alt="">'+
+          '<img class="far t2" src="'+SCN+'tree13.png" alt="">'+
+          '<img class="far cas" src="'+SCN+'castle_grey.png" alt="">'+
+          '<img class="far t4" src="'+SCN+'tree02.png" alt="">'+
+          '<img class="far t3" src="'+SCN+'tree05.png" alt="">'+
+        '</div><div class="ground"></div>'+
         '<div class="ename">'+(m.boss?'<span class="bosslbl">★ボス★</span> ':'')+m.n+'</div>'+
         '<div class="hpwrap"><div class="hpbar"><div class="'+this._hpcls(pct)+'" style="width:'+pct+'%"></div></div>'+
           '<div class="hpnum">'+m.hp+' / '+m.max+'</div></div>'+

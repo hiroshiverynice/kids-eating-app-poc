@@ -1,5 +1,34 @@
 # 画像素材のクレジットとライセンス
 
+すべて **CC0 1.0 Universal**（パブリックドメイン／帰属表示不要・商用利用可・改変自由）。
+このファイルは記録用で、アプリ内にクレジット画面を置く義務はない。
+
+## 情景（`scenery/`）
+
+各ゲームの背景に置く飾り。雲・木・城・柵・草・月と、うちゅうの星・隕石。
+
+| ファイル | 出典 |
+|---|---|
+| `cloud*.png` `tree*.png` `castle_grey.png` `tower_grey.png` `house_beige_front.png` `fence.png` `grass*.png` `moon_full.png` | Kenney "Background Elements" — https://kenney.nl/assets/background-elements |
+| `star_*.png` `meteor_detailedLarge.png` | Kenney "Simple Space" — https://kenney.nl/assets/simple-space |
+
+使いどころ:
+
+- ⚔️ バトル … 月＋丘の向こうの木と城（暗く落として夜のシルエットにしている）
+- 🏁 レース … 空の雲＋地平線の木と柵
+- 🗺️ たんけんマップ … 島の雲と木＋ゴールの城（絵文字🏰から差し替え）
+- 🌷 おはなガーデン … 雲・奥の木・足元の草
+- 🚀 うちゅうロケット … 星と隕石
+
+表示サイズに合わせて最大220pxへ縮小済み（元素材はもっと大きい）。
+
+## 惑星（`planets/`）
+
+🚀 うちゅうロケット の到達目標と、集めた惑星コレクション。絵文字🌕🪐から差し替え。
+
+出典: Kenney "Planets" — https://kenney.nl/assets/planets （CC0）
+元は1280px・1枚280KBあるので、**160pxへ縮小して同梱している**（2.8MB → 310KB）。
+
 ## モンスター（`monsters/`）
 
 ⚔️ もぐもぐクエスト のモンスター22体（＋たおれた顔22枚 = 計44ファイル）。
