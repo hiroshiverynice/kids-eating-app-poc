@@ -887,6 +887,66 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .garden .shelf { display:flex; gap:2px; overflow-x:auto; overflow-y:hidden; padding:4px 10px 8px; min-height:48px; background:rgba(46,107,46,.12) }
 .garden .shelf span { font-size:28px; flex:0 0 auto }
 
+/* ---------- ⚔️ もぐもぐクエスト（ひとくち＝1こうげき / ドラクエ風コマンドバトル）----------
+   安全設計: てきは こうげきしてこない・HPは てきだけ・まけは 存在しない。
+   食べるのが遅い子を急かさないため、時間制限・体力減少は いっさい作らない。 */
+.gf-battle { background: linear-gradient(180deg,#2B2C6B,#4A3A86) }
+.gf-battle .gf-title,.gf-battle .gf-head { color:#FFF3C4 }
+.gf-stage.battle { display:flex; flex-direction:column;
+  background: radial-gradient(120% 82% at 50% 14%, #55479B 0%, #2A2360 58%, #171340 100%) }
+.battle .ezone { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; overflow:hidden }
+.battle .stars { position:absolute; inset:0; pointer-events:none; opacity:.9;
+  background-image:
+    radial-gradient(2px 2px at 18% 16%, #fff, transparent),
+    radial-gradient(2px 2px at 67% 11%, #FFE9A8, transparent),
+    radial-gradient(1.6px 1.6px at 43% 28%, #fff, transparent),
+    radial-gradient(1.6px 1.6px at 85% 24%, #CFE6FF, transparent),
+    radial-gradient(1.6px 1.6px at 11% 36%, #fff, transparent),
+    radial-gradient(1.6px 1.6px at 92% 46%, #fff, transparent) }
+.battle .ground { position:absolute; left:-10%; right:-10%; bottom:-14%; height:40%; border-radius:50% 50% 0 0;
+  background: linear-gradient(180deg,#3E3576,#2A2358); box-shadow: inset 0 3px 0 rgba(255,255,255,.14) }
+.battle .ename { position:relative; z-index:5; font-family:var(--disp); font-weight:800; font-size:15px; color:#FFF3C4; text-shadow:0 2px 0 rgba(0,0,0,.45) }
+.battle .ename .bosslbl { color:#FFC83D }
+.battle .hpwrap { position:relative; z-index:5; width:66%; display:flex; align-items:center; gap:6px }
+.battle .hpbar { flex:1; height:13px; border-radius:7px; background:rgba(0,0,0,.5); overflow:hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.55), 0 0 0 2px rgba(255,255,255,.9) }
+.battle .hpfill { height:100%; border-radius:7px; background:linear-gradient(180deg,#8BE86B,#3FA83A); transition: width .45s var(--out) }
+.battle .hpfill.mid { background:linear-gradient(180deg,#FFD35C,#E8912B) }
+.battle .hpfill.low { background:linear-gradient(180deg,#FF9B8A,#D8402F) }
+.battle .hpnum { font-family:var(--disp); font-weight:800; font-size:11px; color:#fff; opacity:.92; min-width:56px; text-align:right }
+.battle .enemy { position:relative; z-index:4; font-size:94px; line-height:1;
+  filter: drop-shadow(0 10px 14px rgba(0,0,0,.45)); animation: efloat 2.8s ease-in-out infinite }
+@keyframes efloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+.battle .enemy.boss { font-size:114px; filter: drop-shadow(0 0 15px #FFC83D) drop-shadow(0 10px 14px rgba(0,0,0,.5)) }
+.battle .enemy.hit { animation: ehit .42s }
+@keyframes ehit { 0%{transform:translateX(0);filter:brightness(3.2)} 25%{transform:translateX(-13px)} 50%{transform:translateX(10px);filter:brightness(1.7)} 75%{transform:translateX(-6px)} 100%{transform:translateX(0)} }
+.battle .enemy.down { animation: edown 1.15s var(--out) forwards }
+@keyframes edown { 0%{transform:rotate(0) scale(1);opacity:1} 55%{transform:rotate(400deg) scale(.72);opacity:.95} 100%{transform:rotate(760deg) scale(.18);opacity:0} }
+.battle .enemy.come { animation: ecome .6s var(--spring) }
+@keyframes ecome { 0%{transform:translateX(110px) scale(.4);opacity:0} 100%{transform:translateX(0) scale(1);opacity:1} }
+.battle .slash { position:absolute; left:50%; top:52%; width:158px; height:158px; margin:-79px 0 0 -79px; z-index:6; pointer-events:none;
+  border-radius:50%; background: linear-gradient(58deg, transparent 42%, #fff 48%, #BFF0FF 53%, transparent 59%); opacity:0; animation: slashA .4s var(--out) }
+@keyframes slashA { 0%{opacity:0;transform:rotate(-32deg) scale(.5)} 35%{opacity:1;transform:rotate(0) scale(1.08)} 100%{opacity:0;transform:rotate(20deg) scale(1.32)} }
+.battle .slash.crit { width:206px; height:206px; margin:-103px 0 0 -103px;
+  background: linear-gradient(58deg, transparent 38%, #FFF6B0 46%, #FFC83D 55%, transparent 62%) }
+.battle .dmg { position:absolute; left:50%; top:58%; z-index:7; pointer-events:none;   /* てきの体の上に出す（HPバーに重ねない） */
+  font-family:var(--disp); font-weight:900; font-size:42px; color:#fff;
+  -webkit-text-stroke:3px #23306B; paint-order:stroke; animation: dmgA 1s var(--out) forwards }
+@keyframes dmgA { 0%{transform:translate(-50%,0) scale(.4);opacity:0} 24%{transform:translate(-50%,-60%) scale(1.28);opacity:1} 100%{transform:translate(-50%,-125%) scale(1);opacity:0} }
+.battle .dmg.crit { font-size:60px; color:#FFE873; -webkit-text-stroke:3px #8A3B00 }
+.battle .lvup { position:absolute; left:50%; top:22%; z-index:8; pointer-events:none;
+  font-family:var(--disp); font-weight:900; font-size:23px; color:#FFE873;
+  -webkit-text-stroke:3px #6A3B00; paint-order:stroke; animation: dmgA 1.5s var(--out) forwards }
+.battle .cmdwin { margin:6px 8px 4px; padding:8px 12px; min-height:46px; display:flex; align-items:center;
+  background:#0E1A4E; border:3px solid #fff; border-radius:9px; box-shadow:0 4px 10px rgba(0,0,0,.38) }
+.battle .msg { font-family:var(--disp); font-weight:800; font-size:14px; color:#fff; line-height:1.35 }
+.battle .btlhud { display:flex; align-items:center; gap:10px; padding:0 12px 3px;
+  font-family:var(--disp); font-weight:800; font-size:12px; color:#FFE9A8 }
+.battle .party { display:flex; align-items:center; gap:2px; overflow-x:auto; overflow-y:hidden;
+  padding:4px 8px 7px; min-height:42px; background:rgba(0,0,0,.24) }
+.battle .party span { font-size:25px; flex:0 0 auto; animation: gfpop .4s var(--spring) }
+.battle .party .lbl { font-size:11px; color:#FFE9A8; font-family:var(--disp); font-weight:700; opacity:.8; margin-right:4px; animation:none }
+
 /* 画面が短い端末（iPhone SE等）: キャラを少し小さくして、カメラ・ボタン・あそびの場を全部収める */
 @media (max-height: 720px) {
   .stage { gap: 5px; padding: 8px 10px 10px }
@@ -894,6 +954,11 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   .cam-card { width: 66px; height: 66px; bottom: 78px }
   .ring { width: 78px; height: 78px }
   .gf-title { font-size: 19px; margin-bottom: 7px }
+  .battle .enemy { font-size: 76px }
+  .battle .enemy.boss { font-size: 92px }
+  .battle .cmdwin { min-height: 40px; padding: 6px 10px }
+  .battle .party { min-height: 36px }
+  .battle .party span { font-size: 21px }
 }
 .gchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px }
 .gchips button {
@@ -1031,7 +1096,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="prow">
         <div style="flex:1">
           <div class="lab">きょうの あそび</div>
-          <div class="desc" id="gameDesc">日替わり（毎日ちがう・1週間で1巡）</div>
+          <div class="desc" id="gameDesc">日替わり（毎日ちがう・8日で1巡）</div>
           <div class="gchips" id="gameChips">
             <button data-p="auto">🗓 日替わり</button>
           </div>
@@ -1415,13 +1480,156 @@ const GARDEN = {
   }
 };
 
-const GAMES = [FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
+/* ===== ゲーム8: ⚔️ もぐもぐクエスト（ドラクエ風コマンドバトル・ポケモン風なかま集め）=====
+   ひとくち＝1こうげき。子どもは操作しない。
+   【安全設計・ガードレール】
+   ・てきは こうげきしてこない／みかたにHPは無い＝「まける」状態を作らない
+     （食べるのが遅い子を急かす＝親のプレッシャーと同じ作用になるため）
+   ・食事が終わっても敗北ではなく「つづきから」。状態はそのまま保存される
+   ・食べ物をモンスターにしない（野菜＝倒す対象というフレーミングを避ける）
+   ・こわい／痛そうな演出を作らない。たおれる＝目をまわして「なかま」になる */
+const BTL_MONS = [
+  ["👾","ぴこモン"],["🫧","あわボール"],["🐸","けろまる"],["🦔","はりまる"],
+  ["🐢","かめっち"],["🦇","こうもりん"],["🤖","ロボこ"],["👻","おばけん"],
+  ["🐌","つむりん"],["🐜","ありんこ"],["🦎","とかげん"],["🐝","はちすけ"],
+  ["🦉","ふくろん"],["🐹","はむりん"],["🦭","ごまちゃん"],["🐧","ぺんぎー"]
+];
+const BTL_BOSSES = [
+  ["🐲","りゅうおう"],["🦖","キングザウルス"],["🦁","ライオンおう"],
+  ["🐘","ゾウおう"],["🦣","マンモスおう"],["🛸","なぞのUFO"]
+];
+const BTL_GOAL = 4;                       // 4たいで 1回の ぼうけんクリア（4たい目がボス）
+const BTL_HITS = [5,7], BTL_BOSS_HITS = [8,11];   // 1たいに かかる ひとくち数のめやす
+function btlSpawn(g){
+  const boss = (g.defeated+1) >= BTL_GOAL;
+  const m = RNG.pick(boss ? BTL_BOSSES : BTL_MONS);
+  const avg = 10 + g.lv*3;                                     // レベルが上がると こうげき力も上がる
+  const hits = boss ? RNG.int(BTL_BOSS_HITS[0],BTL_BOSS_HITS[1]) : RNG.int(BTL_HITS[0],BTL_HITS[1]);
+  const max = Math.round(avg*hits);
+  return { e:m[0], n:m[1], hp:max, max, boss };
+}
+const BATTLE = {
+  id:"battle", name:"もぐもぐクエスト", icon:"⚔️", cls:"gf-battle", sub:"ひとくちで こうげき！",
+  init(){ const g={ lv:1, defeated:0, party:[] }; g.m=btlSpawn(g); return g; },
+  status(g){ return "⚔️ "+g.defeated+" / "+BTL_GOAL+"　Lv."+g.lv; },
+  bite(g,n){
+    const m=g.m;
+    const critP = Math.min(0.32, 0.08 + n*0.012);              // 口数が進むほど かいしんが出やすい
+    const crit = RNG.chance(critP);
+    let dmg = RNG.int(7,12) + g.lv*3;
+    if(crit) dmg = Math.round(dmg*2.4);
+    // 天井: あと少しで倒せる時は確実に決着（1だけ残ってもどかしい、を作らない）
+    if(m.hp - dmg <= Math.max(2, Math.round(m.max*0.07))) dmg = m.hp;
+    m.hp = Math.max(0, m.hp-dmg);
+    const defeat = m.hp<=0;
+    const ev = { dmg, crit, defeat, hp:m.hp, max:m.max, boss:m.boss,
+                 pct: Math.max(0, m.hp/m.max*100), ename:m.n, eemoji:m.e,
+                 rare: crit || defeat, lvup:false, isNew:false, next:null };
+    if(defeat){
+      g.defeated++;
+      g.party.push(m.e);
+      const book = (st.battleBook = st.battleBook || []);        // なかま図鑑は 食事をまたいで ずっと残る
+      if(!book.includes(m.n)){ book.push(m.n); ev.isNew=true; }
+      const newLv = 1 + Math.floor(g.defeated/2);
+      if(newLv>g.lv){ g.lv=newLv; ev.lvup=true; }
+      if(g.defeated < BTL_GOAL){ g.m=btlSpawn(g); ev.next={e:g.m.e,n:g.m.n,max:g.m.max,boss:g.m.boss}; }
+      ev.say = m.n+" が なかまに なった！";
+    }else{
+      ev.say = crit ? "かいしんの いちげきー！"
+                    : RNG.pick(["それっ！","えいっ！","たあっ！","いくぞー！","つよい！","もういっぱつ！"]);
+    }
+    return ev;
+  },
+  done(g){ return g.defeated>=BTL_GOAL; },
+  finale(g){ return {icon:"👑", title:"ぼうけん クリア！",
+    msg:"なかま "+g.party.length+"ひき／レベル "+g.lv+" になったよ！"}; },
+  _hpcls(pct){ return pct<=30 ? "hpfill low" : pct<=60 ? "hpfill mid" : "hpfill"; },
+  enter(host,g){ host.className="gf-stage battle";
+    const m=g.m, pct=Math.max(0,m.hp/m.max*100);
+    host.innerHTML =
+      '<div class="ezone"><div class="stars"></div><div class="ground"></div>'+
+        '<div class="ename">'+(m.boss?'<span class="bosslbl">★ボス★</span> ':'')+m.n+'</div>'+
+        '<div class="hpwrap"><div class="hpbar"><div class="'+this._hpcls(pct)+'" style="width:'+pct+'%"></div></div>'+
+          '<div class="hpnum">'+m.hp+' / '+m.max+'</div></div>'+
+        '<div class="enemy'+(m.boss?" boss":"")+'">'+m.e+'</div>'+
+      '</div>'+
+      '<div class="cmdwin"><div class="msg">'+(m.boss?"ボスが あらわれた！":m.n+" が あらわれた！")+'</div></div>'+
+      '<div class="btlhud"><span>⚔️ レベル '+g.lv+'</span><span>🏆 たおした '+g.defeated+' / '+BTL_GOAL+'</span></div>'+
+      '<div class="party"><span class="lbl">なかま</span>'+g.party.map(p=>"<span>"+p+"</span>").join("")+'</div>';
+    host.dataset.mon=m.n;                       // いま画面に出ている てき（連打で画面と状態がズレるのを検出するため）
+    const pt=host.querySelector(".party"); pt.scrollLeft=pt.scrollWidth; },
+  act(host,g,ev){
+    const self=this;
+    clearTimeout(this._nextT);
+    const gen = this._gen = (this._gen||0)+1;   // 新しい一口が来たら、前の一口の演出タイマーは無効にする
+    if(host.dataset.mon !== ev.ename){
+      // 決着演出の途中で つぎの一口が来た場合（子どもの連打など）。画面をいまの てきに追いつかせてから演出する
+      this.enter(host,g);
+      const pre=Math.min(100,(ev.hp+ev.dmg)/ev.max*100), pf=host.querySelector(".hpfill");
+      pf.className=this._hpcls(pre); pf.style.width=pre+"%";
+      host.querySelector(".hpnum").textContent=(ev.hp+ev.dmg)+" / "+ev.max;
+      host.querySelector(".enemy").classList.add("come");
+    }
+    const zone=host.querySelector(".ezone"), en=host.querySelector(".enemy"),
+          fill=host.querySelector(".hpfill"), num=host.querySelector(".hpnum"),
+          msg=host.querySelector(".msg"), party=host.querySelector(".party"),
+          hud=host.querySelector(".btlhud");
+    msg.textContent="モグの こうげき！";
+    const sl=document.createElement("div"); sl.className="slash"+(ev.crit?" crit":""); zone.appendChild(sl); setTimeout(()=>sl.remove(),430);
+    sfxSlash(ev.crit);
+    setTimeout(()=>{
+      if(gen!==self._gen) return;
+      en.classList.remove("hit"); void en.offsetWidth; en.classList.add("hit");
+      const d=document.createElement("div"); d.className="dmg"+(ev.crit?" crit":""); d.textContent=ev.dmg;
+      zone.appendChild(d); setTimeout(()=>d.remove(),1050);
+      fill.className=self._hpcls(ev.pct); fill.style.width=ev.pct+"%";
+      num.textContent=ev.hp+" / "+ev.max;
+      if(ev.crit){
+        msg.textContent="かいしんの いちげき！ "+ev.dmg+"の ダメージ！";
+        host.classList.remove("shake"); void host.offsetWidth; host.classList.add("shake"); setTimeout(()=>host.classList.remove("shake"),520);
+        fxBurst(host,50,44,["✨","⭐","💥"],14); sfxCrit();
+      }else{
+        msg.textContent=ev.ename+"に "+ev.dmg+"の ダメージ！";
+        fxBurst(host,50,46,["✨"],4);
+      }
+      if(ev.defeat) setTimeout(()=>{ if(gen===self._gen) self._defeat(host,g,ev,{en,msg,party,hud},gen); }, 620);
+    }, 260);
+  },
+  _defeat(host,g,ev,el,gen){
+    const self=this;
+    el.en.classList.remove("hit"); el.en.classList.add("down"); sfxDefeat();
+    el.msg.textContent=ev.ename+" を たおした！";
+    setTimeout(()=>{
+      if(gen!==self._gen) return;
+      // たおす＝おしまい ではなく「なかまに なりたそうに こちらを みている」（こわくない・かわいい決着）
+      el.msg.textContent=ev.ename+" は なかまに なりたそうに こちらを みている！"+(ev.isNew?" ✨はじめて！":"");
+      fxBurst(host,50,44,["💛","✨","🎉"],14); soundGet();
+      const s=document.createElement("span"); s.textContent=ev.eemoji; el.party.appendChild(s); el.party.scrollLeft=el.party.scrollWidth;
+      el.hud.innerHTML='<span>⚔️ レベル '+g.lv+'</span><span>🏆 たおした '+g.defeated+' / '+BTL_GOAL+'</span>';
+      if(ev.lvup){
+        const lv=document.createElement("div"); lv.className="lvup"; lv.textContent="レベルアップ！ Lv."+g.lv;
+        host.querySelector(".ezone").appendChild(lv); setTimeout(()=>lv.remove(),1550);
+        sfxLevel(); speak("レベルアップ！");
+      }
+    }, 1150);
+    if(ev.next){                                    // つぎの てきが 出てくる（1食のなかで つづく）
+      this._nextT=setTimeout(()=>{ if(gen!==self._gen) return;
+        self.enter(host,g);
+        const ne=host.querySelector(".enemy"); ne.classList.add("come");
+        host.querySelector(".msg").textContent=(ev.next.boss?"ボスが あらわれた！":ev.next.n+" が あらわれた！");
+        if(ev.next.boss){ sfxBoss(); speak("ボスが あらわれた！"); } else sfxAppear();
+      }, 2500);
+    }
+  }
+};
+
+const GAMES = [BATTLE, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
 
 
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function todaysGame(){
   if(st.gamePick && st.gamePick!=="auto"){ const g=GAMES.find(x=>x.id===st.gamePick); if(g) return g; }
-  return GAMES[((dayKey()%GAMES.length)+GAMES.length)%GAMES.length];   // 抽選ではなく日付順の巡回（1週間で1巡）
+  return GAMES[((dayKey()%GAMES.length)+GAMES.length)%GAMES.length];   // 抽選ではなく日付順の巡回（8日で1巡）
 }
 /* あそびが変わったら、そのゲームの状態を新規に（1食で完結する区切り） */
 function ensureGame(){
@@ -1454,7 +1662,7 @@ const GESTURES = {
 
 const KEY="sodateru_tap_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[] }; }
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[] }; }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return Object.assign(base(),d); }catch(e){} return base(); }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
 let st=load();
@@ -1808,6 +2016,18 @@ function sfxBoost(big){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.cu
   const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(big?880:520,t+(big?0.35:0.2));
   g.gain.setValueAtTime(0.08,t); g.gain.exponentialRampToValueAtTime(0.0001,t+(big?0.4:0.24)); o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t+0.45); }
 function sfxBloom(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; tone(659,t,0.08,'sine',0.09); tone(988,t+0.06,0.12,'sine',0.08); } // 開花「ぽわん」
+function sfxSlash(crit){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                   // こうげき「シャキーン」
+  noise(t, crit?0.22:0.13, crit?0.17:0.12, 1500);
+  tone(crit?990:1320,t,0.06,'square',0.07); tone(crit?330:440,t+0.05,0.12,'sawtooth',0.06); }
+function sfxCrit(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                        // かいしんの いちげき
+  noise(t,0.3,0.2,220); tone(90,t,0.34,'sine',0.16);
+  [784,1046,1318,1568].forEach((f,i)=>tone(f,t+0.06+i*0.05,0.2,'square',0.1)); }
+function sfxDefeat(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                      // てきが たおれる（下降・こわくない音）
+  [784,659,523,392].forEach((f,i)=>tone(f,t+i*0.085,0.18,'triangle',0.10)); noise(t+0.34,0.16,0.08,700); }
+function sfxLevel(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                       // レベルアップ
+  [523,659,784,1046,1318].forEach((f,i)=>tone(f,t+i*0.07,0.26,'square',0.09)); }
+function sfxAppear(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                      // てきが あらわれる
+  tone(392,t,0.1,'triangle',0.09); tone(523,t+0.09,0.14,'triangle',0.09); }
 
 /* ---------- ゲームごとのBGM（WebAudio・メロディ＋ベース、それぞれ別の曲）---------- */
 /* mel=メロディ(半音・nullは休符)、bass=2ステップごとの低音、ms=テンポ */
@@ -1832,7 +2052,10 @@ const BGMS = {
     bass:[0,7,5,7, -2,5,0,0] },
   garden: { ms:440, // やさしい おはなメロディ
     mel:[4,7,9,7, 9,11,9,7, 5,9,11,9, 11,12,11,9, 7,9,11,14, 12,11,9,7, 5,7,9,7, 4,2,null,null],
-    bass:[0,5,-3,5, 2,7,0,0] }
+    bass:[0,5,-3,5, 2,7,0,0] },
+  battle: { ms:265, // 勇ましい たたかいマーチ（速め・短調ぎみ）
+    mel:[0,0,7,7, 8,7,5,3, 5,5,3,5, 7,null,0,null, 0,0,12,12, 10,8,7,5, 3,5,7,8, 7,3,0,null],
+    bass:[0,0,7,7, 3,3,5,5] }
 };
 let bgm={on:false,id:null,i:0}, curB=BGMS.fishing;
 function setBGM(id){ const b=BGMS[id]; if(!b) return; curB=b; bgm.i=0;
@@ -1878,7 +2101,7 @@ function renderParent(){
   $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
   const cur=todaysGame();
   $("#gameDesc").textContent = st.gamePick==="auto"
-    ? "日替わり（毎日ちがう・1週間で1巡）／きょうは "+cur.icon+" "+cur.name
+    ? "日替わり（毎日ちがう・8日で1巡）／きょうは "+cur.icon+" "+cur.name
     : "いつも "+cur.icon+" "+cur.name;
   $("#gameChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.p===(st.gamePick||"auto")));
   const g=GESTURES[st.gesture]||GESTURES.peace;
