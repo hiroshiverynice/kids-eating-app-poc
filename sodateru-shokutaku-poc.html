@@ -2104,7 +2104,13 @@ const SFX_FILES = {
   boss:"boss.ogg", defeat:"defeat.ogg", ally:"ally.ogg",
   levelup:"levelup.ogg", clear:"clear.ogg", appear:"appear.ogg"
 };
-const BGM_FILES = { battle:"battle_bgm.ogg" };
+/* BGMはゲームごとに別の曲。合計4MBあるので【選ばれたゲームの分だけ】遅延で読む。
+   起動時に全部読むと、食卓のWi-Fiが弱いときに他の処理まで待たされる。 */
+const BGM_FILES = {
+  battle:"battle_bgm.ogg", fishing:"fishing_bgm.ogg", sweets:"sweets_bgm.ogg",
+  race:"race_bgm.ogg", board:"board_bgm.ogg", dig:"dig_bgm.ogg",
+  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg"
+};
 const SFX_GAIN = { atk:0.5, atkCrit:0.6, hit:0.55, crit:0.7, boss:0.6, defeat:0.5, ally:0.55, levelup:0.55, clear:0.6, appear:0.45 };
 const buf={};                       // 名前 -> AudioBuffer（読み込めたものだけ入る）
 try{ window.__mogu={buf:buf}; }catch(e){}   // 診断用: Object.keys(__mogu.buf) で読み込めた音を確認できる
@@ -2114,15 +2120,25 @@ function loadAudioFiles(){
   // file:// 直開きでは fetch が必ず失敗する（ブラウザがコンソールにエラーを出すだけ）ので最初から試さない
   if(location.protocol==="file:") return;
   if(!ensureAudio()) return;
-  const one=(key,file)=>fetch(AUDIO_DIR+file)
+  Object.keys(SFX_FILES).forEach(k=>fetchBuf(k,SFX_FILES[k]));   // 効果音は小さいので先読み
+}
+function fetchBuf(key,file){
+  return fetch(AUDIO_DIR+file)
     .then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })
     .then(a=>new Promise((res,rej)=>audioCtx.decodeAudioData(a,res,rej)))
     .then(b=>{ buf[key]=b;
       // BGMが合成音で鳴り始めた後に実音源が届いたら、その場で本物に切り替える
       if(key==="bgm_"+bgm.game && bgm.on) startBGMEngine(); })
     .catch(()=>{});                 // 失敗はフォールバックに任せる（黙って合成音に戻る）
-  Object.keys(SFX_FILES).forEach(k=>one(k,SFX_FILES[k]));
-  Object.keys(BGM_FILES).forEach(k=>one("bgm_"+k,BGM_FILES[k]));
+}
+/* いま選ばれているゲームのBGMだけを取りにいく（1曲あたり0.1〜1.4MB） */
+const bgmAsked={};
+function loadBGM(id){
+  if(!id || buf["bgm_"+id] || bgmAsked[id]) return;
+  if(!BGM_FILES[id] || location.protocol==="file:") return;
+  if(!ensureAudio()) return;
+  bgmAsked[id]=1;
+  fetchBuf("bgm_"+id, BGM_FILES[id]);
 }
 /* 実音源を鳴らす。無ければ false を返して呼び出し側が合成音にフォールバックする */
 function play(key,vol,delay){
@@ -2239,6 +2255,7 @@ const BGMS = {
 };
 let bgm={on:false,id:null,i:0,game:null}, curB=BGMS.fishing;
 function setBGM(id){ bgm.game=id; const b=BGMS[id]; if(b){ curB=b; bgm.i=0; }
+  loadBGM(id);                       // このゲームの曲を取りにいく（届くまでは合成メロディで鳴る）
   if(bgm.on) startBGMEngine(); }
 /* いま選ばれているゲームのBGMを鳴らし直す。実音源(CC0)があればそれ、無ければ合成メロディ */
 function startBGMEngine(){
