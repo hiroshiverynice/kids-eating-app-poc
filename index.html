@@ -1588,7 +1588,7 @@ const BATTLE = {
         fxBurst(host,50,44,["✨","⭐","💥"],14); sfxCrit();
       }else{
         msg.textContent=ev.ename+"に "+ev.dmg+"の ダメージ！";
-        fxBurst(host,50,46,["✨"],4);
+        fxBurst(host,50,46,["✨"],4); sfxHit();
       }
       if(ev.defeat) setTimeout(()=>{ if(gen===self._gen) self._defeat(host,g,ev,{en,msg,party,hud},gen); }, 620);
     }, 260);
@@ -1601,7 +1601,7 @@ const BATTLE = {
       if(gen!==self._gen) return;
       // たおす＝おしまい ではなく「なかまに なりたそうに こちらを みている」（こわくない・かわいい決着）
       el.msg.textContent=ev.ename+" は なかまに なりたそうに こちらを みている！"+(ev.isNew?" ✨はじめて！":"");
-      fxBurst(host,50,44,["💛","✨","🎉"],14); soundGet();
+      fxBurst(host,50,44,["💛","✨","🎉"],14); sfxAlly();
       const s=document.createElement("span"); s.textContent=ev.eemoji; el.party.appendChild(s); el.party.scrollLeft=el.party.scrollWidth;
       el.hud.innerHTML='<span>⚔️ レベル '+g.lv+'</span><span>🏆 たおした '+g.defeated+' / '+BTL_GOAL+'</span>';
       if(ev.lvup){
@@ -1615,7 +1615,7 @@ const BATTLE = {
         self.enter(host,g);
         const ne=host.querySelector(".enemy"); ne.classList.add("come");
         host.querySelector(".msg").textContent=(ev.next.boss?"ボスが あらわれた！":ev.next.n+" が あらわれた！");
-        if(ev.next.boss){ sfxBoss(); speak("ボスが あらわれた！"); } else sfxAppear();
+        if(ev.next.boss){ sfxBattleBoss(); speak("ボスが あらわれた！"); } else sfxAppear();
       }, 2500);
     }
   }
@@ -1975,6 +1975,60 @@ function praise(text){ chime(); if(st.rewardMode==="grow"||st.rewardMode==="prai
 
 /* ---------- recognition sounds + gentle BGM (WebAudio, no external files) ---------- */
 function ensureAudio(){ try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} return audioCtx; }
+
+/* ---------- 実音源（CC0）の読み込み ----------
+   WebAudioの合成音は「ピー・ポー」で貧相なので、本物の録音・チップチューンに差し替える。
+   全て CC0（帰属表示不要・商用可）。出典は assets/audio/CREDITS.md。
+   読み込めない環境（file:// 直開き・オフライン・古い端末）では従来の合成音に自動フォールバックするので
+   無音にはならない。差し替えたい時は下のテーブルのファイル名を変えるだけでよい。 */
+const AUDIO_DIR="assets/audio/";
+const SFX_FILES = {
+  atk:"atk.ogg", atkCrit:"atk_crit.ogg", hit:"hit.ogg", crit:"crit.ogg",
+  boss:"boss.ogg", defeat:"defeat.ogg", ally:"ally.ogg",
+  levelup:"levelup.ogg", clear:"clear.ogg", appear:"appear.ogg"
+};
+const BGM_FILES = { battle:"battle_bgm.ogg" };
+const SFX_GAIN = { atk:0.5, atkCrit:0.6, hit:0.55, crit:0.7, boss:0.6, defeat:0.5, ally:0.55, levelup:0.55, clear:0.6, appear:0.45 };
+const buf={};                       // 名前 -> AudioBuffer（読み込めたものだけ入る）
+try{ window.__mogu={buf:buf}; }catch(e){}   // 診断用: Object.keys(__mogu.buf) で読み込めた音を確認できる
+let sfxLoaded=false;
+function loadAudioFiles(){
+  if(sfxLoaded) return; sfxLoaded=true;
+  // file:// 直開きでは fetch が必ず失敗する（ブラウザがコンソールにエラーを出すだけ）ので最初から試さない
+  if(location.protocol==="file:") return;
+  if(!ensureAudio()) return;
+  const one=(key,file)=>fetch(AUDIO_DIR+file)
+    .then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })
+    .then(a=>new Promise((res,rej)=>audioCtx.decodeAudioData(a,res,rej)))
+    .then(b=>{ buf[key]=b;
+      // BGMが合成音で鳴り始めた後に実音源が届いたら、その場で本物に切り替える
+      if(key==="bgm_"+bgm.game && bgm.on) startBGMEngine(); })
+    .catch(()=>{});                 // 失敗はフォールバックに任せる（黙って合成音に戻る）
+  Object.keys(SFX_FILES).forEach(k=>one(k,SFX_FILES[k]));
+  Object.keys(BGM_FILES).forEach(k=>one("bgm_"+k,BGM_FILES[k]));
+}
+/* 実音源を鳴らす。無ければ false を返して呼び出し側が合成音にフォールバックする */
+function play(key,vol,delay){
+  const b=buf[key]; if(!b||!audioCtx) return false;
+  try{
+    const s=audioCtx.createBufferSource(), g=audioCtx.createGain();
+    s.buffer=b; g.gain.value=(vol==null?(SFX_GAIN[key]||0.5):vol);
+    s.connect(g); g.connect(audioCtx.destination); s.start(audioCtx.currentTime+(delay||0));
+    return true;
+  }catch(e){ return false; }
+}
+let bgmSrc=null, bgmGain=null;
+function playBGMFile(key){                       // ループBGM（1曲を切れ目なく回す）
+  const b=buf["bgm_"+key]; if(!b||!audioCtx) return false;
+  stopBGMFile();
+  try{
+    bgmSrc=audioCtx.createBufferSource(); bgmGain=audioCtx.createGain();
+    bgmSrc.buffer=b; bgmSrc.loop=true; bgmGain.gain.value=0.22;
+    bgmSrc.connect(bgmGain); bgmGain.connect(audioCtx.destination); bgmSrc.start(0);
+    return true;
+  }catch(e){ return false; }
+}
+function stopBGMFile(){ try{ if(bgmSrc){ bgmSrc.stop(); bgmSrc.disconnect(); } }catch(e){} bgmSrc=null; }
 function tone(freq,at,dur,type,peak){ try{ ensureAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(),g=audioCtx.createGain();
   o.type=type||'sine'; o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
   g.gain.setValueAtTime(0.0001,at); g.gain.exponentialRampToValueAtTime(peak||0.1,at+0.02);
@@ -1988,7 +2042,8 @@ function soundEat(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.curre
   tone(392,t,0.08,'sine',0.11); tone(294,t+0.06,0.11,'sine',0.10); }
 function soundRare(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                               // レア上昇音
   [784,988,1319,1568].forEach((f,i)=>tone(f,t+i*0.08,0.16,'triangle',0.12)); }
-function soundFanfare(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                            // 進化・コンプリートのファンファーレ
+function soundFanfare(){ if(play("clear",0.5)) return;                                                                  // 進化・コンプリートのファンファーレ（実音源優先）
+  ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
   [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,t+i*0.11,0.22,'triangle',0.11)); }
 /* ---------- ゲーム用のにぎやかな効果音（WebAudio・外部ファイル無し）---------- */
 function noise(at,dur,peak,hp){ try{ ensureAudio(); if(!audioCtx) return;
@@ -2014,18 +2069,28 @@ function sfxBoost(big){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.cu
   const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(big?880:520,t+(big?0.35:0.2));
   g.gain.setValueAtTime(0.08,t); g.gain.exponentialRampToValueAtTime(0.0001,t+(big?0.4:0.24)); o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t+0.45); }
 function sfxBloom(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; tone(659,t,0.08,'sine',0.09); tone(988,t+0.06,0.12,'sine',0.08); } // 開花「ぽわん」
-function sfxSlash(crit){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                   // こうげき「シャキーン」
+/* 以下の戦闘音は CC0 の実音源を優先し、読み込めていない時だけ従来の合成音で鳴らす */
+function sfxSlash(crit){ if(play(crit?"atkCrit":"atk")) return;                                                               // こうげき「シャキーン」（振り）
+  ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
   noise(t, crit?0.22:0.13, crit?0.17:0.12, 1500);
   tone(crit?990:1320,t,0.06,'square',0.07); tone(crit?330:440,t+0.05,0.12,'sawtooth',0.06); }
-function sfxCrit(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                        // かいしんの いちげき
+function sfxHit(){ if(play("hit")) return;                                                                                    // 命中の打撃（通常）
+  ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime; noise(t,0.1,0.1,600); tone(220,t,0.1,'sine',0.09); }
+function sfxCrit(){ if(play("crit")) return;                                                                                  // かいしんの いちげき（命中）
+  ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
   noise(t,0.3,0.2,220); tone(90,t,0.34,'sine',0.16);
   [784,1046,1318,1568].forEach((f,i)=>tone(f,t+0.06+i*0.05,0.2,'square',0.1)); }
-function sfxDefeat(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                      // てきが たおれる（下降・こわくない音）
+function sfxDefeat(){ if(play("defeat")) return;                                                                              // てきが たおれる（下降・こわくない音）
+  ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
   [784,659,523,392].forEach((f,i)=>tone(f,t+i*0.085,0.18,'triangle',0.10)); noise(t+0.34,0.16,0.08,700); }
-function sfxLevel(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                       // レベルアップ
+function sfxAlly(){ if(play("ally")) return; soundGet(); }                                                                    // なかまに なった
+function sfxLevel(){ if(play("levelup")) return;                                                                             // レベルアップ
+  ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
   [523,659,784,1046,1318].forEach((f,i)=>tone(f,t+i*0.07,0.26,'square',0.09)); }
-function sfxAppear(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;                                      // てきが あらわれる
+function sfxAppear(){ if(play("appear")) return;                                                                              // てきが あらわれる
+  ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
   tone(392,t,0.1,'triangle',0.09); tone(523,t+0.09,0.14,'triangle',0.09); }
+function sfxBattleBoss(){ if(play("boss")) return; sfxBoss(); }                                                               // ボス出現（釣りの「ぬし」とは別音）
 
 /* ---------- ゲームごとのBGM（WebAudio・メロディ＋ベース、それぞれ別の曲）---------- */
 /* mel=メロディ(半音・nullは休符)、bass=2ステップごとの低音、ms=テンポ */
@@ -2055,16 +2120,23 @@ const BGMS = {
     mel:[0,0,7,7, 8,7,5,3, 5,5,3,5, 7,null,0,null, 0,0,12,12, 10,8,7,5, 3,5,7,8, 7,3,0,null],
     bass:[0,0,7,7, 3,3,5,5] }
 };
-let bgm={on:false,id:null,i:0}, curB=BGMS.fishing;
-function setBGM(id){ const b=BGMS[id]; if(!b) return; curB=b; bgm.i=0;
-  if(bgm.on){ clearInterval(bgm.id); bgm.id=setInterval(bgmStep,curB.ms); } }
+let bgm={on:false,id:null,i:0,game:null}, curB=BGMS.fishing;
+function setBGM(id){ bgm.game=id; const b=BGMS[id]; if(b){ curB=b; bgm.i=0; }
+  if(bgm.on) startBGMEngine(); }
+/* いま選ばれているゲームのBGMを鳴らし直す。実音源(CC0)があればそれ、無ければ合成メロディ */
+function startBGMEngine(){
+  clearInterval(bgm.id); bgm.id=null; stopBGMFile();
+  if(!bgm.on) return;
+  if(playBGMFile(bgm.game)) return;
+  bgm.i=0; bgm.id=setInterval(bgmStep,curB.ms); bgmStep();
+}
 function bgmStep(){ if(!bgm.on||!audioCtx) return; const t=audioCtx.currentTime, dur=curB.ms/1000;
   const m=curB.mel[bgm.i%curB.mel.length];
   if(m!=null){ const hz=261.63*Math.pow(2,m/12); tone(hz,t,dur*0.92,'triangle',0.055); tone(hz*2,t,dur*0.4,'sine',0.012); }
   if(bgm.i%2===0){ const b=curB.bass[(bgm.i/2)%curB.bass.length]; if(b!=null) tone(261.63*Math.pow(2,(b-12)/12),t,dur*1.7,'sine',0.05); }
   bgm.i++; }
-function startBGM(){ if(bgm.on||!st.bgm) return; if(!ensureAudio()) return; bgm.on=true; bgm.id=setInterval(bgmStep,curB.ms); bgmStep(); }
-function stopBGM(){ bgm.on=false; if(bgm.id){ clearInterval(bgm.id); bgm.id=null; } }
+function startBGM(){ if(bgm.on||!st.bgm) return; if(!ensureAudio()) return; loadAudioFiles(); bgm.on=true; startBGMEngine(); }
+function stopBGM(){ bgm.on=false; clearInterval(bgm.id); bgm.id=null; stopBGMFile(); }
 
 /* ---------- meal ---------- */
 function startMeal(){ if(meal.active) return; startBGM(); meal={active:true,startTs:Date.now(),bites:0,tickId:null};
@@ -2115,7 +2187,7 @@ function applyGestureUI(){
   $("#prompt").textContent = (st.camMode && !camFailed) ? g.prompt : "ごはんを たべたら ボタンを おしてね 👆";
   if(camReady && detState!=="DETECTING") camHint(g.hint);
 }
-function resumeAudio(){ try{ audioCtx&&audioCtx.state==="suspended"&&audioCtx.resume(); }catch(e){} startBGM(); }
+function resumeAudio(){ try{ audioCtx&&audioCtx.state==="suspended"&&audioCtx.resume(); }catch(e){} loadAudioFiles(); startBGM(); }
 $("#fallback").onclick=()=>{ resumeAudio(); registerBite(); };
 $("#mealBtn").onclick=()=> meal.active?endMeal():startMeal();
 $("#giftBadge").onclick=showBoard;
@@ -2210,6 +2282,7 @@ function loop(){
 /* ---------- boot ---------- */
 if(!SHOW_PET) $(".phone").classList.add("no-pet");   // 育成キャラをトップから隠す
 renderChar(); renderGame(); save(); renderParent(); updateButtonVis(); applyGestureUI();
+loadAudioFiles();                                   // CC0音源を先読み（1口目から本物の音が鳴るように）
 document.addEventListener("click",resumeAudio,{once:true});
 if(st.camMode) startCamera(); else { camFailed=false; updateButtonVis(); }
 </script>

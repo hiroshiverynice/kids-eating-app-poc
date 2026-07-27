@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>音の聴き比べ - もぐもぐクエスト</title>
+<style>
+  :root { color-scheme: light dark }
+  body { font-family: system-ui, -apple-system, "Hiragino Sans", sans-serif; margin: 0; padding: 20px 16px 60px; line-height: 1.6 }
+  .wrap { max-width: 760px; margin: 0 auto }
+  h1 { font-size: 22px; margin: 0 0 4px }
+  .note { font-size: 13px; opacity: .75; margin: 0 0 24px }
+  .slot { border: 1px solid rgba(128,128,128,.35); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px }
+  .slot h2 { font-size: 16px; margin: 0 0 2px }
+  .use { font-size: 12px; opacity: .7; margin: 0 0 10px }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+  button { font: inherit; font-size: 14px; padding: 9px 15px; border-radius: 999px; border: 1.5px solid rgba(128,128,128,.5);
+           background: transparent; color: inherit; cursor: pointer }
+  button:hover { background: rgba(128,128,128,.14) }
+  button.cur { border-color: #3FA83A; background: rgba(63,168,58,.16); font-weight: 700 }
+  code { background: rgba(128,128,128,.18); padding: 2px 6px; border-radius: 5px; font-size: 12px }
+  .how { border: 1px solid rgba(128,128,128,.35); border-radius: 12px; padding: 14px 16px; margin-top: 22px; font-size: 14px }
+  .warn { font-size: 13px; padding: 10px 14px; border-radius: 10px; background: rgba(230,150,40,.16); margin-bottom: 20px }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>音の聴き比べ</h1>
+  <p class="note">⚔️ もぐもぐクエスト で使っている CC0 音源。緑が現在アプリで鳴っているもの。</p>
+
+  <div class="warn">
+    <b>ローカルサーバー経由で開いてください。</b><br>
+    ファイルを直接ダブルクリック（<code>file://</code>）だと音が読み込めません。<br>
+    リポジトリ直下で <code>python -m http.server 8000</code> を実行し、
+    <code>http://localhost:8000/tools/audition.html</code> を開いてください。
+  </div>
+
+  <div id="slots"></div>
+
+  <div class="how">
+    <b>差し替え方</b><br>
+    気に入った候補が見つかったら、そのファイルを <code>assets/audio/</code> の本番名に上書きコピーするか、
+    <code>sodateru-shokutaku-poc.html</code> の <code>SFX_FILES</code> テーブルのファイル名を書き換えてください。<br>
+    その後 <code>python derive.py</code> を実行すると index.html / sodateru-tap.html に反映されます。<br><br>
+    音量は同ファイル内の <code>SFX_GAIN</code> で個別に調整できます（0〜1）。
+  </div>
+</div>
+
+<script>
+const SLOTS = [
+  { name:"こうげき（振り）", use:"ひとくちごとに鳴る。一番回数が多い音", cur:"../assets/audio/atk.ogg", alts:[] },
+  { name:"かいしんの振り",   use:"会心の一撃のとき",                   cur:"../assets/audio/atk_crit.ogg", alts:[] },
+  { name:"命中の打撃",       use:"通常こうげきが当たった音",           cur:"../assets/audio/hit.ogg",
+    alts:[["軽め","../assets/audio/alt/hit_a.ogg"],["金属","../assets/audio/alt/hit_b.ogg"]] },
+  { name:"かいしんの命中",   use:"会心が当たった重い音",               cur:"../assets/audio/crit.ogg",
+    alts:[["ベル","../assets/audio/alt/crit_a.ogg"],["金属(重)","../assets/audio/alt/crit_b.ogg"]] },
+  { name:"てきを たおした",  use:"撃破の瞬間",                         cur:"../assets/audio/defeat.ogg",
+    alts:[["ピチカート別","../assets/audio/alt/defeat_a.ogg"],["ヒット系","../assets/audio/alt/defeat_b.ogg"]] },
+  { name:"なかまに なった",  use:"仲間になる決着。子が一番喜ぶ場面",   cur:"../assets/audio/ally.ogg",
+    alts:[["ピチカート別","../assets/audio/alt/ally_a.ogg"],["確定音","../assets/audio/alt/ally_b.ogg"]] },
+  { name:"レベルアップ",     use:"2体たおすごと",                      cur:"../assets/audio/levelup.ogg",
+    alts:[["8bit別","../assets/audio/alt/levelup_a.ogg"],["スチール","../assets/audio/alt/levelup_b.ogg"]] },
+  { name:"ぼうけん クリア",  use:"4体たおした完結ファンファーレ",      cur:"../assets/audio/clear.ogg",
+    alts:[["8bit別","../assets/audio/alt/clear_a.ogg"],["スチール","../assets/audio/alt/clear_b.ogg"]] },
+  { name:"てき 出現",        use:"次のてきが出てくるとき",             cur:"../assets/audio/appear.ogg",
+    alts:[["セレクト","../assets/audio/alt/appear_a.ogg"],["金属クリック","../assets/audio/alt/appear_b.ogg"]] },
+  { name:"ボス 出現",        use:"4体目のボス登場",                    cur:"../assets/audio/boss.ogg", alts:[] },
+  { name:"戦闘BGM",          use:"バトル中ずっと流れるループ",         cur:"../assets/audio/battle_bgm.ogg", alts:[], bgm:true }
+];
+
+let ctx = null, playing = null;
+function play(url, loop){
+  ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+  if(playing){ try{ playing.stop(); }catch(e){} playing = null; }
+  fetch(url).then(r => { if(!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+    .then(a => ctx.decodeAudioData(a))
+    .then(b => {
+      const s = ctx.createBufferSource(), g = ctx.createGain();
+      s.buffer = b; s.loop = !!loop; g.gain.value = loop ? 0.3 : 0.6;
+      s.connect(g); g.connect(ctx.destination); s.start(0);
+      if(loop) playing = s;
+    })
+    .catch(e => alert("読み込めませんでした: " + url + "\n" + e + "\n\nローカルサーバー経由で開いていますか？"));
+}
+
+const host = document.getElementById("slots");
+SLOTS.forEach(s => {
+  const d = document.createElement("div"); d.className = "slot";
+  const alts = s.alts.map(a => '<button data-u="' + a[1] + '">' + a[0] + '</button>').join("");
+  d.innerHTML = '<h2>' + s.name + '</h2><p class="use">' + s.use + '</p>' +
+    '<div class="row"><button class="cur" data-u="' + s.cur + '" data-loop="' + (s.bgm ? 1 : 0) + '">▶ いま使用中</button>' +
+    alts + (s.bgm ? ' <button data-stop="1">■ とめる</button>' : '') + '</div>';
+  host.appendChild(d);
+});
+host.addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  if(b.dataset.stop){ if(playing){ try{ playing.stop(); }catch(err){} playing = null; } return; }
+  play(b.dataset.u, b.dataset.loop === "1");
+});
+</script>
+</body>
+</html>
