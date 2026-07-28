@@ -933,6 +933,58 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .scn .cl2 { animation: drift 46s ease-in-out infinite alternate-reverse }
 @keyframes drift { from{transform:translateX(-9%)} to{transform:translateX(9%)} }
 
+/* ---------- 🌱 モグをそだてよう（育成。バトルと同じ画面構成で作る）---------- */
+.gf-grow { background: linear-gradient(180deg,#E7F6D6,#A9DC8C) }
+.gf-grow .gf-title,.gf-grow .gf-head { color:#2E6B2E }
+.gf-stage.grow { display:flex; flex-direction:column;
+  background: linear-gradient(180deg,#CFEEFF 0%,#DFF4E4 46%,#BCE79C 62%,#8FCF6A 100%) }
+.grow .gzone { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; overflow:hidden }
+.grow .hill { position:absolute; left:-10%; right:-10%; bottom:-16%; height:38%; border-radius:50% 50% 0 0; z-index:2;
+  background: linear-gradient(180deg,#93D06C,#6FB44C); box-shadow: inset 0 3px 0 rgba(255,255,255,.3) }
+.grow .scn .sun { top:5%; right:9%; width:44px; opacity:.9 }
+.grow .scn .cl { top:9%;  left:5%;  width:56px; opacity:.95 }
+.grow .scn .w2 { top:20%; left:56%; width:42px; opacity:.8 }
+.grow .scn .gtree { width:38px }
+.grow .scn .e1 { bottom:21%; left:3% } .grow .scn .e2 { bottom:22%; right:4%; width:32px }
+.grow .scn.fg { z-index:3 }                      /* 草は丘より手前に置いて奥行きを出す */
+.grow .scn .ggrass { bottom:3%; width:22px; opacity:.95 }
+.grow .scn .q1 { left:12% } .grow .scn .q2 { left:46%; width:16px } .grow .scn .q3 { right:14% }
+.grow .gname { position:relative; z-index:5; font-family:var(--disp); font-weight:800; font-size:15px; color:#2A5F26; text-shadow:0 2px 0 rgba(255,255,255,.6) }
+.grow .gbarwrap { position:relative; z-index:5; width:66%; display:flex; align-items:center; gap:6px }
+.grow .gbar { flex:1; height:13px; border-radius:7px; background:rgba(255,255,255,.55); overflow:hidden;
+  box-shadow: inset 0 2px 4px rgba(40,90,30,.28), 0 0 0 2px rgba(255,255,255,.9) }
+.grow .gfill { height:100%; border-radius:7px; background:linear-gradient(180deg,#8BE86B,#3FA83A); transition: width .45s var(--out) }
+.grow .gnum { font-family:var(--disp); font-weight:800; font-size:11px; color:#2A5F26; min-width:50px; text-align:right }
+.grow .mogu { position:relative; z-index:4; width:150px; height:150px; filter: drop-shadow(0 8px 12px rgba(60,110,40,.3)) }
+.grow .mogu svg { width:100%; height:100% }
+.grow .mogu.chomp { animation: gchomp .42s var(--spring) }
+@keyframes gchomp { 0%{transform:scale(1)} 35%{transform:scale(1.14,.9)} 65%{transform:scale(.95,1.08)} 100%{transform:scale(1)} }
+.grow .mogu.grew { animation: ggrew .8s var(--spring) }
+@keyframes ggrew { 0%{transform:scale(.4) rotate(-12deg);opacity:.3} 60%{transform:scale(1.22) rotate(6deg);opacity:1} 100%{transform:scale(1) rotate(0)} }
+.grow .gfood { position:absolute; left:50%; bottom:6%; transform:translateX(-50%); z-index:6; font-size:34px; animation: gfly .72s var(--out) forwards }
+@keyframes gfly { 0%{bottom:4%; transform:translateX(-50%) scale(.6) rotate(-14deg); opacity:0}
+                  25%{opacity:1}
+                  100%{bottom:44%; transform:translateX(-50%) scale(.35) rotate(12deg); opacity:0} }
+.grow .gplus { position:absolute; left:50%; top:46%; z-index:7; pointer-events:none;
+  font-family:var(--disp); font-weight:900; font-size:30px; color:#fff;
+  -webkit-text-stroke:3px #2A5F26; paint-order:stroke; animation: dmgA 1s var(--out) forwards }
+.grow .gplus.big { font-size:46px; color:#FFE873; -webkit-text-stroke:3px #7A4B00 }
+.grow .gbloom { position:absolute; left:50%; top:40%; z-index:8; transform:translate(-50%,-50%); font-size:88px;
+  filter: drop-shadow(0 6px 12px rgba(60,110,40,.35)); animation: gbloomA 2.4s var(--spring) forwards }
+@keyframes gbloomA { 0%{transform:translate(-50%,-50%) scale(0) rotate(-40deg);opacity:0}
+                     35%{transform:translate(-50%,-50%) scale(1.25) rotate(8deg);opacity:1}
+                     75%{transform:translate(-50%,-50%) scale(1.1) rotate(0);opacity:1}
+                     100%{transform:translate(-50%,-90%) scale(.9);opacity:0} }
+.grow .cmdwin { margin:6px 8px 4px; padding:8px 12px; min-height:46px; display:flex; align-items:center;
+  background:#F7FFE9; border:3px solid #4E9440; border-radius:9px; box-shadow:0 4px 10px rgba(40,90,30,.2) }
+.grow .msg { font-family:var(--disp); font-weight:800; font-size:14px; color:#2A5F26; line-height:1.35 }
+.grow .ghud { display:flex; align-items:center; gap:10px; padding:0 12px 3px;
+  font-family:var(--disp); font-weight:800; font-size:12px; color:#2E6B2E }
+.grow .gshelf { display:flex; align-items:center; gap:2px; overflow-x:auto; overflow-y:hidden;
+  padding:4px 8px 7px; min-height:42px; background:rgba(46,107,46,.14) }
+.grow .gshelf span { font-size:25px; flex:0 0 auto; animation: gfpop .4s var(--spring) }
+.grow .gshelf .lbl { font-size:11px; color:#2E6B2E; font-family:var(--disp); font-weight:700; opacity:.85; margin-right:4px; animation:none }
+
 /* ---------- ⚔️ もぐもぐクエスト（ひとくち＝1こうげき / ドラクエ風コマンドバトル）----------
    安全設計: てきは こうげきしてこない・HPは てきだけ・まけは 存在しない。
    食べるのが遅い子を急かさないため、時間制限・体力減少は いっさい作らない。 */
@@ -1153,7 +1205,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="prow">
         <div style="flex:1">
           <div class="lab">きょうの あそび</div>
-          <div class="desc" id="gameDesc">日替わり（毎日ちがう・8日で1巡）</div>
+          <div class="desc" id="gameDesc">日替わり（毎日ちがう・9日で1巡）</div>
           <div class="gchips" id="gameChips">
             <button data-p="auto">🗓 日替わり</button>
           </div>
@@ -1738,13 +1790,140 @@ const BATTLE = {
   }
 };
 
-const GAMES = [BATTLE, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
+/* ===== ゲーム9: 🌱 モグをそだてよう（育成）=====
+   もともとトップに常設していた育成メカニクスを、他ゲームと同じエンジンに載せ直したもの。
+   バトルと同じ画面構成（情景＋主役＋ゲージ＋メッセージ窓＋コレクション棚）で作ってある。
+   一口＝ごはんがモグの口へ飛び込む→もぐもぐ→せいちょうゲージが伸びる。
+   まれに「ぐんぐん！」で3倍伸びる（バトルの会心と同じ役割の変動報酬）。
+   4段階そだつと はなが さいて 図鑑へ。花の図鑑は食事をまたいで ずっと残る。
+   【ガードレール】キャラの弱化・病気・悲しい顔は作らない。食べない時は「止まる」だけ。 */
+const GROW_FOODS = [["🍚","ごはん"],["🥕","にんじん"],["🍅","トマト"],["🥦","ブロッコリー"],["🐟","おさかな"],
+                    ["🍗","おにく"],["🥚","たまご"],["🍠","おいも"],["🌽","とうもろこし"],["🥬","はっぱ"],
+                    ["🍄","きのこ"],["🫛","まめ"],["🥔","じゃがいも"],["🍞","パン"]];
+const GROW_NEED = [6,8,10,12];                      // 各段階に必要な せいちょうポイント（合計36≒28〜30口）
+const GROW_STAGE = [
+  {v:"egg",   name:"たまご", next:"うまれる",       evo:"うまれた！",        emo:"🥚"},
+  {v:"baby",  name:"ふたば", next:"おおきくなる",   evo:"おおきく なった！", emo:"🌱"},
+  {v:"child", name:"わかば", next:"つぼみに なる",  evo:"つぼみに なった！", emo:"🌿"},
+  {v:"teen",  name:"つぼみ", next:"はなが さく",    evo:"はなが さいた！",   emo:"🌷"}
+];
+const GROW_GOAL = 1;                                 // 1食のなかで はなが1つ さいたら ひと区切り
+const GROW = {
+  id:"grow", name:"モグをそだてよう", icon:"🌱", cls:"gf-grow", sub:"ごはんで モグが そだつ！",
+  init(){ return { idx:0, prog:0, bloom:0, flowers:[] }; },
+  status(g){ const s=GROW_STAGE[g.idx]; return "🌱 "+s.name+" "+g.prog+" / "+GROW_NEED[g.idx]; },
+  bite(g,n){
+    const food=RNG.pick(GROW_FOODS);
+    const big=RNG.chance(Math.min(0.30, 0.10+n*0.01));          // 口数が進むほど「ぐんぐん」が出やすい
+    let gain=big?3:1;
+    const need=GROW_NEED[g.idx];
+    if(g.prog+gain>need) gain=need-g.prog;                       // はみ出さない（次の段階に持ち越さない）
+    g.prog+=gain;
+    const ev={ emoji:food[0], fname:food[1], gain, big, evo:false, bloom:false, flower:null,
+               idx:g.idx, prog:g.prog, need, isNew:false, rare:big,
+               say: big?"ぐんぐん そだつ！":(food[1]+" もぐもぐ！") };
+    if(g.prog>=need){
+      if(g.idx<GROW_STAGE.length-1){
+        g.idx++; g.prog=0; ev.evo=true; ev.idx=g.idx; ev.prog=0; ev.need=GROW_NEED[g.idx];
+        ev.say=GROW_STAGE[g.idx-1].evo; ev.rare=true;
+      }else{
+        const fl=FLOWERS[((st.growBook||[]).length)%FLOWERS.length];
+        g.bloom++; g.flowers.push(fl); g.idx=0; g.prog=0;
+        const book=(st.growBook=st.growBook||[]);                // 花の図鑑は食事をまたいで残る
+        book.push(fl); ev.isNew = book.filter(x=>x===fl).length===1;
+        ev.bloom=true; ev.flower=fl; ev.idx=0; ev.prog=0; ev.need=GROW_NEED[0]; ev.rare=true;
+        ev.say="はなが さいたよ！";
+      }
+    }
+    return ev;
+  },
+  done(g){ return g.bloom>=GROW_GOAL; },
+  finale(g){ return {icon:g.flowers[g.flowers.length-1]||"🌸", title:"はなが さいた！",
+    msg:"ずかんの おはなが "+((st.growBook||[]).length)+"こに なったよ！"}; },
+  _pct(g){ return Math.min(100, g.prog/GROW_NEED[g.idx]*100); },
+  enter(host,g){ host.className="gf-stage grow";
+    const s=GROW_STAGE[g.idx], book=(st.growBook||[]);
+    host.innerHTML=
+      '<div class="gzone">'+
+        '<div class="scn">'+
+          '<img class="sun" src="'+SCN+'sun.png" alt="">'+
+          '<img class="cl w1" src="'+SCN+'cloud3.png" alt="">'+
+          '<img class="cl2 w2" src="'+SCN+'cloud7.png" alt="">'+
+          '<img class="gtree e1" src="'+SCN+'tree34.png" alt="">'+
+          '<img class="gtree e2" src="'+SCN+'tree06.png" alt="">'+
+        '</div><div class="hill"></div>'+
+        '<div class="scn fg">'+
+          '<img class="ggrass q1" src="'+SCN+'grass2.png" alt="">'+
+          '<img class="ggrass q2" src="'+SCN+'grass4.png" alt="">'+
+          '<img class="ggrass q3" src="'+SCN+'grass6.png" alt="">'+
+        '</div>'+
+        '<div class="gname">'+s.name+'</div>'+
+        '<div class="gbarwrap"><div class="gbar"><div class="gfill" style="width:'+this._pct(g)+'%"></div></div>'+
+          '<div class="gnum">'+g.prog+' / '+GROW_NEED[g.idx]+'</div></div>'+
+        '<div class="mogu">'+buildMascot(s.v)+'</div>'+
+      '</div>'+
+      '<div class="cmdwin"><div class="msg">'+(g.prog?("あと "+(GROW_NEED[g.idx]-g.prog)+"かいで "+s.next+"よ"):(s.name+" が まってるよ！"))+'</div></div>'+
+      '<div class="ghud"><span>🌱 だんかい '+(g.idx+1)+' / 4</span><span>🌸 ずかん '+book.length+'こ</span></div>'+
+      '<div class="gshelf"><span class="lbl">さいた おはな</span>'+book.slice(-14).map(f=>"<span>"+f+"</span>").join("")+'</div>';
+    host.dataset.stage=g.idx;
+    const sh=host.querySelector(".gshelf"); sh.scrollLeft=sh.scrollWidth; },
+  act(host,g,ev){
+    const self=this;
+    clearTimeout(this._t); const gen=this._gen=(this._gen||0)+1;
+    if(+host.dataset.stage !== ev.idx && !ev.evo && !ev.bloom){ this.enter(host,g); }  // 連打で段階がズレた時の追いつき
+    const zone=host.querySelector(".gzone"), mogu=host.querySelector(".mogu"),
+          fill=host.querySelector(".gfill"), num=host.querySelector(".gnum"),
+          msg=host.querySelector(".msg"), shelf=host.querySelector(".gshelf"),
+          hud=host.querySelector(".ghud"), nm=host.querySelector(".gname");
+    // ごはんが下から モグの口へ 飛び込む
+    const f=document.createElement("div"); f.className="gfood"; f.textContent=ev.emoji; zone.appendChild(f);
+    setTimeout(()=>f.remove(),720);
+    msg.textContent=ev.fname+" を たべた！";
+    setTimeout(()=>{
+      if(gen!==self._gen) return;
+      mogu.classList.remove("chomp"); void mogu.offsetWidth; mogu.classList.add("chomp");
+      soundEat();
+      const p=document.createElement("div"); p.className="gplus"+(ev.big?" big":"");
+      p.textContent="+"+ev.gain; zone.appendChild(p); setTimeout(()=>p.remove(),1000);
+      fill.style.width=(ev.prog/ev.need*100)+"%"; num.textContent=ev.prog+" / "+ev.need;
+      if(ev.big){ msg.textContent="ぐんぐん そだつ！ +"+ev.gain; fxBurst(host,50,52,["✨","⭐","💚"],12); soundRare(); }
+      else fxBurst(host,50,54,["✨"],4);
+
+      if(ev.evo){                                       // つぎの すがたへ
+        setTimeout(()=>{ if(gen!==self._gen) return;
+          nm.textContent=GROW_STAGE[ev.idx].name;
+          mogu.innerHTML=buildMascot(GROW_STAGE[ev.idx].v);
+          mogu.classList.remove("grew"); void mogu.offsetWidth; mogu.classList.add("grew");
+          host.dataset.stage=ev.idx;
+          fill.style.width="0%"; num.textContent="0 / "+ev.need;
+          hud.innerHTML='<span>🌱 だんかい '+(ev.idx+1)+' / 4</span><span>🌸 ずかん '+((st.growBook||[]).length)+'こ</span>';
+          msg.textContent=ev.say+" つぎは "+GROW_STAGE[ev.idx].next+"よ";
+          fxBurst(host,50,48,["🎉","✨","⭐","💛"],16); sfxLevel(); host.classList.add("shake");
+          setTimeout(()=>host.classList.remove("shake"),520);
+        }, 520);
+      }
+      if(ev.bloom){                                     // はなが さいた
+        setTimeout(()=>{ if(gen!==self._gen) return;
+          const b=document.createElement("div"); b.className="gbloom"; b.textContent=ev.flower;
+          zone.appendChild(b); setTimeout(()=>b.remove(),2400);
+          msg.textContent="はなが さいたよ！"+(ev.isNew?" ✨はじめての おはな！":"");
+          shelf.insertAdjacentHTML("beforeend","<span>"+ev.flower+"</span>"); shelf.scrollLeft=shelf.scrollWidth;
+          hud.innerHTML='<span>🌱 だんかい 1 / 4</span><span>🌸 ずかん '+((st.growBook||[]).length)+'こ</span>';
+          fxBurst(host,50,44,["🌸","✨","🎉","💛"],20); sfxBloom(); soundFanfare();
+          self._t=setTimeout(()=>{ if(gen===self._gen) self.enter(host,g); },1900);   // あたらしい たまご
+        }, 560);
+      }
+    }, 460);
+  }
+};
+
+const GAMES = [BATTLE, GROW, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
 
 
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function todaysGame(){
   if(st.gamePick && st.gamePick!=="auto"){ const g=GAMES.find(x=>x.id===st.gamePick); if(g) return g; }
-  return GAMES[((dayKey()%GAMES.length)+GAMES.length)%GAMES.length];   // 抽選ではなく日付順の巡回（8日で1巡）
+  return GAMES[((dayKey()%GAMES.length)+GAMES.length)%GAMES.length];   // 抽選ではなく日付順の巡回（9日で1巡）
 }
 /* あそびが変わったら、そのゲームの状態を新規に（1食で完結する区切り） */
 function ensureGame(){
@@ -1777,15 +1956,16 @@ const GESTURES = {
 
 const KEY="sodateru_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[] }; }
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[] }; }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return Object.assign(base(),d); }catch(e){} return base(); }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
 let st=load();
 let meal={active:false,startTs:0,bites:0,tickId:null};
 let camFailed=false;
 const $=s=>document.querySelector(s);
-/* 選んだゲームを画面の主役にする。育成キャラ(モグ)はトップに出さない（ユーザー要望）。
-   育成メカニクスは残してあり、true にすればキャラ主役UIに戻せる。 */
+/* 選んだゲームを画面の主役にする。育成キャラ(モグ)はトップに常設しない（ユーザー要望）。
+   育成そのものは 2026-07-28 に GROW（🌱 モグをそだてよう）として他ゲームと同じ選択肢に移した。
+   ここを true にすると昔の「トップに育成キャラ常設」UIに戻る（現在は使っていない）。 */
 const SHOW_PET=false;
 
 /* ---------- cute mascot (Mogu) ---------- */
@@ -2109,7 +2289,7 @@ const SFX_FILES = {
 const BGM_FILES = {
   battle:"battle_bgm.ogg", fishing:"fishing_bgm.ogg", sweets:"sweets_bgm.ogg",
   race:"race_bgm.ogg", board:"board_bgm.ogg", dig:"dig_bgm.ogg",
-  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg"
+  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg", grow:"grow_bgm.ogg"
 };
 const SFX_GAIN = { atk:0.5, atkCrit:0.6, hit:0.55, crit:0.7, boss:0.6, defeat:0.5, ally:0.55, levelup:0.55, clear:0.6, appear:0.45 };
 const buf={};                       // 名前 -> AudioBuffer（読み込めたものだけ入る）
@@ -2249,6 +2429,9 @@ const BGMS = {
   garden: { ms:440, // やさしい おはなメロディ
     mel:[4,7,9,7, 9,11,9,7, 5,9,11,9, 11,12,11,9, 7,9,11,14, 12,11,9,7, 5,7,9,7, 4,2,null,null],
     bass:[0,5,-3,5, 2,7,0,0] },
+  grow: { ms:450, // あたたかい そだてるメロディ（実音源が届くまでの合成フォールバック）
+    mel:[0,4,7,9, 7,4,5,null, 2,5,9,11, 9,5,7,null, 4,7,12,14, 12,9,7,4, 5,9,7,4, 0,null,null,null],
+    bass:[0,7,5,7, 3,5,0,0] },
   battle: { ms:265, // 勇ましい たたかいマーチ（速め・短調ぎみ）
     mel:[0,0,7,7, 8,7,5,3, 5,5,3,5, 7,null,0,null, 0,0,12,12, 10,8,7,5, 3,5,7,8, 7,3,0,null],
     bass:[0,0,7,7, 3,3,5,5] }
@@ -2305,7 +2488,7 @@ function renderParent(){
   $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
   const cur=todaysGame();
   $("#gameDesc").textContent = st.gamePick==="auto"
-    ? "日替わり（毎日ちがう・8日で1巡）／きょうは "+cur.icon+" "+cur.name
+    ? "日替わり（毎日ちがう・9日で1巡）／きょうは "+cur.icon+" "+cur.name
     : "いつも "+cur.icon+" "+cur.name;
   $("#gameChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.p===(st.gamePick||"auto")));
   const g=GESTURES[st.gesture]||GESTURES.peace;

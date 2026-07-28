@@ -39,6 +39,7 @@ CC0 は帰属表示（クレジット記載）が**不要**で、商用利用・
 | `dig_bgm.ogg` | 🦖 かせきはっくつ | "Mysterious Cave Theme Loop" — https://opengameart.org/content/mysterious-cave-theme-loop |
 | `rocket_bgm.ogg` | 🚀 うちゅうロケット | "Space Music Out There" — https://opengameart.org/content/space-music-out-there |
 | `garden_bgm.ogg` | 🌷 おはなガーデン | "Flowerbed Fields Loop" — https://opengameart.org/content/flowerbed-fields-loop |
+| `grow_bgm.ogg` | 🌱 モグをそだてよう | "Children's March Theme" — https://opengameart.org/content/childrens-march-theme |
 
 **BGMは選ばれたゲームの分だけ遅延で読み込む**（`loadBGM()`）。全部を起動時に読むと、
 食卓のWi-Fiが弱いときに待たされるため。届くまでは従来の合成メロディが鳴り、
