@@ -40,6 +40,10 @@ CC0 は帰属表示（クレジット記載）が**不要**で、商用利用・
 | `rocket_bgm.ogg` | 🚀 うちゅうロケット | "Space Music Out There" — https://opengameart.org/content/space-music-out-there |
 | `garden_bgm.ogg` | 🌷 おはなガーデン | "Flowerbed Fields Loop" — https://opengameart.org/content/flowerbed-fields-loop |
 | `grow_bgm.ogg` | 🌱 モグをそだてよう | "Children's March Theme" — https://opengameart.org/content/childrens-march-theme |
+| `spa_bgm.ogg` | 🛁 どうぶつスパ | "Happy Lullaby" — https://opengameart.org/content/happy-lullaby-song17 |
+| `ride_bgm.ogg` | 🚌 のりものパレード | "Overworld Theme" — https://opengameart.org/content/overworld-theme-0 |
+| `dress_bgm.ogg` | 👗 きせかえコレクション | "Catsong" — https://opengameart.org/content/catsong |
+| （ファイル無し） | 🎼 おんがくたい | **実音源は使わない**。なかまの人数ぶん WebAudio の声部が増えるのが報酬そのものなので、合成のまま |
 
 **BGMは選ばれたゲームの分だけ遅延で読み込む**（`loadBGM()`）。全部を起動時に読むと、
 食卓のWi-Fiが弱いときに待たされるため。届くまでは従来の合成メロディが鳴り、

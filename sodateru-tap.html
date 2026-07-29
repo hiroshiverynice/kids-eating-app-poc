@@ -966,6 +966,46 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .scn .cl2 { animation: drift 46s ease-in-out infinite alternate-reverse }
 @keyframes drift { from{transform:translateX(-9%)} to{transform:translateX(9%)} }
 
+/* ---------- 🎼 おんがくたい（報酬が「音の変化」＝耳で分かる唯一のゲーム）---------- */
+.gf-music { background: linear-gradient(180deg,#EFE4FF,#C6ADEA) }
+.gf-music .gf-title,.gf-music .gf-head { color:#4A2A78 }
+.gf-stage.music { display:flex; flex-direction:column;
+  background: radial-gradient(120% 80% at 50% 8%, #6A4FA8 0%, #3E2C6E 58%, #281D4C 100%) }
+.music .mzone { position:relative; flex:1; display:flex; align-items:flex-end; justify-content:center; overflow:hidden }
+.music .mzone.beat { animation: mbeat .4s }
+@keyframes mbeat { 0%,100%{transform:scale(1)} 40%{transform:scale(1.015)} }
+.music .mcurtain { position:absolute; top:0; bottom:0; width:16%; z-index:5;
+  background: linear-gradient(90deg,#8E2740,#B8384F 60%,#7A2038);
+  box-shadow: inset -6px 0 12px rgba(0,0,0,.35) }
+.music .mcurtain.l { left:0; border-radius:0 0 22px 0 }
+.music .mcurtain.r { right:0; transform:scaleX(-1); border-radius:0 0 22px 0 }
+.music .mlight { position:absolute; left:50%; top:-6%; width:74%; height:96%; transform:translateX(-50%); z-index:1;
+  background: radial-gradient(60% 70% at 50% 0%, rgba(255,240,190,.34), rgba(255,240,190,0) 72%) }
+.music .mstage { position:relative; z-index:3; width:72%; padding-bottom:10px }
+.music .mband { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:center; gap:4px 6px; min-height:98px }
+.music .mmem { font-size:34px; line-height:1; filter: drop-shadow(0 5px 8px rgba(0,0,0,.45)) }
+.music .mmem.join { animation: mjoin .7s var(--spring) }
+@keyframes mjoin { 0%{transform:translateY(40px) scale(.4);opacity:0} 65%{transform:translateY(-8px) scale(1.2);opacity:1} 100%{transform:translateY(0) scale(1)} }
+.music .mband.play .mmem { animation: msway 1s ease-in-out 3 }
+@keyframes msway { 0%,100%{transform:translateY(0) rotate(0)} 30%{transform:translateY(-8px) rotate(-7deg)} 70%{transform:translateY(-4px) rotate(6deg)} }
+.music .mfloor { height:14px; border-radius:8px 8px 0 0; margin-top:4px;
+  background: linear-gradient(180deg,#6B4E2E,#4B3620); box-shadow: 0 -3px 0 rgba(255,255,255,.12) inset }
+.music .mnotes { position:absolute; inset:0; z-index:4; pointer-events:none; overflow:hidden }
+.music .mnote { position:absolute; bottom:18%; font-size:20px; opacity:0; color:#FFE9A8;
+  animation: mfloat 2.2s ease-out forwards }
+@keyframes mfloat { 0%{transform:translateY(0) rotate(0);opacity:0}
+                    18%{opacity:1}
+                    100%{transform:translateY(-150px) rotate(22deg);opacity:0} }
+.music .cmdwin { margin:6px 8px 4px; padding:8px 12px; min-height:46px; display:flex; align-items:center;
+  background:#231A44; border:3px solid #FFE9A8; border-radius:9px; box-shadow:0 4px 10px rgba(0,0,0,.35) }
+.music .msg { font-family:var(--disp); font-weight:800; font-size:14px; color:#FFF3C4; line-height:1.35 }
+.music .mhud { display:flex; align-items:center; gap:10px; padding:0 12px 3px;
+  font-family:var(--disp); font-weight:800; font-size:12px; color:#FFE9A8 }
+.music .mshelf { display:flex; align-items:center; gap:2px; overflow-x:auto; overflow-y:hidden;
+  padding:4px 8px 7px; min-height:42px; background:rgba(0,0,0,.26) }
+.music .mshelf span { font-size:24px; flex:0 0 auto; animation: gfpop .4s var(--spring) }
+.music .mshelf .lbl { font-size:11px; color:#FFE9A8; font-family:var(--disp); font-weight:700; opacity:.85; margin-right:4px; animation:none }
+
 /* ---------- 👗 きせかえコレクション（6〜8歳女児向け・そろえて完成させる）---------- */
 .gf-dress { background: linear-gradient(180deg,#FFE7F3,#F5BEDC) }
 .gf-dress .gf-title,.gf-dress .gf-head { color:#8E2E5B }
@@ -1411,7 +1451,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="prow">
         <div style="flex:1">
           <div class="lab">きょうの あそび</div>
-          <div class="desc" id="gameDesc">日替わり（毎日ちがう・12日で1巡）</div>
+          <div class="desc" id="gameDesc">日替わり（毎日ちがう・13日で1巡）</div>
           <div class="gchips" id="gameChips">
             <button data-p="auto">🗓 日替わり</button>
           </div>
@@ -2429,14 +2469,104 @@ const DRESS = {
   }
 };
 
-const GAMES = [BATTLE, GROW, SPA, RIDE, DRESS, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
+/* ===== ゲーム13: 🎼 おんがくたい（既存12本に無い「音そのものが報酬」）=====
+   他のゲームの報酬は すべて“見た目”だった。ここだけは**耳で分かる報酬**にする。
+   一口ごとに 楽器の なかまが1人ふえ、そのぶん **BGMの声部が実際に増えて演奏が厚くなる**。
+   （ensembleN を bgmStep が読んで、和音・オクターブ上・アルペジオ・リズムを足していく） */
+const BAND_MEMBERS = [
+  ["🥁","ドラム",     "square",  0.5,  55],
+  ["🎸","ギター",     "sawtooth",1,    130.81],
+  ["🎹","ピアノ",     "triangle",1,    261.63],
+  ["🎻","バイオリン", "sine",    2,    392.00],
+  ["🎺","トランペット","square",  2,    523.25],
+  ["🎷","サックス",   "sawtooth",1,    349.23],
+  ["🪗","アコーディオン","triangle",1,  293.66],
+  ["🪕","バンジョー", "triangle",2,    440.00],
+  ["🪘","たいこ",     "sine",    0.5,  73.42],
+  ["🔔","ベル",       "sine",    3,    1046.5],
+  ["🎤","ボーカル",   "triangle",2,    659.25],
+  ["🎼","しきしゃ",   "sine",    2,    523.25]
+];
+const BAND_GOAL = 8;                 // 8にんで がくだん かんせい
+let ensembleN = 0;                   // いま鳴っている声部の数（bgmStep が読む）
+const MUSIC = {
+  id:"music", name:"おんがくたい", icon:"🎼", cls:"gf-music", sub:"なかまが ふえると 音が ふえる！",
+  init(){ return { band:[], done:0 }; },
+  status(g){ return "🎼 "+g.band.length+" / "+BAND_GOAL; },
+  bite(g,n){
+    const pool=BAND_MEMBERS.filter(m=>!g.band.some(b=>b.n===m[1]));
+    const m=RNG.pick(pool.length?pool:BAND_MEMBERS);
+    g.band.push({e:m[0], n:m[1]});
+    const book=(st.musicBook=st.musicBook||[]);
+    const isNew=!book.includes(m[1]); if(isNew) book.push(m[1]);
+    const complete=g.band.length>=BAND_GOAL;
+    if(complete) g.done++;
+    return { emoji:m[0], mname:m[1], wave:m[2], oct:m[3], hz:m[4],
+             count:g.band.length, isNew, complete, rare:isNew,
+             say: complete?"がくだん かんせい！":(m[1]+" が なかまに なったよ！") };
+  },
+  done(g){ return g.done>=1; },
+  finale(g){ return {icon:"🎼", title:"えんそう かんせい！",
+    msg:"がっきの なかまが "+((st.musicBook||[]).length)+"しゅるいに なったよ！"}; },
+  enter(host,g){ host.className="gf-stage music";
+    ensembleN=g.band.length;                                   // 声部数を演奏エンジンへ反映
+    const book=(st.musicBook||[]);
+    host.innerHTML=
+      '<div class="mzone">'+
+        '<div class="mcurtain l"></div><div class="mcurtain r"></div>'+
+        '<div class="mlight"></div>'+
+        '<div class="mstage">'+
+          '<div class="mband">'+g.band.map(b=>'<span class="mmem">'+b.e+'</span>').join("")+'</div>'+
+          '<div class="mfloor"></div>'+
+        '</div>'+
+        '<div class="mnotes"></div>'+
+      '</div>'+
+      '<div class="cmdwin"><div class="msg">'+(g.band.length?("あと "+(BAND_GOAL-g.band.length)+"にんで がくだん かんせい！"):"だれか こないかな？")+'</div></div>'+
+      '<div class="mhud"><span>🎼 メンバー '+g.band.length+' / '+BAND_GOAL+'</span><span>🎵 ずかん '+book.length+'しゅるい</span></div>'+
+      '<div class="mshelf"><span class="lbl">がっき</span>'+
+        book.slice(-14).map(nm=>{ const f=BAND_MEMBERS.find(x=>x[1]===nm); return "<span>"+(f?f[0]:"🎵")+"</span>"; }).join("")+'</div>';
+  },
+  act(host,g,ev){
+    const self=this;
+    clearTimeout(this._t); const gen=this._gen=(this._gen||0)+1;
+    const band=host.querySelector(".mband"), msg=host.querySelector(".msg"),
+          hud=host.querySelector(".mhud"), shelf=host.querySelector(".mshelf"),
+          notes=host.querySelector(".mnotes"), zone=host.querySelector(".mzone");
+    ensembleN=ev.count;                                        // ここで演奏が1声ぶん厚くなる
+    const s=document.createElement("span"); s.className="mmem join"; s.textContent=ev.emoji;
+    band.appendChild(s);
+    msg.textContent=ev.mname+" が なかまに なったよ！"+(ev.isNew?" ✨はじめて！":"");
+    sfxJoin(ev);                                               // その楽器の音で ひとふし鳴る
+    // おんぷが ふわっと 舞う（人数が多いほど たくさん）
+    for(let i=0;i<Math.min(10,3+ev.count);i++){
+      const nnote=document.createElement("span"); nnote.className="mnote";
+      nnote.textContent=RNG.pick(["🎵","🎶","♪","♬"]);
+      nnote.style.left=(12+Math.random()*76)+"%";
+      nnote.style.animationDelay=(Math.random()*0.5).toFixed(2)+"s";
+      notes.appendChild(nnote); setTimeout(()=>nnote.remove(),2200);
+    }
+    zone.classList.remove("beat"); void zone.offsetWidth; zone.classList.add("beat");
+    hud.innerHTML='<span>🎼 メンバー '+ev.count+' / '+BAND_GOAL+'</span><span>🎵 ずかん '+((st.musicBook||[]).length)+'しゅるい</span>';
+    if(ev.isNew){ shelf.insertAdjacentHTML("beforeend","<span>"+ev.emoji+"</span>"); shelf.scrollLeft=shelf.scrollWidth; }
+    if(ev.complete){
+      setTimeout(()=>{ if(gen!==self._gen) return;
+        msg.textContent="がくだん かんせい！ みんなで えんそう！";
+        band.classList.remove("play"); void band.offsetWidth; band.classList.add("play");
+        fxBurst(host,50,44,["🎵","🎶","✨","🎉","⭐"],24);
+        sfxEnsemble();                                         // 全員ぶんの和音で しめる
+      }, 420);
+    }
+  }
+};
+
+const GAMES = [BATTLE, GROW, SPA, RIDE, DRESS, MUSIC, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
 
 
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function todaysGame(){
   if(st.gamePick && st.gamePick!=="auto"){ const g=GAMES.find(x=>x.id===st.gamePick); if(g) return g; }
   const og=orderedGames();                                             // 日替わりも おすすめ順で回す
-  return og[((dayKey()%og.length)+og.length)%og.length];               // 抽選ではなく日付順の巡回（12日で1巡）
+  return og[((dayKey()%og.length)+og.length)%og.length];               // 抽選ではなく日付順の巡回（13日で1巡）
 }
 /* あそびが変わったら、そのゲームの状態を新規に（1食で完結する区切り） */
 /* あそびを かえても、そのゲームの途中経過は残しておく。
@@ -2460,10 +2590,10 @@ function ensureGame(){
    ・3〜5歳は「お世話(nurturing)」の欲求がピーク。複雑なルールと遅延報酬は処理できない
    ・6〜8歳でルール理解と自己ベスト志向が出て、バトルの戦略性を評価しはじめる
    ・性差は統計的な傾向にすぎないので、並び順を変えるだけにして選択肢は減らさない */
-const REC_YOUNG = ["grow","spa","ride","garden","sweets","dress","fishing","race","board","dig","rocket","battle"];
-const REC_OLDER = ["battle","board","dig","rocket","race","fishing","dress","ride","grow","spa","sweets","garden"];
-const REC_BOY   = ["battle","ride","race","rocket","dig","board","fishing","spa","grow","sweets","dress","garden"];
-const REC_GIRL  = ["dress","spa","grow","sweets","garden","fishing","board","ride","race","dig","rocket","battle"];
+const REC_YOUNG = ["grow","spa","ride","garden","music","sweets","dress","fishing","race","board","dig","rocket","battle"];
+const REC_OLDER = ["battle","board","dig","rocket","race","music","fishing","dress","ride","grow","spa","sweets","garden"];
+const REC_BOY   = ["battle","ride","race","rocket","dig","board","music","fishing","spa","grow","sweets","dress","garden"];
+const REC_GIRL  = ["dress","music","spa","grow","sweets","garden","fishing","board","ride","race","dig","rocket","battle"];
 function recOrder(){
   const ids=GAMES.map(g=>g.id);
   const byAge = st.age==null ? null : (st.age<=5 ? REC_YOUNG : REC_OLDER);
@@ -2501,7 +2631,7 @@ const GESTURES = {
 
 const KEY="sodateru_tap_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[], spaBook:[], rideBook:[], dressBook:[],
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[], spaBook:[], rideBook:[], dressBook:[], musicBook:[],
   gsAll:{},            // ゲームごとの途中経過（あそびを かえても つづきから）
   kidPick:true,        // こどもが自分で あそびを えらべるか（親メニューで切替）
   age:null, sex:null, onboarded:false }; }   // オンボーディングで聞く（どちらも「こたえない」可）
@@ -2961,6 +3091,15 @@ function noiseScrub(big){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.
 function sfxHorn(rare){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;   // クラクション／サイレン
   if(rare){ [740,988,740,988].forEach((f,i)=>tone(f,t+i*0.16,0.15,'square',0.09)); }
   else { tone(392,t,0.13,'square',0.08); tone(330,t+0.06,0.16,'square',0.07); noise(t,0.1,0.05,900); } }
+function sfxJoin(ev){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;   // 加わった楽器で ひとふし
+  const base=ev.hz*(ev.oct||1);
+  [0,4,7].forEach((iv,i)=>tone(base*Math.pow(2,iv/12), t+i*0.09, 0.26, ev.wave||'triangle', 0.075));
+  if(ev.wave==='square'||ev.wave==='sawtooth') noise(t,0.06,0.05,1200); }
+function sfxEnsemble(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;       // 全員そろっての和音
+  const ch=[261.63,329.63,392.00,523.25,659.25,783.99];
+  ch.forEach((f,i)=>{ tone(f,t,0.9,'triangle',0.055); tone(f*2,t+0.05*i,0.7,'sine',0.022); });
+  [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,t+0.55+i*0.1,0.5,'square',0.06));
+  noise(t,0.3,0.09,600); }
 function sfxBattleBoss(){ if(play("boss")) return; sfxBoss(); }                                                               // ボス出現（釣りの「ぬし」とは別音）
 
 /* ---------- ゲームごとのBGM（WebAudio・メロディ＋ベース、それぞれ別の曲）---------- */
@@ -2987,6 +3126,9 @@ const BGMS = {
   garden: { ms:440, // やさしい おはなメロディ
     mel:[4,7,9,7, 9,11,9,7, 5,9,11,9, 11,12,11,9, 7,9,11,14, 12,11,9,7, 5,7,9,7, 4,2,null,null],
     bass:[0,5,-3,5, 2,7,0,0] },
+  music: { ms:420, // おんがくたい: なかまが増えると bgmStep が声部を足していく土台メロディ
+    mel:[0,4,7,4, 5,9,5,2, 7,11,7,4, 9,5,2,0, 4,7,9,7, 5,9,12,9, 7,4,2,4, 0,null,null,null],
+    bass:[0,5,7,5, 3,7,0,0] },
   dress: { ms:400, // かわいい きらきらメロディ（実音源が届くまでの合成フォールバック）
     mel:[12,16,19,16, 14,17,14,null, 12,16,21,19, 17,14,12,null, 11,14,19,17, 16,14,12,11, 9,12,16,12, 9,null,null,null],
     bass:[0,5,7,5, -1,4,7,0] },
@@ -3018,6 +3160,17 @@ function bgmStep(){ if(!bgm.on||!audioCtx) return; const t=audioCtx.currentTime,
   const m=curB.mel[bgm.i%curB.mel.length];
   if(m!=null){ const hz=261.63*Math.pow(2,m/12); tone(hz,t,dur*0.92,'triangle',0.055); tone(hz*2,t,dur*0.4,'sine',0.012); }
   if(bgm.i%2===0){ const b=curB.bass[(bgm.i/2)%curB.bass.length]; if(b!=null) tone(261.63*Math.pow(2,(b-12)/12),t,dur*1.7,'sine',0.05); }
+  /* 🎼 おんがくたい だけは「なかまの人数ぶん 声部が増える」＝耳で分かる報酬にする */
+  if(bgm.game==="music" && ensembleN>0 && m!=null){
+    const hz=261.63*Math.pow(2,m/12);
+    if(ensembleN>=2) tone(hz*1.5,       t, dur*0.8,  'sine',     0.030);   // 5度のハモリ
+    if(ensembleN>=3) tone(hz*1.26,      t, dur*0.8,  'triangle', 0.024);   // 3度のハモリ
+    if(ensembleN>=4) tone(hz*2,         t, dur*0.5,  'square',   0.016);   // オクターブ上
+    if(ensembleN>=5) tone(hz*0.5,       t, dur*1.6,  'sine',     0.038);   // 低音の厚み
+    if(ensembleN>=6) tone(hz*3,   t+dur*0.5, dur*0.35,'sine',    0.014);   // きらめき
+    if(ensembleN>=7) noise(t, 0.05, 0.030, 4000);                          // シャカシャカ（リズム）
+    if(ensembleN>=8 && bgm.i%2===1) noise(t, 0.09, 0.045, 900);            // うらのドラム
+  }
   bgm.i++; }
 function startBGM(){ if(bgm.on||!st.bgm) return; if(!ensureAudio()) return; loadAudioFiles(); bgm.on=true; startBGMEngine(); }
 function stopBGM(){ bgm.on=false; clearInterval(bgm.id); bgm.id=null; stopBGMFile(); }
@@ -3055,7 +3208,7 @@ function renderParent(){
   $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
   const cur=todaysGame();
   $("#gameDesc").textContent = st.gamePick==="auto"
-    ? "日替わり（毎日ちがう・12日で1巡）／きょうは "+cur.icon+" "+cur.name
+    ? "日替わり（毎日ちがう・13日で1巡）／きょうは "+cur.icon+" "+cur.name
     : "いつも "+cur.icon+" "+cur.name;
   $("#gameChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.p===(st.gamePick||"auto")));
   $("#kidPickDesc").textContent=st.kidPick?"子ども画面に「🔄 かえる」ボタンを出す":"おうちの人だけが かえられる";

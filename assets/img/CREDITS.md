@@ -29,6 +29,14 @@
 出典: Kenney "Planets" — https://kenney.nl/assets/planets （CC0）
 元は1280px・1枚280KBあるので、**160pxへ縮小して同梱している**（2.8MB → 310KB）。
 
+## どうぶつ（`animals/`）
+
+🛁 どうぶつスパ の10ひき（ぞう・きりん・かば・さる・パンダ・オウム・ペンギン・ぶた・うさぎ・へび）。
+
+出典: Kenney "Animal Pack" — https://kenney.nl/assets/animal-pack （CC0）の Round 版。
+表示サイズに合わせて最大200pxへ縮小済み。よごれ→ピカピカは CSS フィルタで表現しているので
+1ひきにつき画像は1枚だけ。
+
 ## モンスター（`monsters/`）
 
 ⚔️ もぐもぐクエスト のモンスター22体（＋たおれた顔22枚 = 計44ファイル）。
