@@ -966,6 +966,44 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .scn .cl2 { animation: drift 46s ease-in-out infinite alternate-reverse }
 @keyframes drift { from{transform:translateX(-9%)} to{transform:translateX(9%)} }
 
+/* ---------- 🚌 のりものパレード（3〜5歳・因果が一目で分かる形）---------- */
+.gf-ride { background: linear-gradient(180deg,#DCEEFF,#A9CDEF) }
+.gf-ride .gf-title,.gf-ride .gf-head { color:#1F3F6B }
+.gf-stage.ride { display:flex; flex-direction:column;
+  background: linear-gradient(180deg,#CFE9FF 0%,#B7DEF7 46%,#CFE3B8 60%,#AFD495 100%) }
+.ride .rzone { position:relative; flex:1; overflow:hidden }
+.ride .scn .sun { top:5%; right:8%; width:42px; opacity:.9 }
+.ride .scn .cl { top:9%; left:5%; width:54px; opacity:.95 }
+.ride .scn .v2 { top:19%; left:58%; width:42px; opacity:.8 }
+.ride .scn .hs { bottom:44%; width:52px }
+.ride .scn .h1 { left:6% } .ride .scn .h2 { right:9%; width:34px; bottom:45% }
+.ride .scn .rtr { bottom:45%; width:34px }
+.ride .scn .v3 { left:34% } .ride .scn .v4 { right:34%; width:28px }
+/* どうろ */
+.ride .road { position:absolute; left:0; right:0; bottom:0; height:42%; z-index:3;
+  background: linear-gradient(180deg,#5E6470,#474D57);
+  box-shadow: inset 0 5px 0 rgba(255,255,255,.18) }
+.ride .lane-mark { position:absolute; left:0; right:0; top:22%; height:5px;
+  background: repeating-linear-gradient(90deg,#FFE9A8 0 22px, transparent 22px 44px); opacity:.85 }
+.ride .parade { position:absolute; left:0; right:0; bottom:12%; display:flex; align-items:flex-end; gap:2px;
+  overflow-x:auto; overflow-y:hidden; padding:0 10px; scroll-behavior:smooth }
+.ride .parade::-webkit-scrollbar { display:none }
+.ride .ride { font-size:38px; flex:0 0 auto; line-height:1; filter: drop-shadow(0 4px 6px rgba(0,0,0,.3)) }
+.ride .ride.rare { font-size:44px; filter: drop-shadow(0 0 10px #FFD35C) drop-shadow(0 4px 6px rgba(0,0,0,.3)) }
+.ride .ride.comein { animation: rideIn .62s var(--spring) }
+@keyframes rideIn { 0%{transform:translateX(120px) scale(.7);opacity:0} 70%{transform:translateX(-6px) scale(1.1);opacity:1} 100%{transform:translateX(0) scale(1)} }
+.ride .parade.cheer { animation: rideCheer .9s }
+@keyframes rideCheer { 0%,100%{transform:translateY(0)} 25%{transform:translateY(-7px)} 55%{transform:translateY(-3px)} }
+.ride .cmdwin { margin:6px 8px 4px; padding:8px 12px; min-height:46px; display:flex; align-items:center;
+  background:#F3F8FF; border:3px solid #3E6BA8; border-radius:9px; box-shadow:0 4px 10px rgba(20,50,100,.18) }
+.ride .msg { font-family:var(--disp); font-weight:800; font-size:14px; color:#1F3F6B; line-height:1.35 }
+.ride .rhud { display:flex; align-items:center; gap:10px; padding:0 12px 3px;
+  font-family:var(--disp); font-weight:800; font-size:12px; color:#1F3F6B }
+.ride .rshelf { display:flex; align-items:center; gap:2px; overflow-x:auto; overflow-y:hidden;
+  padding:4px 8px 7px; min-height:42px; background:rgba(31,63,107,.13) }
+.ride .rshelf span { font-size:24px; flex:0 0 auto; animation: gfpop .4s var(--spring) }
+.ride .rshelf .lbl { font-size:11px; color:#1F3F6B; font-family:var(--disp); font-weight:700; opacity:.85; margin-right:4px; animation:none }
+
 /* ---------- 🛁 どうぶつスパ（3〜5歳の「お世話」。バトル/育成と同じ画面構成）---------- */
 .gf-spa { background: linear-gradient(180deg,#DFF3FB,#A7DCEF) }
 .gf-spa .gf-title,.gf-spa .gf-head { color:#0F5A78 }
@@ -1324,7 +1362,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="prow">
         <div style="flex:1">
           <div class="lab">きょうの あそび</div>
-          <div class="desc" id="gameDesc">日替わり（毎日ちがう・10日で1巡）</div>
+          <div class="desc" id="gameDesc">日替わり（毎日ちがう・11日で1巡）</div>
           <div class="gchips" id="gameChips">
             <button data-p="auto">🗓 日替わり</button>
           </div>
@@ -2170,14 +2208,93 @@ const SPA = {
 /* どろ汚れ: きれいになるほど フィルタが薄れて 本来の色に戻る */
 function spaDirt(r){ const d=Math.max(0,1-r); return "sepia("+(d*0.75).toFixed(2)+") brightness("+(1-d*0.28).toFixed(2)+") saturate("+(1-d*0.45).toFixed(2)+")"; }
 
-const GAMES = [BATTLE, GROW, SPA, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
+/* ===== ゲーム11: 🚌 のりものパレード（3〜5歳・とくに男児の穴を埋める）=====
+   ルール理解ゼロ・因果が一目で分かる・種類の多さがそのまま楽しさになる形。
+   のりものは「種類の多さが遊びの核」なので、あえて絵文字で数をそろえ、
+   道路・空・街並みの情景だけをCC0スプライトで作り込む
+   （2026-07-27の結論=スプライトが勝つのは「主役1体」と「情景」。種類勝負は絵文字が勝つ）。 */
+const RIDES = [
+  ["🚌","バス"],["🚗","じどうしゃ"],["🚕","タクシー"],["🚚","トラック"],["🚛","おおがたトラック"],
+  ["🚐","ワゴン"],["🛻","ピックアップ"],["🚜","トラクター"],["🚲","じてんしゃ"],["🛵","バイク"],
+  ["🚙","ジープ"],["🛺","オートさんりん"]
+];
+const RIDES_RARE = [
+  ["🚒","しょうぼうしゃ"],["🚑","きゅうきゅうしゃ"],["🚓","パトカー"],
+  ["🚂","きかんしゃ"],["🚁","ヘリコプター"],["🚀","ロケット"]
+];
+const RIDE_GOAL = 12;                 // 12だいで パレード かんせい
+const RIDE = {
+  id:"ride", name:"のりものパレード", icon:"🚌", cls:"gf-ride", sub:"1だいずつ ふえていくよ！",
+  init(){ return { line:[], done:0 }; },
+  status(g){ return "🚌 "+g.line.length+" / "+RIDE_GOAL; },
+  bite(g,n){
+    const rare=RNG.chance(Math.min(0.28, 0.10+n*0.01));
+    const r=RNG.pick(rare?RIDES_RARE:RIDES);
+    g.line.push({e:r[0], n:r[1], rare:rare});
+    const book=(st.rideBook=st.rideBook||[]);
+    const isNew=!book.includes(r[1]); if(isNew) book.push(r[1]);
+    const complete=g.line.length>=RIDE_GOAL;
+    if(complete) g.done++;
+    return { emoji:r[0], rname:r[1], rare, isNew, complete, count:g.line.length,
+             say: rare?(r[1]+" だ！ すごい！"):(r[1]+" が きたよ！") };
+  },
+  done(g){ return g.done>=1; },
+  finale(g){ return {icon:"🚌", title:"パレード かんせい！",
+    msg:"のりもの ずかんが "+((st.rideBook||[]).length)+"しゅるいに なったよ！"}; },
+  _shelf(){ const book=(st.rideBook||[]); const all=RIDES.concat(RIDES_RARE);
+    return book.slice(-16).map(nm=>{ const f=all.find(x=>x[1]===nm); return "<span>"+(f?f[0]:"🚗")+"</span>"; }).join(""); },
+  enter(host,g){ host.className="gf-stage ride";
+    const book=(st.rideBook||[]);
+    host.innerHTML=
+      '<div class="rzone">'+
+        '<div class="scn">'+
+          '<img class="sun" src="'+SCN+'sun.png" alt="">'+
+          '<img class="cl v1" src="'+SCN+'cloud3.png" alt="">'+
+          '<img class="cl2 v2" src="'+SCN+'cloud7.png" alt="">'+
+          '<img class="hs h1" src="'+SCN+'house_beige_front.png" alt="">'+
+          '<img class="hs h2" src="'+SCN+'tower_grey.png" alt="">'+
+          '<img class="rtr v3" src="'+SCN+'tree34.png" alt="">'+
+          '<img class="rtr v4" src="'+SCN+'tree06.png" alt="">'+
+        '</div>'+
+        '<div class="road"><div class="lane-mark"></div>'+
+          '<div class="parade">'+g.line.map(r=>'<span class="ride'+(r.rare?" rare":"")+'">'+r.e+'</span>').join("")+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="cmdwin"><div class="msg">'+(g.line.length?("あと "+(RIDE_GOAL-g.line.length)+"だいで パレード かんせい！"):"のりものが やってくるよ！")+'</div></div>'+
+      '<div class="rhud"><span>🚌 パレード '+g.line.length+' / '+RIDE_GOAL+'</span><span>📗 ずかん '+book.length+'しゅるい</span></div>'+
+      '<div class="rshelf"><span class="lbl">ずかん</span>'+this._shelf()+'</div>';
+    const pr=host.querySelector(".parade"); pr.scrollLeft=pr.scrollWidth; },
+  act(host,g,ev){
+    const self=this;
+    clearTimeout(this._t); const gen=this._gen=(this._gen||0)+1;
+    const parade=host.querySelector(".parade"), msg=host.querySelector(".msg"),
+          hud=host.querySelector(".rhud"), shelf=host.querySelector(".rshelf");
+    const s=document.createElement("span"); s.className="ride comein"+(ev.rare?" rare":"");
+    s.textContent=ev.emoji; parade.appendChild(s); parade.scrollLeft=parade.scrollWidth;
+    msg.textContent=ev.rname+" が きたよ！"+(ev.isNew?" ✨はじめて！":"");
+    sfxHorn(ev.rare);
+    if(ev.rare){ fxBurst(host,50,62,["✨","⭐","🎉"],14); soundRare(); }
+    else fxBurst(host,74,68,["💨"],4);
+    hud.innerHTML='<span>🚌 パレード '+ev.count+' / '+RIDE_GOAL+'</span><span>📗 ずかん '+((st.rideBook||[]).length)+'しゅるい</span>';
+    if(ev.isNew){ shelf.insertAdjacentHTML("beforeend","<span>"+ev.emoji+"</span>"); shelf.scrollLeft=shelf.scrollWidth; }
+    if(ev.complete){
+      setTimeout(()=>{ if(gen!==self._gen) return;
+        msg.textContent="パレード かんせい！ ぜんぶで "+RIDE_GOAL+"だい！";
+        fxBurst(host,50,56,["🎉","🎊","✨","⭐"],22); soundFanfare();
+        parade.classList.remove("cheer"); void parade.offsetWidth; parade.classList.add("cheer");
+      }, 420);
+    }
+  }
+};
+
+const GAMES = [BATTLE, GROW, SPA, RIDE, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
 
 
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function todaysGame(){
   if(st.gamePick && st.gamePick!=="auto"){ const g=GAMES.find(x=>x.id===st.gamePick); if(g) return g; }
   const og=orderedGames();                                             // 日替わりも おすすめ順で回す
-  return og[((dayKey()%og.length)+og.length)%og.length];               // 抽選ではなく日付順の巡回（10日で1巡）
+  return og[((dayKey()%og.length)+og.length)%og.length];               // 抽選ではなく日付順の巡回（11日で1巡）
 }
 /* あそびが変わったら、そのゲームの状態を新規に（1食で完結する区切り） */
 /* あそびを かえても、そのゲームの途中経過は残しておく。
@@ -2201,10 +2318,10 @@ function ensureGame(){
    ・3〜5歳は「お世話(nurturing)」の欲求がピーク。複雑なルールと遅延報酬は処理できない
    ・6〜8歳でルール理解と自己ベスト志向が出て、バトルの戦略性を評価しはじめる
    ・性差は統計的な傾向にすぎないので、並び順を変えるだけにして選択肢は減らさない */
-const REC_YOUNG = ["grow","spa","garden","sweets","fishing","race","board","dig","rocket","battle"];
-const REC_OLDER = ["battle","board","dig","rocket","race","fishing","grow","spa","sweets","garden"];
-const REC_BOY   = ["battle","race","rocket","dig","board","fishing","spa","grow","sweets","garden"];
-const REC_GIRL  = ["spa","grow","sweets","garden","fishing","board","race","dig","rocket","battle"];
+const REC_YOUNG = ["grow","spa","ride","garden","sweets","fishing","race","board","dig","rocket","battle"];
+const REC_OLDER = ["battle","board","dig","rocket","race","fishing","ride","grow","spa","sweets","garden"];
+const REC_BOY   = ["battle","ride","race","rocket","dig","board","fishing","spa","grow","sweets","garden"];
+const REC_GIRL  = ["spa","grow","sweets","garden","fishing","ride","board","race","dig","rocket","battle"];
 function recOrder(){
   const ids=GAMES.map(g=>g.id);
   const byAge = st.age==null ? null : (st.age<=5 ? REC_YOUNG : REC_OLDER);
@@ -2242,7 +2359,7 @@ const GESTURES = {
 
 const KEY="sodateru_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[], spaBook:[],
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[], spaBook:[], rideBook:[],
   gsAll:{},            // ゲームごとの途中経過（あそびを かえても つづきから）
   kidPick:true,        // こどもが自分で あそびを えらべるか（親メニューで切替）
   age:null, sex:null, onboarded:false }; }   // オンボーディングで聞く（どちらも「こたえない」可）
@@ -2581,7 +2698,7 @@ const SFX_FILES = {
 const BGM_FILES = {
   battle:"battle_bgm.ogg", fishing:"fishing_bgm.ogg", sweets:"sweets_bgm.ogg",
   race:"race_bgm.ogg", board:"board_bgm.ogg", dig:"dig_bgm.ogg",
-  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg", grow:"grow_bgm.ogg", spa:"spa_bgm.ogg"
+  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg", grow:"grow_bgm.ogg", spa:"spa_bgm.ogg", ride:"ride_bgm.ogg"
 };
 const SFX_GAIN = { atk:0.5, atkCrit:0.6, hit:0.55, crit:0.7, boss:0.6, defeat:0.5, ally:0.55, levelup:0.55, clear:0.6, appear:0.45 };
 const buf={};                       // 名前 -> AudioBuffer（読み込めたものだけ入る）
@@ -2699,6 +2816,9 @@ function sfxScrub(big){ if(play(big?"crit":"hit",big?0.35:0.28)) { noiseScrub(bi
 function noiseScrub(big){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
   noise(t, big?0.34:0.2, big?0.13:0.09, 1800);                       // あわの「しゅわしゅわ」
   for(let i=0;i<(big?5:3);i++) tone(700+Math.random()*900, t+i*0.055, 0.06, 'sine', 0.05); }   // ぷくぷく
+function sfxHorn(rare){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;   // クラクション／サイレン
+  if(rare){ [740,988,740,988].forEach((f,i)=>tone(f,t+i*0.16,0.15,'square',0.09)); }
+  else { tone(392,t,0.13,'square',0.08); tone(330,t+0.06,0.16,'square',0.07); noise(t,0.1,0.05,900); } }
 function sfxBattleBoss(){ if(play("boss")) return; sfxBoss(); }                                                               // ボス出現（釣りの「ぬし」とは別音）
 
 /* ---------- ゲームごとのBGM（WebAudio・メロディ＋ベース、それぞれ別の曲）---------- */
@@ -2725,6 +2845,9 @@ const BGMS = {
   garden: { ms:440, // やさしい おはなメロディ
     mel:[4,7,9,7, 9,11,9,7, 5,9,11,9, 11,12,11,9, 7,9,11,14, 12,11,9,7, 5,7,9,7, 4,2,null,null],
     bass:[0,5,-3,5, 2,7,0,0] },
+  ride: { ms:330, // げんきな パレードマーチ（実音源が届くまでの合成フォールバック）
+    mel:[0,0,4,4, 7,7,4,null, 5,5,9,9, 12,9,7,null, 4,7,12,12, 11,9,7,5, 4,5,7,4, 0,null,null,null],
+    bass:[0,0,7,7, 5,5,0,0] },
   spa: { ms:520, // ゆったり あわあわメロディ（実音源が届くまでの合成フォールバック）
     mel:[7,9,11,9, 7,4,7,null, 9,12,14,12, 11,9,7,null, 4,7,9,11, 9,7,4,2, 0,4,7,4, 0,null,null,null],
     bass:[0,5,7,5, 2,7,0,0] },
@@ -2787,7 +2910,7 @@ function renderParent(){
   $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
   const cur=todaysGame();
   $("#gameDesc").textContent = st.gamePick==="auto"
-    ? "日替わり（毎日ちがう・10日で1巡）／きょうは "+cur.icon+" "+cur.name
+    ? "日替わり（毎日ちがう・11日で1巡）／きょうは "+cur.icon+" "+cur.name
     : "いつも "+cur.icon+" "+cur.name;
   $("#gameChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.p===(st.gamePick||"auto")));
   $("#kidPickDesc").textContent=st.kidPick?"子ども画面に「🔄 かえる」ボタンを出す":"おうちの人だけが かえられる";
