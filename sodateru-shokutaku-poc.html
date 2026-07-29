@@ -711,6 +711,39 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   opacity: .85;
   margin-bottom: 8px;
 }
+/* こどもが押す「あそびを かえる」ボタン。押し間違えないよう指のサイズを確保する */
+.gf-pick {
+  font-family: var(--disp); font-size: 12px; font-weight: 800;
+  padding: 5px 12px; margin: 0 8px; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid rgba(255,255,255,.85); background: rgba(255,255,255,.6);
+  color: inherit; min-height: 28px; white-space: nowrap;
+  box-shadow: 0 2px 5px rgba(90,60,20,.12);
+}
+.gf-pick:active { transform: scale(.94) }
+.gf-pick[hidden] { display: none }
+/* あそび選びの画面 */
+.ov-card.pick-card { max-width: 340px }
+.pick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 12px }
+.pick-grid button {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  font-family: var(--disp); font-weight: 800; font-size: 10.5px; line-height: 1.2; text-align: center;
+  padding: 10px 4px 9px; border-radius: 14px; cursor: pointer; color: #3A2A18;
+  border: 2px solid var(--line); background: var(--surface); min-height: 74px;
+}
+.pick-grid button .ic { font-size: 26px; line-height: 1 }
+.pick-grid button.on { border-color: #3FA83A; background: rgba(63,168,58,.14); box-shadow: 0 3px 8px rgba(63,168,58,.22) }
+.pick-grid button:active { transform: scale(.95) }
+.pick-note { font-size: 12px; opacity: .7; margin-top: 12px }
+/* はじめての設定（年齢・性別） */
+.ov-card.onb-card { max-width: 330px }
+.onb-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px }
+.onb-grid button {
+  font-family: var(--disp); font-size: 15px; font-weight: 800; color: #3A2A18;
+  padding: 11px 16px; border-radius: 999px; cursor: pointer; min-height: 44px;
+  border: 2px solid var(--line); background: var(--surface);
+}
+.onb-grid button:active { transform: scale(.95) }
+.onb-fine { font-size: 11px; opacity: .6; margin-top: 14px; line-height: 1.5 }
 .gf-track { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px }
 .gf-cell {
   height: 30px;
@@ -1137,7 +1170,9 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 
     <div class="game-field" id="gameField">
       <div class="gf-title" id="gfTitle">…</div>
-      <div class="gf-head"><span id="gfSub">きょうの あそび</span><span id="gfCount">0 / 20</span></div>
+      <div class="gf-head"><span id="gfSub">きょうの あそび</span>
+        <button class="gf-pick" id="gfPick" aria-label="あそびを かえる">🔄 かえる</button>
+        <span id="gfCount">0 / 20</span></div>
       <div class="gf-stage" id="gfStage"></div>
     </div>
     <p class="prompt-big" id="prompt">ごはんを たべたら おててを かざしてね ✋</p>
@@ -1174,6 +1209,38 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <p id="sumMsg">きょうは 0こ たべたね！</p>
       <div class="rec" id="sumRec"></div>
       <div class="coll-strip" id="sumColl"></div>
+    </div>
+  </div>
+
+  <!-- はじめて開いたときだけ出る設定（おうちの人向け）。
+       年齢と性別は「おすすめの並び順」を決めるためだけに使う。ゲームを隠すことはしない。
+       どちらも「こたえない」を選べる（答えなくても全機能つかえる）。 -->
+  <div class="ov-back" id="onbBack" style="display:none">
+    <div class="ov-card onb-card">
+      <div class="big">🍚</div>
+      <h3 id="onbTitle">おこさんの としは？</h3>
+      <p id="onbNote">あそびの おすすめ順を きめるのに つかいます。<br>あとから かえられます。</p>
+      <div class="onb-grid" id="onbAge">
+        <button data-a="3">3さい</button><button data-a="4">4さい</button><button data-a="5">5さい</button>
+        <button data-a="6">6さい</button><button data-a="7">7さい</button><button data-a="8">8さい</button>
+        <button data-a="">こたえない</button>
+      </div>
+      <div class="onb-grid" id="onbSex" style="display:none">
+        <button data-s="boy">おとこのこ</button><button data-s="girl">おんなのこ</button>
+        <button data-s="">こたえない</button>
+      </div>
+      <p class="onb-fine">※ どちらも 並び順を きめるだけです。ゲームは ぜんぶ えらべます。</p>
+    </div>
+  </div>
+
+  <!-- こどもが自分で あそびを えらぶ画面（日替わりの強制をやめ、選べるようにした）
+       幼児は「予測できること」を好むので、毎日ちがうものを押しつけるより
+       好きなものを選び続けられるほうが発達的に自然（2026-07-29 リサーチ）。 -->
+  <div class="ov-back" id="pickBack" style="display:none">
+    <div class="ov-card pick-card">
+      <h3>どれで あそぶ？</h3>
+      <div class="pick-grid" id="pickGrid"></div>
+      <p class="pick-note">つづきから あそべるよ</p>
     </div>
   </div>
 
@@ -1221,6 +1288,30 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
             <button data-g="good">👍 グッド</button>
             <button data-g="open">✋ パー</button>
             <button data-g="any">🖐 どれでも</button>
+          </div>
+        </div>
+      </div>
+      <div class="prow">
+        <div><div class="lab">こどもが あそびを えらべる</div><div class="desc" id="kidPickDesc">子ども画面に「🔄 かえる」ボタンを出す</div></div>
+        <div class="toggle on" id="kidPickToggle" role="switch" aria-checked="true"></div>
+      </div>
+      <div class="prow">
+        <div style="flex:1">
+          <div class="lab">おこさんの とし</div>
+          <div class="desc" id="ageDesc">おすすめの並び順を きめるのに つかいます</div>
+          <div class="gchips" id="ageChips">
+            <button data-a="3">3さい</button><button data-a="4">4さい</button><button data-a="5">5さい</button>
+            <button data-a="6">6さい</button><button data-a="7">7さい</button><button data-a="8">8さい</button>
+            <button data-a="">こたえない</button>
+          </div>
+        </div>
+      </div>
+      <div class="prow">
+        <div style="flex:1">
+          <div class="lab">おこさん</div>
+          <div class="desc" id="sexDesc">同じく 並び順だけに つかいます（ゲームは全部えらべます）</div>
+          <div class="gchips" id="sexChips">
+            <button data-s="boy">おとこのこ</button><button data-s="girl">おんなのこ</button><button data-s="">こたえない</button>
           </div>
         </div>
       </div>
@@ -1923,14 +2014,47 @@ const GAMES = [BATTLE, GROW, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function todaysGame(){
   if(st.gamePick && st.gamePick!=="auto"){ const g=GAMES.find(x=>x.id===st.gamePick); if(g) return g; }
-  return GAMES[((dayKey()%GAMES.length)+GAMES.length)%GAMES.length];   // 抽選ではなく日付順の巡回（9日で1巡）
+  const og=orderedGames();                                             // 日替わりも おすすめ順で回す
+  return og[((dayKey()%og.length)+og.length)%og.length];               // 抽選ではなく日付順の巡回（9日で1巡）
 }
 /* あそびが変わったら、そのゲームの状態を新規に（1食で完結する区切り） */
+/* あそびを かえても、そのゲームの途中経過は残しておく。
+   こどもが自分で切り替えられるようにしたので、切り替えるたびに進行が消えると
+   「せっかく集めたのに」になってしまうため（ゲームごとに保存して つづきから再開する）。 */
 function ensureGame(){
   const g=todaysGame();
-  if(st.gameId!==g.id || !st.gs){ st.gameId=g.id; st.gs=g.init(); st.gsN=0; }
+  if(st.gameId!==g.id || !st.gs){
+    const all=(st.gsAll=st.gsAll||{});
+    if(st.gameId && st.gs) all[st.gameId]={gs:st.gs, n:st.gsN||0};   // いま遊んでいたぶんを退避
+    const kept=all[g.id];
+    st.gameId=g.id;
+    if(kept && kept.gs){ st.gs=kept.gs; st.gsN=kept.n||0; }          // 前のつづきから
+    else { st.gs=g.init(); st.gsN=0; }
+  }
   return g;
 }
+
+/* 年齢と性別から「おすすめの並び順」を作る。**ゲームを隠すことはしない**（全部えらべる）。
+   根拠(2026-07-29 リサーチ):
+   ・3〜5歳は「お世話(nurturing)」の欲求がピーク。複雑なルールと遅延報酬は処理できない
+   ・6〜8歳でルール理解と自己ベスト志向が出て、バトルの戦略性を評価しはじめる
+   ・性差は統計的な傾向にすぎないので、並び順を変えるだけにして選択肢は減らさない */
+const REC_YOUNG = ["grow","garden","sweets","fishing","board","race","dig","rocket","battle"];
+const REC_OLDER = ["battle","board","dig","rocket","race","fishing","grow","sweets","garden"];
+const REC_BOY   = ["battle","race","rocket","dig","board","fishing","grow","sweets","garden"];
+const REC_GIRL  = ["grow","sweets","garden","fishing","board","race","dig","rocket","battle"];
+function recOrder(){
+  const ids=GAMES.map(g=>g.id);
+  const byAge = st.age==null ? null : (st.age<=5 ? REC_YOUNG : REC_OLDER);
+  const bySex = st.sex==="boy" ? REC_BOY : st.sex==="girl" ? REC_GIRL : null;
+  if(!byAge && !bySex) return ids;
+  const rank=id=>{ let s=0,n=0;
+    if(byAge){ const i=byAge.indexOf(id); if(i>=0){ s+=i; n++; } }
+    if(bySex){ const i=bySex.indexOf(id); if(i>=0){ s+=i; n++; } }
+    return n? s/n : 99; };
+  return ids.slice().sort((a,b)=>rank(a)-rank(b) || ids.indexOf(a)-ids.indexOf(b));
+}
+function orderedGames(){ const by=recOrder(); return by.map(id=>GAMES.find(g=>g.id===id)).filter(Boolean); }
 /* あそびの場をまるごと組み立て直す（ロード時・切替時・完結後） */
 let curGameId=null;
 function renderGame(){
@@ -1956,9 +2080,15 @@ const GESTURES = {
 
 const KEY="sodateru_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[] }; }
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[],
+  gsAll:{},            // ゲームごとの途中経過（あそびを かえても つづきから）
+  kidPick:true,        // こどもが自分で あそびを えらべるか（親メニューで切替）
+  age:null, sex:null, onboarded:false }; }   // オンボーディングで聞く（どちらも「こたえない」可）
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return Object.assign(base(),d); }catch(e){} return base(); }
-function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+function save(){ try{
+  if(st.gameId && st.gs){ (st.gsAll=st.gsAll||{})[st.gameId]={gs:st.gs, n:st.gsN||0}; }  // 途中経過を最新に保つ
+  localStorage.setItem(KEY,JSON.stringify(st));
+}catch(e){} }
 let st=load();
 let meal={active:false,startTs:0,bites:0,tickId:null};
 let camFailed=false;
@@ -2491,6 +2621,13 @@ function renderParent(){
     ? "日替わり（毎日ちがう・9日で1巡）／きょうは "+cur.icon+" "+cur.name
     : "いつも "+cur.icon+" "+cur.name;
   $("#gameChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.p===(st.gamePick||"auto")));
+  $("#kidPickDesc").textContent=st.kidPick?"子ども画面に「🔄 かえる」ボタンを出す":"おうちの人だけが かえられる";
+  $("#kidPickToggle").classList.toggle("on",!!st.kidPick);
+  const av=st.age==null?"":String(st.age);
+  $("#ageChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.a===av));
+  $("#sexChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.s===(st.sex||"")));
+  const top=orderedGames()[0];
+  $("#ageDesc").textContent=(st.age==null?"こたえていません":st.age+"さい")+"／おすすめの1番目は "+top.icon+" "+top.name;
   const g=GESTURES[st.gesture]||GESTURES.peace;
   const row=$("#gestRow"); if(row) row.style.display=st.camMode?"":"none";
   if($("#gestDesc")){
@@ -2519,9 +2656,53 @@ $("#camToggle").onclick=()=>{ st.camMode=!st.camMode; save(); renderParent(); up
 GAMES.forEach(g=>{ const b=document.createElement("button"); b.dataset.p=g.id; b.textContent=g.icon+" "+g.name; $("#gameChips").appendChild(b); });
 $("#gameChips").onclick=e=>{ const b=e.target.closest("button[data-p]"); if(!b) return;
   st.gamePick=b.dataset.p; renderGame(); save(); renderParent(); };   // renderGame内で盤をリセットしてから保存する
+
+/* ---------- はじめての設定（年齢・性別）----------
+   ここで聞いた内容は「おすすめの並び順」を決めるためだけに使う。ゲームは1つも隠さない。
+   どちらも「こたえない」で飛ばせる（答えなくても全機能つかえる）。 */
+function openOnb(){
+  $("#onbTitle").textContent="おこさんの としは？";
+  $("#onbAge").style.display="flex"; $("#onbSex").style.display="none";
+  $("#onbBack").style.display="grid";
+}
+$("#onbAge").onclick=e=>{ const b=e.target.closest("button[data-a]"); if(!b) return;
+  st.age = b.dataset.a==="" ? null : parseInt(b.dataset.a,10);
+  $("#onbTitle").textContent="おこさんは？";
+  $("#onbAge").style.display="none"; $("#onbSex").style.display="flex"; };
+$("#onbSex").onclick=e=>{ const b=e.target.closest("button[data-s]"); if(!b) return;
+  st.sex = b.dataset.s || null;
+  st.onboarded=true;
+  st.gamePick=recOrder()[0];            // 日替わりの押しつけではなく、おすすめの1つから始める
+  $("#onbBack").style.display="none";
+  renderGame(); save(); renderParent(); };
+
+/* ---------- こどもが あそびを えらぶ ---------- */
+function openPick(){
+  const grid=$("#pickGrid"); grid.innerHTML="";
+  const cur=todaysGame().id;
+  orderedGames().forEach(g=>{ const b=document.createElement("button"); b.dataset.p=g.id;
+    if(g.id===cur) b.className="on";
+    b.innerHTML='<span class="ic">'+g.icon+'</span>'+g.name; grid.appendChild(b); });
+  $("#pickBack").style.display="grid";
+}
+function updatePickVis(){ $("#gfPick").hidden = !st.kidPick; }
+$("#gfPick").onclick=()=>{ resumeAudio(); openPick(); };
+$("#pickGrid").onclick=e=>{ const b=e.target.closest("button[data-p]"); if(!b) return;
+  st.gamePick=b.dataset.p; $("#pickBack").style.display="none";
+  const g=renderGame(); save(); renderParent(); speak(g.name); };
+$("#pickBack").onclick=e=>{ if(e.target===$("#pickBack")) $("#pickBack").style.display="none"; };
+$("#kidPickToggle").onclick=()=>{ st.kidPick=!st.kidPick; save(); renderParent(); updatePickVis(); };
+$("#ageChips").onclick=e=>{ const b=e.target.closest("button[data-a]"); if(!b) return;
+  st.age = b.dataset.a==="" ? null : parseInt(b.dataset.a,10); save(); renderParent(); };
+$("#sexChips").onclick=e=>{ const b=e.target.closest("button[data-s]"); if(!b) return;
+  st.sex = b.dataset.s || null; save(); renderParent(); };
 $("#gestChips").onclick=e=>{ const b=e.target.closest("button[data-g]"); if(!b) return;
   st.gesture=b.dataset.g; save(); renderParent(); applyGestureUI(); detState="IDLE"; gHist.length=0; setRing(0); };
-$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm,gs=st.gesture,gp=st.gamePick; st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; st.gesture=gs; st.gamePick=gp; save(); meal.bites=0; renderChar(); renderGame(); renderParent(); } };
+$("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm,gs=st.gesture,gp=st.gamePick,
+        kp=st.kidPick,ag=st.age,sx=st.sex,ob=st.onboarded;
+    st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; st.gesture=gs; st.gamePick=gp;
+    st.kidPick=kp; st.age=ag; st.sex=sx; st.onboarded=ob;   /* 設定（年齢・性別など）は消さない */
+    save(); meal.bites=0; renderChar(); renderGame(); renderParent(); } };
 
 /* ---------- camera + hand detection ---------- */
 let handLandmarker=null, stream=null, rafId=null, camReady=false;
@@ -2598,7 +2779,8 @@ function loop(){
 
 /* ---------- boot ---------- */
 if(!SHOW_PET) $(".phone").classList.add("no-pet");   // 育成キャラをトップから隠す
-renderChar(); renderGame(); save(); renderParent(); updateButtonVis(); applyGestureUI();
+renderChar(); renderGame(); save(); renderParent(); updateButtonVis(); applyGestureUI(); updatePickVis();
+if(!st.onboarded) openOnb();                        // はじめて開いた時だけ 年齢・性別をきく（どちらも省略可）
 loadAudioFiles();                                   // CC0音源を先読み（1口目から本物の音が鳴るように）
 document.addEventListener("click",resumeAudio,{once:true});
 if(st.camMode) startCamera(); else { camFailed=false; updateButtonVis(); }

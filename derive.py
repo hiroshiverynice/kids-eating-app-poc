@@ -8,6 +8,19 @@ root = pathlib.Path(__file__).parent
 master = root / "sodateru-shokutaku-poc.html"
 src = master.read_text(encoding="utf-8")
 
+# --- JSの構文チェック（type="module" は1つでも構文エラーがあると全体が動かなくなる）---
+# 実際に「行末コメントが残りのコードを飲み込んで閉じ括弧が消える」事故が起きたため、
+# 派生ファイルを書き出す前に必ず node --check を通す。
+import subprocess, tempfile, os
+_i = src.index('<script type="module">') + len('<script type="module">')
+_j = src.rindex("</script>")
+_tmp = root / "_syntax_check.mjs"
+_tmp.write_text(src[_i:_j], encoding="utf-8", newline="\n")
+_r = subprocess.run(["node", "--check", str(_tmp)], capture_output=True, text=True)
+os.remove(_tmp)
+if _r.returncode != 0:
+    sys.exit("derive.py: JSの構文エラーで中断しました\n" + (_r.stderr or _r.stdout))
+
 # index.html = マスターそのまま（手かざし版）
 (root / "index.html").write_text(src, encoding="utf-8", newline="\n")
 
