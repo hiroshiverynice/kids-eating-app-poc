@@ -966,6 +966,58 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .scn .cl2 { animation: drift 46s ease-in-out infinite alternate-reverse }
 @keyframes drift { from{transform:translateX(-9%)} to{transform:translateX(9%)} }
 
+/* ---------- 🛁 どうぶつスパ（3〜5歳の「お世話」。バトル/育成と同じ画面構成）---------- */
+.gf-spa { background: linear-gradient(180deg,#DFF3FB,#A7DCEF) }
+.gf-spa .gf-title,.gf-spa .gf-head { color:#0F5A78 }
+.gf-stage.spa { display:flex; flex-direction:column;
+  background: linear-gradient(180deg,#E8F7FF 0%,#CDEBFA 52%,#A9DDF2 100%) }
+.spa .szone { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; overflow:hidden }
+.spa .scn .cl { top:6%; left:6%; width:52px; opacity:.9 }
+.spa .scn .p2 { top:16%; right:7%; width:40px; opacity:.75 }
+.spa .sname { position:relative; z-index:5; font-family:var(--disp); font-weight:800; font-size:15px; color:#0F5A78; text-shadow:0 2px 0 rgba(255,255,255,.7) }
+.spa .sbarwrap { position:relative; z-index:5; width:66%; display:flex; align-items:center; gap:6px }
+.spa .sbar { flex:1; height:13px; border-radius:7px; background:rgba(255,255,255,.6); overflow:hidden;
+  box-shadow: inset 0 2px 4px rgba(10,70,100,.25), 0 0 0 2px rgba(255,255,255,.9) }
+.spa .sfill { height:100%; border-radius:7px; background:linear-gradient(180deg,#8FE3FF,#37A8D8); transition: width .45s var(--out) }
+.spa .snum { font-family:var(--disp); font-weight:800; font-size:11px; color:#0F5A78; min-width:50px; text-align:right }
+/* おふろ */
+.spa .tub { position:relative; z-index:4; width:246px; height:184px; display:flex; align-items:center; justify-content:center;
+  border-radius: 26px 26px 42px 42px; background: linear-gradient(180deg,#FFFFFF,#E4F3FA);
+  box-shadow: 0 8px 16px rgba(20,80,110,.22), inset 0 -6px 0 rgba(120,180,210,.28) }
+.spa .tub .water { position:absolute; left:8px; right:8px; bottom:8px; height:52%; border-radius:8px 8px 34px 34px;
+  background: linear-gradient(180deg,rgba(120,205,240,.85),rgba(70,175,220,.9)); overflow:hidden }
+.spa .ani { position:relative; z-index:3; width:128px; height:auto; transition: filter .5s ease;
+  filter: drop-shadow(0 6px 10px rgba(20,80,110,.28)) }
+.spa .ani.fb { font-size:74px; width:auto }
+.spa .ani.scrub { animation: scrubA .5s }
+@keyframes scrubA { 0%,100%{transform:translateX(0) rotate(0)} 25%{transform:translateX(-7px) rotate(-6deg)} 60%{transform:translateX(6px) rotate(5deg)} }
+.spa .ani.shiny { animation: shinyA 1s var(--spring) }
+@keyframes shinyA { 0%{transform:scale(1)} 45%{transform:scale(1.22) rotate(6deg); filter:brightness(1.5) drop-shadow(0 0 16px #FFE873)} 100%{transform:scale(1)} }
+.spa .ani.come { animation: ecome .6s var(--spring) }
+.spa .foam { position:absolute; inset:0; z-index:4; pointer-events:none; border-radius:26px 26px 42px 42px;
+  transition: opacity .45s ease;
+  background-image:
+    radial-gradient(9px 9px at 22% 26%, rgba(255,255,255,.95), transparent),
+    radial-gradient(13px 13px at 68% 18%, rgba(255,255,255,.9), transparent),
+    radial-gradient(8px 8px at 44% 12%, rgba(255,255,255,.9), transparent),
+    radial-gradient(11px 11px at 82% 44%, rgba(255,255,255,.85), transparent),
+    radial-gradient(10px 10px at 14% 58%, rgba(255,255,255,.85), transparent),
+    radial-gradient(7px 7px at 56% 62%, rgba(255,255,255,.9), transparent) }
+.spa .splus { position:absolute; left:50%; top:46%; z-index:7; pointer-events:none;
+  font-family:var(--disp); font-weight:900; font-size:30px; color:#fff;
+  -webkit-text-stroke:3px #0F5A78; paint-order:stroke; animation: dmgA 1s var(--out) forwards }
+.spa .splus.big { font-size:46px; color:#FFF3B0; -webkit-text-stroke:3px #0A5570 }
+.spa .cmdwin { margin:6px 8px 4px; padding:8px 12px; min-height:46px; display:flex; align-items:center;
+  background:#F2FBFF; border:3px solid #3E9CC4; border-radius:9px; box-shadow:0 4px 10px rgba(20,80,110,.18) }
+.spa .msg { font-family:var(--disp); font-weight:800; font-size:14px; color:#0F5A78; line-height:1.35 }
+.spa .shud { display:flex; align-items:center; gap:10px; padding:0 12px 3px;
+  font-family:var(--disp); font-weight:800; font-size:12px; color:#0F5A78 }
+.spa .sshelf { display:flex; align-items:center; gap:3px; overflow-x:auto; overflow-y:hidden;
+  padding:4px 8px 7px; min-height:44px; background:rgba(15,90,120,.12) }
+.spa .spty { height:30px; width:auto; flex:0 0 auto; animation: gfpop .4s var(--spring) }
+.spa .spty.fb { font-size:24px; height:auto }
+.spa .sshelf .lbl { font-size:11px; color:#0F5A78; font-family:var(--disp); font-weight:700; opacity:.85; margin-right:4px; animation:none }
+
 /* ---------- 🌱 モグをそだてよう（育成。バトルと同じ画面構成で作る）---------- */
 .gf-grow { background: linear-gradient(180deg,#E7F6D6,#A9DC8C) }
 .gf-grow .gf-title,.gf-grow .gf-head { color:#2E6B2E }
@@ -1274,7 +1326,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="prow">
         <div style="flex:1">
           <div class="lab">きょうの あそび</div>
-          <div class="desc" id="gameDesc">日替わり（毎日ちがう・9日で1巡）</div>
+          <div class="desc" id="gameDesc">日替わり（毎日ちがう・10日で1巡）</div>
           <div class="gchips" id="gameChips">
             <button data-p="auto">🗓 日替わり</button>
           </div>
@@ -2010,14 +2062,124 @@ const GROW = {
   }
 };
 
-const GAMES = [BATTLE, GROW, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
+/* ===== ゲーム10: 🛁 どうぶつスパ（3〜5歳のど真ん中「お世話」）=====
+   リサーチ(2026-07-29): 3〜5歳は お世話(nurturing)の欲求がピーク。複雑なルールは要らない。
+   育成(GROW)が「1体をずっと育てる」のに対し、こちらは「毎回ちがう子が来る」ので
+   反復の安心感とコレクションの新鮮さを両立させる。
+   一口＝あわが増えて どろが落ちる → ピカピカになったら なかよしに なる。 */
+const SPA_ANIMALS = [
+  ["elephant","ぞうさん"],["giraffe","きりんさん"],["hippo","かばさん"],["monkey","おさるさん"],
+  ["panda","パンダさん"],["parrot","オウムさん"],["penguin","ペンギンさん"],["pig","ぶたさん"],
+  ["rabbit","うさぎさん"],["snake","へびさん"]
+];
+const ANI_DIR="assets/img/animals/";
+const SPA_NEED=[5,7], SPA_GOAL=3;          // 1ぴきに5〜7口 / 3びきで ひと区切り
+function aniImg(a,cls){
+  return '<img class="'+cls+'" src="'+ANI_DIR+a.id+'.png" alt="'+a.n+'" '+
+         'onerror="this.outerHTML=\'<span class=&quot;'+cls+' fb&quot;>🐾</span>\'">';
+}
+function spaPick(g){
+  const seen=(g.done||[]).map(x=>x.id);
+  const pool=SPA_ANIMALS.filter(a=>!seen.includes(a[0]));
+  const m=RNG.pick(pool.length?pool:SPA_ANIMALS);
+  return { id:m[0], n:m[1], need:RNG.int(SPA_NEED[0],SPA_NEED[1]), prog:0 };
+}
+const SPA = {
+  id:"spa", name:"どうぶつスパ", icon:"🛁", cls:"gf-spa", sub:"あわあわで ピカピカに！",
+  init(){ const g={ done:[] }; g.a=spaPick(g); return g; },
+  status(g){ return "🛁 ピカピカ "+g.done.length+" / "+SPA_GOAL; },
+  bite(g,n){
+    const a=g.a;
+    const big=RNG.chance(Math.min(0.30,0.10+n*0.012));      // たまに「あわあわ もこもこ！」で一気に進む
+    let gain=big?3:1;
+    if(a.prog+gain>a.need) gain=a.need-a.prog;
+    a.prog+=gain;
+    const ev={ big, gain, prog:a.prog, need:a.need, id:a.id, name:a.n,
+               pct: Math.min(100, a.prog/a.need*100), clean:false, isNew:false, next:null,
+               rare:big, say: big?"あわあわ もこもこ！":RNG.pick(["ごしごし！","きもちいい〜","あわあわ！","きれいに なあれ"]) };
+    if(a.prog>=a.need){
+      g.done.push({id:a.id,n:a.n});
+      const book=(st.spaBook=st.spaBook||[]);               // なかよしになった子は 食事をまたいで残る
+      if(!book.includes(a.n)){ book.push(a.n); ev.isNew=true; }
+      ev.clean=true; ev.rare=true; ev.say=a.n+" ピカピカ！";
+      if(g.done.length<SPA_GOAL){ g.a=spaPick(g); ev.next={id:g.a.id,n:g.a.n}; }
+    }
+    return ev;
+  },
+  done(g){ return g.done.length>=SPA_GOAL; },
+  finale(g){ return {icon:"🛁", title:"スパ おしまい！",
+    msg:"ピカピカに した子が "+((st.spaBook||[]).length)+"ひきに なったよ！"}; },
+  enter(host,g){ host.className="gf-stage spa";
+    const a=g.a, pct=Math.min(100,a.prog/a.need*100), book=(st.spaBook||[]);
+    host.innerHTML=
+      '<div class="szone">'+
+        '<div class="scn">'+
+          '<img class="cl p1" src="'+SCN+'cloud5.png" alt="">'+
+          '<img class="cl2 p2" src="'+SCN+'cloud1.png" alt="">'+
+        '</div>'+
+        '<div class="sname">'+a.n+'</div>'+
+        '<div class="sbarwrap"><div class="sbar"><div class="sfill" style="width:'+pct+'%"></div></div>'+
+          '<div class="snum">'+a.prog+' / '+a.need+'</div></div>'+
+        '<div class="tub">'+
+          '<div class="water"></div>'+
+          aniImg(a,"ani"+(a.prog?"":" dirty"))+
+          '<div class="foam" style="opacity:'+(a.prog/a.need)+'"></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="cmdwin"><div class="msg">'+(a.prog?("あと "+(a.need-a.prog)+"かいで ピカピカ！"):(a.n+" が やってきた！"))+'</div></div>'+
+      '<div class="shud"><span>🛁 きょう '+g.done.length+' / '+SPA_GOAL+'</span><span>💛 なかよし '+book.length+'ひき</span></div>'+
+      '<div class="sshelf"><span class="lbl">なかよし</span>'+
+        (g.done.map(d=>aniImg(d,"spty")).join(""))+'</div>';
+    host.dataset.ani=a.id;
+    const el=host.querySelector(".ani"); if(el) el.style.filter=spaDirt(a.prog/a.need);
+    const sh=host.querySelector(".sshelf"); sh.scrollLeft=sh.scrollWidth; },
+  act(host,g,ev){
+    const self=this;
+    clearTimeout(this._t); const gen=this._gen=(this._gen||0)+1;
+    if(host.dataset.ani!==ev.id && !ev.clean){ this.enter(host,g); }
+    const zone=host.querySelector(".szone"), ani=host.querySelector(".ani"),
+          fill=host.querySelector(".sfill"), num=host.querySelector(".snum"),
+          foam=host.querySelector(".foam"), msg=host.querySelector(".msg"),
+          shelf=host.querySelector(".sshelf"), hud=host.querySelector(".shud"), nm=host.querySelector(".sname");
+    sfxScrub(ev.big);
+    ani.classList.remove("scrub"); void ani.offsetWidth; ani.classList.add("scrub");
+    fxBurst(host,50,58,ev.big?["🫧","🫧","✨","💧"]:["🫧","💧"], ev.big?16:7);
+    const p=document.createElement("div"); p.className="splus"+(ev.big?" big":"");
+    p.textContent="+"+ev.gain; zone.appendChild(p); setTimeout(()=>p.remove(),1000);
+    fill.style.width=ev.pct+"%"; num.textContent=ev.prog+" / "+ev.need;
+    foam.style.opacity=ev.prog/ev.need;
+    ani.style.filter=spaDirt(ev.prog/ev.need);                    // どろが だんだん落ちていく
+    msg.textContent=ev.big?"あわあわ もこもこ！ +"+ev.gain:(ev.name+" を ごしごし！");
+    if(ev.clean){
+      setTimeout(()=>{ if(gen!==self._gen) return;
+        ani.classList.remove("scrub"); void ani.offsetWidth; ani.classList.add("shiny");
+        msg.textContent=ev.name+" ピカピカ！ なかよしに なったよ！"+(ev.isNew?" ✨はじめて！":"");
+        fxBurst(host,50,50,["✨","⭐","💛","🫧"],18); soundFanfare();
+        shelf.insertAdjacentHTML("beforeend", aniImg({id:ev.id,n:ev.name},"spty")); shelf.scrollLeft=shelf.scrollWidth;
+        hud.innerHTML='<span>🛁 きょう '+g.done.length+' / '+SPA_GOAL+'</span><span>💛 なかよし '+((st.spaBook||[]).length)+'ひき</span>';
+        if(ev.next){
+          self._t=setTimeout(()=>{ if(gen!==self._gen) return;
+            self.enter(host,g);
+            const na=host.querySelector(".ani"); na.classList.add("come");
+            host.querySelector(".msg").textContent=ev.next.n+" が やってきた！";
+            sfxAppear();
+          }, 2200);
+        }
+      }, 520);
+    }
+  }
+};
+/* どろ汚れ: きれいになるほど フィルタが薄れて 本来の色に戻る */
+function spaDirt(r){ const d=Math.max(0,1-r); return "sepia("+(d*0.75).toFixed(2)+") brightness("+(1-d*0.28).toFixed(2)+") saturate("+(1-d*0.45).toFixed(2)+")"; }
+
+const GAMES = [BATTLE, GROW, SPA, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
 
 
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function todaysGame(){
   if(st.gamePick && st.gamePick!=="auto"){ const g=GAMES.find(x=>x.id===st.gamePick); if(g) return g; }
   const og=orderedGames();                                             // 日替わりも おすすめ順で回す
-  return og[((dayKey()%og.length)+og.length)%og.length];               // 抽選ではなく日付順の巡回（9日で1巡）
+  return og[((dayKey()%og.length)+og.length)%og.length];               // 抽選ではなく日付順の巡回（10日で1巡）
 }
 /* あそびが変わったら、そのゲームの状態を新規に（1食で完結する区切り） */
 /* あそびを かえても、そのゲームの途中経過は残しておく。
@@ -2041,10 +2203,10 @@ function ensureGame(){
    ・3〜5歳は「お世話(nurturing)」の欲求がピーク。複雑なルールと遅延報酬は処理できない
    ・6〜8歳でルール理解と自己ベスト志向が出て、バトルの戦略性を評価しはじめる
    ・性差は統計的な傾向にすぎないので、並び順を変えるだけにして選択肢は減らさない */
-const REC_YOUNG = ["grow","garden","sweets","fishing","board","race","dig","rocket","battle"];
-const REC_OLDER = ["battle","board","dig","rocket","race","fishing","grow","sweets","garden"];
-const REC_BOY   = ["battle","race","rocket","dig","board","fishing","grow","sweets","garden"];
-const REC_GIRL  = ["grow","sweets","garden","fishing","board","race","dig","rocket","battle"];
+const REC_YOUNG = ["grow","spa","garden","sweets","fishing","race","board","dig","rocket","battle"];
+const REC_OLDER = ["battle","board","dig","rocket","race","fishing","grow","spa","sweets","garden"];
+const REC_BOY   = ["battle","race","rocket","dig","board","fishing","spa","grow","sweets","garden"];
+const REC_GIRL  = ["spa","grow","sweets","garden","fishing","board","race","dig","rocket","battle"];
 function recOrder(){
   const ids=GAMES.map(g=>g.id);
   const byAge = st.age==null ? null : (st.age<=5 ? REC_YOUNG : REC_OLDER);
@@ -2082,7 +2244,7 @@ const GESTURES = {
 
 const KEY="sodateru_tap_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[],
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[], spaBook:[],
   gsAll:{},            // ゲームごとの途中経過（あそびを かえても つづきから）
   kidPick:true,        // こどもが自分で あそびを えらべるか（親メニューで切替）
   age:null, sex:null, onboarded:false }; }   // オンボーディングで聞く（どちらも「こたえない」可）
@@ -2421,7 +2583,7 @@ const SFX_FILES = {
 const BGM_FILES = {
   battle:"battle_bgm.ogg", fishing:"fishing_bgm.ogg", sweets:"sweets_bgm.ogg",
   race:"race_bgm.ogg", board:"board_bgm.ogg", dig:"dig_bgm.ogg",
-  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg", grow:"grow_bgm.ogg"
+  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg", grow:"grow_bgm.ogg", spa:"spa_bgm.ogg"
 };
 const SFX_GAIN = { atk:0.5, atkCrit:0.6, hit:0.55, crit:0.7, boss:0.6, defeat:0.5, ally:0.55, levelup:0.55, clear:0.6, appear:0.45 };
 const buf={};                       // 名前 -> AudioBuffer（読み込めたものだけ入る）
@@ -2535,6 +2697,10 @@ function sfxLevel(){ if(play("levelup")) return;                                
 function sfxAppear(){ if(play("appear")) return;                                                                              // てきが あらわれる
   ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
   tone(392,t,0.1,'triangle',0.09); tone(523,t+0.09,0.14,'triangle',0.09); }
+function sfxScrub(big){ if(play(big?"crit":"hit",big?0.35:0.28)) { noiseScrub(big); return; } noiseScrub(big); }   // ごしごし＋あわ
+function noiseScrub(big){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
+  noise(t, big?0.34:0.2, big?0.13:0.09, 1800);                       // あわの「しゅわしゅわ」
+  for(let i=0;i<(big?5:3);i++) tone(700+Math.random()*900, t+i*0.055, 0.06, 'sine', 0.05); }   // ぷくぷく
 function sfxBattleBoss(){ if(play("boss")) return; sfxBoss(); }                                                               // ボス出現（釣りの「ぬし」とは別音）
 
 /* ---------- ゲームごとのBGM（WebAudio・メロディ＋ベース、それぞれ別の曲）---------- */
@@ -2561,6 +2727,9 @@ const BGMS = {
   garden: { ms:440, // やさしい おはなメロディ
     mel:[4,7,9,7, 9,11,9,7, 5,9,11,9, 11,12,11,9, 7,9,11,14, 12,11,9,7, 5,7,9,7, 4,2,null,null],
     bass:[0,5,-3,5, 2,7,0,0] },
+  spa: { ms:520, // ゆったり あわあわメロディ（実音源が届くまでの合成フォールバック）
+    mel:[7,9,11,9, 7,4,7,null, 9,12,14,12, 11,9,7,null, 4,7,9,11, 9,7,4,2, 0,4,7,4, 0,null,null,null],
+    bass:[0,5,7,5, 2,7,0,0] },
   grow: { ms:450, // あたたかい そだてるメロディ（実音源が届くまでの合成フォールバック）
     mel:[0,4,7,9, 7,4,5,null, 2,5,9,11, 9,5,7,null, 4,7,12,14, 12,9,7,4, 5,9,7,4, 0,null,null,null],
     bass:[0,7,5,7, 3,5,0,0] },
@@ -2620,7 +2789,7 @@ function renderParent(){
   $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
   const cur=todaysGame();
   $("#gameDesc").textContent = st.gamePick==="auto"
-    ? "日替わり（毎日ちがう・9日で1巡）／きょうは "+cur.icon+" "+cur.name
+    ? "日替わり（毎日ちがう・10日で1巡）／きょうは "+cur.icon+" "+cur.name
     : "いつも "+cur.icon+" "+cur.name;
   $("#gameChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.p===(st.gamePick||"auto")));
   $("#kidPickDesc").textContent=st.kidPick?"子ども画面に「🔄 かえる」ボタンを出す":"おうちの人だけが かえられる";
