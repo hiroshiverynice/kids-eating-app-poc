@@ -966,6 +966,53 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .scn .cl2 { animation: drift 46s ease-in-out infinite alternate-reverse }
 @keyframes drift { from{transform:translateX(-9%)} to{transform:translateX(9%)} }
 
+/* ---------- 👗 きせかえコレクション（6〜8歳女児向け・そろえて完成させる）---------- */
+.gf-dress { background: linear-gradient(180deg,#FFE7F3,#F5BEDC) }
+.gf-dress .gf-title,.gf-dress .gf-head { color:#8E2E5B }
+.gf-stage.dress { display:flex; flex-direction:column;
+  background: linear-gradient(180deg,#FFF2F9 0%,#FFE0F0 48%,#FBC9E4 100%) }
+.dress .dzone { position:relative; flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden;
+  background-image:
+    radial-gradient(3px 3px at 14% 18%, rgba(255,255,255,.9), transparent),
+    radial-gradient(4px 4px at 82% 12%, rgba(255,255,255,.8), transparent),
+    radial-gradient(3px 3px at 68% 76%, rgba(255,255,255,.8), transparent),
+    radial-gradient(3px 3px at 22% 82%, rgba(255,255,255,.85), transparent) }
+/* コーデボード（6スロット） */
+.dress .dboard { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; width:88%; z-index:2 }
+.dress .dslot { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  min-height:72px; border-radius:15px; border:2.5px dashed rgba(142,46,91,.35); background:rgba(255,255,255,.55) }
+.dress .dslot .di { font-size:32px; line-height:1; min-height:34px }
+.dress .dslot .dl { font-family:var(--disp); font-weight:800; font-size:10.5px; color:#8E2E5B; opacity:.75 }
+.dress .dslot.on { border-style:solid; border-color:#F08CBE; background:rgba(255,255,255,.92);
+  box-shadow:0 3px 9px rgba(180,60,120,.2) }
+.dress .dslot.on.rare { border-color:#FFC83D; background:linear-gradient(180deg,#FFF9E4,#FFEFC2);
+  box-shadow:0 0 12px rgba(255,200,61,.65) }
+.dress .dslot.pop { animation: gfpop .5s var(--spring) }
+/* 完成したコーデのカード */
+.dress .dmade { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) scale(.6); opacity:0; z-index:6; pointer-events:none }
+.dress .dmade.show { animation: dcardIn 2.2s var(--spring) forwards }
+@keyframes dcardIn { 0%{transform:translate(-50%,-50%) scale(.4) rotate(-10deg);opacity:0}
+                     22%{transform:translate(-50%,-50%) scale(1.12) rotate(4deg);opacity:1}
+                     78%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:1}
+                     100%{transform:translate(-50%,-84%) scale(.9);opacity:0} }
+.dress .dcoord { padding:16px 20px; border-radius:20px; text-align:center; background:#fff;
+  border:4px solid #F08CBE; box-shadow:0 10px 24px rgba(180,60,120,.3) }
+.dress .dcoord.rare { border-color:#FFC83D; background:linear-gradient(180deg,#FFFDF3,#FFF2CE) }
+.dress .dcoord .dci { font-size:30px; letter-spacing:-1px; line-height:1.2 }
+.dress .dcoord .dcn { font-family:var(--disp); font-weight:900; font-size:15px; color:#8E2E5B; margin-top:6px }
+.dress .cmdwin { margin:6px 8px 4px; padding:8px 12px; min-height:46px; display:flex; align-items:center;
+  background:#FFF7FB; border:3px solid #E06CA6; border-radius:9px; box-shadow:0 4px 10px rgba(180,60,120,.18) }
+.dress .msg { font-family:var(--disp); font-weight:800; font-size:14px; color:#8E2E5B; line-height:1.35 }
+.dress .dhud { display:flex; align-items:center; gap:10px; padding:0 12px 3px;
+  font-family:var(--disp); font-weight:800; font-size:12px; color:#8E2E5B }
+.dress .dshelf { display:flex; align-items:center; gap:4px; overflow-x:auto; overflow-y:hidden;
+  padding:5px 8px 8px; min-height:46px; background:rgba(142,46,91,.12) }
+.dress .dcard { flex:0 0 auto; font-size:15px; letter-spacing:-2px; padding:5px 7px; border-radius:9px;
+  background:rgba(255,255,255,.92); border:1.5px solid #F0A8CC; animation: gfpop .4s var(--spring) }
+.dress .dcard.rare { border-color:#FFC83D; background:linear-gradient(180deg,#FFFDF3,#FFF0C8) }
+.dress .dshelf .lbl { font-size:11px; color:#8E2E5B; font-family:var(--disp); font-weight:700; opacity:.85; margin-right:4px;
+  animation:none; background:none; border:none; padding:0; letter-spacing:0 }
+
 /* ---------- 🚌 のりものパレード（3〜5歳・因果が一目で分かる形）---------- */
 .gf-ride { background: linear-gradient(180deg,#DCEEFF,#A9CDEF) }
 .gf-ride .gf-title,.gf-ride .gf-head { color:#1F3F6B }
@@ -1364,7 +1411,7 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="prow">
         <div style="flex:1">
           <div class="lab">きょうの あそび</div>
-          <div class="desc" id="gameDesc">日替わり（毎日ちがう・11日で1巡）</div>
+          <div class="desc" id="gameDesc">日替わり（毎日ちがう・12日で1巡）</div>
           <div class="gchips" id="gameChips">
             <button data-p="auto">🗓 日替わり</button>
           </div>
@@ -2289,14 +2336,107 @@ const RIDE = {
   }
 };
 
-const GAMES = [BATTLE, GROW, SPA, RIDE, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
+/* ===== ゲーム12: 👗 きせかえコレクション（6〜8歳女児の「ど真ん中」不足を埋める）=====
+   リサーチ(2026-07-29): 6〜8歳は「完成させる・集める」に加えて 手順のある遊びを楽しめる。
+   女児は装飾・キャラ・関係づくりの遊びを好む（統計的傾向）。
+   6つのスロットを1口ずつ埋めて1コーデ完成 → 名前がついて ずかんに残る。 */
+const DRESS_SLOTS = [
+  { key:"hat",   label:"ぼうし", items:[["👒","むぎわらぼうし"],["🎩","シルクハット"],["🧢","キャップ"],["👑","おうかん"],["🎀","リボン"]] },
+  { key:"top",   label:"トップス", items:[["👕","Tシャツ"],["👚","ブラウス"],["🧥","コート"],["🥼","はおりもの"],["🦺","ベスト"]] },
+  { key:"bottom",label:"ボトム", items:[["👖","ジーンズ"],["🩳","ショートパンツ"],["👗","ワンピース"],["🥻","ロングスカート"],["🩱","レオタード"]] },
+  { key:"shoes", label:"くつ",   items:[["👟","スニーカー"],["👠","ハイヒール"],["🥾","ブーツ"],["🩰","バレエシューズ"],["🥿","フラットシューズ"]] },
+  { key:"acc",   label:"アクセ", items:[["💍","ゆびわ"],["📿","ネックレス"],["🕶️","サングラス"],["⌚","うでどけい"],["🧣","マフラー"]] },
+  { key:"bag",   label:"バッグ", items:[["👜","ハンドバッグ"],["🎒","リュック"],["👝","ポーチ"],["🛍️","ショッパー"],["🧺","かご"]] }
+];
+const DRESS_RARE = [["✨","きらきら"],["🌈","にじいろ"],["💎","ダイヤ"],["🦄","ユニコーン"],["🌟","スター"]];
+const DRESS_NAMES = ["おでかけ","おひめさま","げんき","ゆめかわ","おしゃれ","スポーツ","おさんぽ","パーティ","カフェ","たびだち"];
+const DRESS_GOAL = 2;                 // 2コーデ完成で ひと区切り（6スロット×2＝12口）
+const DRESS = {
+  id:"dress", name:"きせかえコレクション", icon:"👗", cls:"gf-dress", sub:"1つずつ そろえよう！",
+  init(){ return { slots:[null,null,null,null,null,null], made:0, rare:false }; },
+  status(g){ const f=g.slots.filter(Boolean).length; return "👗 "+f+" / "+DRESS_SLOTS.length; },
+  bite(g,n){
+    const i=g.slots.findIndex(x=>!x);
+    const slot=DRESS_SLOTS[i];
+    const rare=RNG.chance(Math.min(0.26, 0.10+n*0.01));
+    const it=RNG.pick(slot.items);
+    const deco=rare?RNG.pick(DRESS_RARE):null;
+    g.slots[i]={ e:it[0], n:(deco?deco[1]+"の ":"")+it[1], rare:!!rare };
+    if(rare) g.rare=true;
+    const filled=g.slots.filter(Boolean).length;
+    const ev={ idx:i, emoji:it[0], iname:g.slots[i].n, label:slot.label, rare, filled,
+               total:DRESS_SLOTS.length, complete:false, coord:null, isNew:false,
+               say: rare?("きらきらの "+it[1]+"！"):(slot.label+" は "+it[1]+"！") };
+    if(filled>=DRESS_SLOTS.length){
+      const nm=RNG.pick(DRESS_NAMES)+(g.rare?" キラキラ":"")+"コーデ";
+      const icons=g.slots.map(s=>s.e);
+      const book=(st.dressBook=st.dressBook||[]);
+      book.push({ n:nm, r:g.rare, i:icons.join("") });
+      ev.complete=true; ev.coord={ name:nm, rare:g.rare, icons }; ev.rare=true;
+      ev.isNew=book.filter(b=>b.n===nm).length===1;
+      ev.say=nm+" かんせい！";
+      g.made++; g.slots=[null,null,null,null,null,null]; g.rare=false;
+    }
+    return ev;
+  },
+  done(g){ return g.made>=DRESS_GOAL; },
+  finale(g){ return {icon:"👗", title:"コーデ かんせい！",
+    msg:"コーデずかんが "+((st.dressBook||[]).length)+"チャクに なったよ！"}; },
+  _slotHTML(g){ return DRESS_SLOTS.map((s,i)=>{ const v=g.slots[i];
+      return '<div class="dslot'+(v?(" on"+(v.rare?" rare":"")):"")+'">'+
+             '<span class="di">'+(v?v.e:"")+'</span>'+
+             '<span class="dl">'+s.label+'</span></div>'; }).join(""); },
+  _shelfHTML(){ const book=(st.dressBook||[]);
+    return book.slice(-10).map(b=>'<span class="dcard'+(b.r?" rare":"")+'">'+b.i+'</span>').join(""); },
+  enter(host,g){ host.className="gf-stage dress";
+    const book=(st.dressBook||[]), filled=g.slots.filter(Boolean).length;
+    host.innerHTML=
+      '<div class="dzone">'+
+        '<div class="dboard">'+this._slotHTML(g)+'</div>'+
+        '<div class="dmade"></div>'+
+      '</div>'+
+      '<div class="cmdwin"><div class="msg">'+(filled?("あと "+(DRESS_SLOTS.length-filled)+"つで コーデ かんせい！"):"アイテムを あつめよう！")+'</div></div>'+
+      '<div class="dhud"><span>👗 きょう '+g.made+' / '+DRESS_GOAL+'</span><span>👚 ずかん '+book.length+'チャク</span></div>'+
+      '<div class="dshelf"><span class="lbl">コーデずかん</span>'+this._shelfHTML()+'</div>';
+    const sh=host.querySelector(".dshelf"); sh.scrollLeft=sh.scrollWidth; },
+  act(host,g,ev){
+    const self=this;
+    clearTimeout(this._t); const gen=this._gen=(this._gen||0)+1;
+    const board=host.querySelector(".dboard"), msg=host.querySelector(".msg"),
+          hud=host.querySelector(".dhud"), shelf=host.querySelector(".dshelf"),
+          made=host.querySelector(".dmade");
+    const cells=board.querySelectorAll(".dslot"), cell=cells[ev.idx];
+    if(cell){
+      cell.className="dslot on"+(ev.rare?" rare":"")+" pop";
+      cell.querySelector(".di").textContent=ev.emoji;
+    }
+    msg.textContent=ev.label+" は "+ev.iname+"！";
+    if(ev.rare && !ev.complete){ fxBurst(host,50,42,["✨","💖","⭐"],13); soundRare(); }
+    else sfxDeco();
+    hud.innerHTML='<span>👗 きょう '+g.made+' / '+DRESS_GOAL+'</span><span>👚 ずかん '+((st.dressBook||[]).length)+'チャク</span>';
+    if(ev.complete){
+      setTimeout(()=>{ if(gen!==self._gen) return;
+        made.innerHTML='<div class="dcoord'+(ev.coord.rare?" rare":"")+'"><div class="dci">'+ev.coord.icons.join("")+'</div>'+
+                       '<div class="dcn">'+ev.coord.name+'</div></div>';
+        made.classList.remove("show"); void made.offsetWidth; made.classList.add("show");
+        msg.textContent=ev.coord.name+" かんせい！"+(ev.isNew?" ✨はじめて！":"");
+        fxBurst(host,50,38,["✨","🎉","💖","⭐","🌈"],20); soundFanfare();
+        shelf.insertAdjacentHTML("beforeend",'<span class="dcard'+(ev.coord.rare?" rare":"")+'">'+ev.coord.icons.join("")+'</span>');
+        shelf.scrollLeft=shelf.scrollWidth;
+        self._t=setTimeout(()=>{ if(gen===self._gen) self.enter(host,g); }, 2200);   // つぎのコーデへ
+      }, 480);
+    }
+  }
+};
+
+const GAMES = [BATTLE, GROW, SPA, RIDE, DRESS, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
 
 
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function todaysGame(){
   if(st.gamePick && st.gamePick!=="auto"){ const g=GAMES.find(x=>x.id===st.gamePick); if(g) return g; }
   const og=orderedGames();                                             // 日替わりも おすすめ順で回す
-  return og[((dayKey()%og.length)+og.length)%og.length];               // 抽選ではなく日付順の巡回（11日で1巡）
+  return og[((dayKey()%og.length)+og.length)%og.length];               // 抽選ではなく日付順の巡回（12日で1巡）
 }
 /* あそびが変わったら、そのゲームの状態を新規に（1食で完結する区切り） */
 /* あそびを かえても、そのゲームの途中経過は残しておく。
@@ -2320,10 +2460,10 @@ function ensureGame(){
    ・3〜5歳は「お世話(nurturing)」の欲求がピーク。複雑なルールと遅延報酬は処理できない
    ・6〜8歳でルール理解と自己ベスト志向が出て、バトルの戦略性を評価しはじめる
    ・性差は統計的な傾向にすぎないので、並び順を変えるだけにして選択肢は減らさない */
-const REC_YOUNG = ["grow","spa","ride","garden","sweets","fishing","race","board","dig","rocket","battle"];
-const REC_OLDER = ["battle","board","dig","rocket","race","fishing","ride","grow","spa","sweets","garden"];
-const REC_BOY   = ["battle","ride","race","rocket","dig","board","fishing","spa","grow","sweets","garden"];
-const REC_GIRL  = ["spa","grow","sweets","garden","fishing","ride","board","race","dig","rocket","battle"];
+const REC_YOUNG = ["grow","spa","ride","garden","sweets","dress","fishing","race","board","dig","rocket","battle"];
+const REC_OLDER = ["battle","board","dig","rocket","race","fishing","dress","ride","grow","spa","sweets","garden"];
+const REC_BOY   = ["battle","ride","race","rocket","dig","board","fishing","spa","grow","sweets","dress","garden"];
+const REC_GIRL  = ["dress","spa","grow","sweets","garden","fishing","board","ride","race","dig","rocket","battle"];
 function recOrder(){
   const ids=GAMES.map(g=>g.id);
   const byAge = st.age==null ? null : (st.age<=5 ? REC_YOUNG : REC_OLDER);
@@ -2361,7 +2501,7 @@ const GESTURES = {
 
 const KEY="sodateru_tap_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[], spaBook:[], rideBook:[],
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[], spaBook:[], rideBook:[], dressBook:[],
   gsAll:{},            // ゲームごとの途中経過（あそびを かえても つづきから）
   kidPick:true,        // こどもが自分で あそびを えらべるか（親メニューで切替）
   age:null, sex:null, onboarded:false }; }   // オンボーディングで聞く（どちらも「こたえない」可）
@@ -2700,7 +2840,7 @@ const SFX_FILES = {
 const BGM_FILES = {
   battle:"battle_bgm.ogg", fishing:"fishing_bgm.ogg", sweets:"sweets_bgm.ogg",
   race:"race_bgm.ogg", board:"board_bgm.ogg", dig:"dig_bgm.ogg",
-  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg", grow:"grow_bgm.ogg", spa:"spa_bgm.ogg", ride:"ride_bgm.ogg"
+  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg", grow:"grow_bgm.ogg", spa:"spa_bgm.ogg", ride:"ride_bgm.ogg", dress:"dress_bgm.ogg"
 };
 const SFX_GAIN = { atk:0.5, atkCrit:0.6, hit:0.55, crit:0.7, boss:0.6, defeat:0.5, ally:0.55, levelup:0.55, clear:0.6, appear:0.45 };
 const buf={};                       // 名前 -> AudioBuffer（読み込めたものだけ入る）
@@ -2847,6 +2987,9 @@ const BGMS = {
   garden: { ms:440, // やさしい おはなメロディ
     mel:[4,7,9,7, 9,11,9,7, 5,9,11,9, 11,12,11,9, 7,9,11,14, 12,11,9,7, 5,7,9,7, 4,2,null,null],
     bass:[0,5,-3,5, 2,7,0,0] },
+  dress: { ms:400, // かわいい きらきらメロディ（実音源が届くまでの合成フォールバック）
+    mel:[12,16,19,16, 14,17,14,null, 12,16,21,19, 17,14,12,null, 11,14,19,17, 16,14,12,11, 9,12,16,12, 9,null,null,null],
+    bass:[0,5,7,5, -1,4,7,0] },
   ride: { ms:330, // げんきな パレードマーチ（実音源が届くまでの合成フォールバック）
     mel:[0,0,4,4, 7,7,4,null, 5,5,9,9, 12,9,7,null, 4,7,12,12, 11,9,7,5, 4,5,7,4, 0,null,null,null],
     bass:[0,0,7,7, 5,5,0,0] },
@@ -2912,7 +3055,7 @@ function renderParent(){
   $("#bgmDesc").textContent=st.bgm?"やさしい音楽を流す":"BGM オフ"; $("#bgmToggle").classList.toggle("on",st.bgm);
   const cur=todaysGame();
   $("#gameDesc").textContent = st.gamePick==="auto"
-    ? "日替わり（毎日ちがう・11日で1巡）／きょうは "+cur.icon+" "+cur.name
+    ? "日替わり（毎日ちがう・12日で1巡）／きょうは "+cur.icon+" "+cur.name
     : "いつも "+cur.icon+" "+cur.name;
   $("#gameChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.p===(st.gamePick||"auto")));
   $("#kidPickDesc").textContent=st.kidPick?"子ども画面に「🔄 かえる」ボタンを出す":"おうちの人だけが かえられる";
