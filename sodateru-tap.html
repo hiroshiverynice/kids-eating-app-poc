@@ -1324,6 +1324,92 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important }
 }
+/* ③ ごほうびの対象をしぼる: にがて・はじめての ひとくち だけ 追加のごほうびを出す。
+   すきな物の ひとくちには出さない（すでに好きな物まで報酬漬けにしない=overjustification回避）。
+   ただし基礎の進行（あそびが1手すすむ）は どの ひとくちでも同じ＝ごほうびを取り上げて泣かせない。 */
+.chal-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 2px 10px 0 }
+.chal-bar[hidden] { display: none }
+.chal-chip {
+  font-family: var(--disp);
+  font-size: 15px;
+  font-weight: 700;
+  color: #7A4A12;
+  background: linear-gradient(180deg, #FFF3CC, #FFE28A);
+  border: 1.5px solid #F0C24A;
+  border-radius: 999px;
+  padding: 10px 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.12);
+}
+.chal-chip:active { transform: scale(.95) }
+.chal-add { display: flex; gap: 8px; align-items: center; margin-top: 8px }
+.chal-add input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--disp);
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+/* ⑥ 安全のかくにん（おうちの人向け）。診断ではなく「専門家につなぐ」ための入口。
+   ごほうびで食事をうながす方法は、ARFID・感覚の過敏さ・体の要因が背景にある子には
+   かえって負担になりうる（研究レビュー 2026-07-22）。だから最初に一度だけ確認する。 */
+/* 親メニュー(.parent-back = z-index 70)より前に出す。ここが後ろだと「見えているのに押せない」 */
+#scrBack { z-index: 80 }
+.scr-card { max-width: 340px; max-height: 86vh; overflow: auto }
+.scr-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 4px }
+.scr-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.scr-item input { width: 20px; height: 20px; flex: none; margin-top: 1px }
+.scr-res {
+  text-align: left;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  background: #FFF6E6;
+  border: 1px solid #F0C24A;
+  border-radius: 14px;
+  padding: 12px;
+  margin-top: 10px;
+}
+.scr-res b { color: #A2560A }
+.scr-res ul { margin: 6px 0 0; padding-left: 1.1em }
+.scr-btns { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 14px }
+.scr-ok {
+  font-family: var(--disp);
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  background: var(--leaf);
+  border-radius: 14px;
+  padding: 12px 22px;
+}
+.scr-gentle {
+  font-family: var(--disp);
+  font-weight: 700;
+  font-size: 13px;
+  color: #7A4A12;
+  background: #FFE28A;
+  border: 1.5px solid #F0C24A;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  width: 100%;
+}
 #camCard{display:none}
 .fallback{font-size:24px;padding:22px}
 </style>
@@ -1363,6 +1449,10 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="cam-badge" id="camBadge">じゅんび中…</div>
       <div class="cam-hint" id="camHint"></div>
     </div>
+
+    <!-- ③ にがて・はじめての食べもの を おうちの人が登録すると ここに出る。
+         押すと「ふつうの ひとくち＋チャレンジのごほうび」になる（すきな物には出ない）。 -->
+    <div class="chal-bar" id="chalBar" hidden></div>
 
     <button class="fallback hide" id="fallback">🥄 たべた！</button>
 
@@ -1412,6 +1502,23 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
     </div>
   </div>
 
+  <!-- 安全のかくにん（おうちの人向け・はじめに1回＋親メニューからいつでも）。
+       あてはまる項目があっても あそびは何も減らさない。専門家へつなぐ案内と
+       「ごほうびを ひかえめに」の提案だけを出す。 -->
+  <div class="ov-back" id="scrBack" style="display:none">
+    <div class="ov-card scr-card">
+      <div class="big">👪</div>
+      <h3 id="scrTitle">おうちの かたへ</h3>
+      <p id="scrLead">あてはまるものに チェックしてください。<br>これは<b>診断ではありません</b>。答えても あそびは 何も変わりません。</p>
+      <div class="scr-list" id="scrList"></div>
+      <div class="scr-res" id="scrRes" hidden></div>
+      <div class="scr-btns">
+        <button class="scr-ok" id="scrDone">これで OK</button>
+        <button class="link" id="scrSkip">あとで</button>
+      </div>
+    </div>
+  </div>
+
   <!-- こどもが自分で あそびを えらぶ画面（日替わりの強制をやめ、選べるようにした）
        幼児は「予測できること」を好むので、毎日ちがうものを押しつけるより
        好きなものを選び続けられるほうが発達的に自然（2026-07-29 リサーチ）。 -->
@@ -1443,6 +1550,30 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
         <div><b id="pBest">0</b><span>1食の最高</span></div>
       </div>
       <div class="pnote"><b>今は食べきれなくてOK。</b>ひとくちの挑戦をくり返すことが「すき」への近道です。時間は記録だけ・子どもには見せていません。</div>
+
+      <div class="prow">
+        <div style="flex:1">
+          <div class="lab">安全のかくにん</div>
+          <div class="desc" id="scrDesc">まだ 答えていません</div>
+          <div class="gchips"><button id="scrOpen">チェックする</button></div>
+        </div>
+      </div>
+      <div class="prow">
+        <div><div class="lab">ごほうびを ひかえめに</div><div class="desc" id="gentleDesc">オフ（ふつうの演出）</div></div>
+        <div class="toggle" id="gentleToggle" role="switch" aria-checked="false"></div>
+      </div>
+      <div class="prow">
+        <div style="flex:1">
+          <div class="lab">きょうの チャレンジ</div>
+          <div class="desc">にがて・はじめて の食べものを 3つまで。<b>ここに入れた ひとくちだけ</b> 追加のごほうびが出ます（すきな物には出しません）。同じものを3回 ためせたら 🏅。</div>
+          <div class="chal-add">
+            <input id="chalInput" type="text" maxlength="8" placeholder="ピーマン">
+            <button class="link" id="chalAdd">＋ 追加</button>
+          </div>
+          <div class="gchips" id="chalChips"></div>
+          <div class="desc" id="chalStat">チャレンジの ひとくち 0回 ／ 🏅 0こ</div>
+        </div>
+      </div>
 
       <div class="prow">
         <div><div class="lab">カメラで手かざし検知</div><div class="desc" id="camModeDesc">オン（画面を触らずに記録）</div></div>
@@ -2561,6 +2692,13 @@ const MUSIC = {
 
 const GAMES = [BATTLE, GROW, SPA, RIDE, DRESS, MUSIC, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
 
+/* 各ゲームの enter は「完結演出の1.7〜2.2秒後に次の1回を組み直す」ために setTimeout から呼ばれる。
+   そのあいだに あそびを かえると、切り替わった画面に前のあそびの enter が描き戻されてしまい、
+   以降のタップで act が壊れる（実バグ: 完結演出中に「🔄 かえる」を押すと あそびが止まった）。
+   世代カウンタは同じゲーム内の連打しか守れないので、ここで「現役のゲームでなければ描かない」を全体にかける。 */
+GAMES.forEach(g=>{ const origEnter=g.enter;
+  g.enter=function(host,gs){ if(st.gameId && st.gameId!==g.id) return; return origEnter.call(this,host,gs); }; });
+
 
 function dayKey(){ const d=new Date(); return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
 function todaysGame(){
@@ -2577,6 +2715,9 @@ function ensureGame(){
   if(st.gameId!==g.id || !st.gs){
     const all=(st.gsAll=st.gsAll||{});
     if(st.gameId && st.gs) all[st.gameId]={gs:st.gs, n:st.gsN||0};   // いま遊んでいたぶんを退避
+    /* 前のあそびの遅延演出を止める。_gen を進めると各ゲームの `if(gen!==self._gen) return` が働く */
+    const prev=GAMES.find(x=>x.id===st.gameId);
+    if(prev){ prev._gen=(prev._gen||0)+1; clearTimeout(prev._t); clearTimeout(prev._nextT); }
     const kept=all[g.id];
     st.gameId=g.id;
     if(kept && kept.gs){ st.gs=kept.gs; st.gsN=kept.n||0; }          // 前のつづきから
@@ -2634,8 +2775,19 @@ try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KE
 function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:false, showButton:true, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[], spaBook:[], rideBook:[], dressBook:[], musicBook:[],
   gsAll:{},            // ゲームごとの途中経過（あそびを かえても つづきから）
   kidPick:true,        // こどもが自分で あそびを えらべるか（親メニューで切替）
-  age:null, sex:null, onboarded:false }; }   // オンボーディングで聞く（どちらも「こたえない」可）
-function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d) return Object.assign(base(),d); }catch(e){} return base(); }
+  age:null, sex:null, onboarded:false,       // オンボーディングで聞く（どちらも「こたえない」可）
+  scr:{done:false, asked:false, flags:[], ts:0},   // ⑥ 安全のかくにん（禁忌スクリーニング）。askedは「一度出した」印
+  gentle:false,                              // ごほうびを ひかえめに（該当ありのとき提案する）
+  chal:{items:[], total:0, medals:0} }; }    // ③ にがて・はじめての食べもの（ごほうびの対象をしぼる）
+function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d){
+  const s=Object.assign(base(),d);
+  /* Object.assign は浅いコピー。古い保存データには scr/chal が無いので既定値で埋め直す */
+  s.scr =Object.assign({done:false, asked:false, flags:[], ts:0}, s.scr||{});
+  s.chal=Object.assign({items:[], total:0, medals:0}, s.chal||{});
+  if(!Array.isArray(s.scr.flags))  s.scr.flags=[];
+  if(!Array.isArray(s.chal.items)) s.chal.items=[];
+  return s;
+} }catch(e){} return base(); }
 function save(){ try{
   if(st.gameId && st.gs){ (st.gsAll=st.gsAll||{})[st.gameId]={gs:st.gs, n:st.gsN||0}; }  // 途中経過を最新に保つ
   localStorage.setItem(KEY,JSON.stringify(st));
@@ -2829,8 +2981,11 @@ function renderChar(){
   $("#progCap").textContent="あと "+(f.need-st.stageProg)+"かい で "+f.next+"よ";
 }
 
-/* ---------- a bite happened: get a food, feed the pet, it grows ---------- */
-function registerBite(){
+/* ---------- a bite happened: get a food, feed the pet, it grows ----------
+   opt.chal に食べもの名が入っていれば「にがて・はじめての ひとくち」＝追加のごほうびを重ねる。
+   基礎の進行（あそびが1手すすむ）は どの ひとくちでも同じ扱いにする。 */
+function registerBite(opt){
+  const chalName = opt && opt.chal || null;
   if(!meal.active) startMeal();
   st.total++; meal.bites++; st.stageProg++;
 
@@ -2842,8 +2997,10 @@ function registerBite(){
     game.act($("#gfStage"),st.gs,ev);               // ゲームごとの作り込み演出＋効果音（シーンを更新）
     updateHud(game);
     const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
-    speak(Math.random()<0.55 ? (ev.say||"やったね！") : RNG.pick(CHEERS));   // 一口ごとに 喋って応援
-    if(ev.rare) chime();
+    /* ひかえめモードでは 掛け声を数口に1回まで減らす（急かす感じ・にぎやかさを弱める） */
+    if(!st.gentle) speak(Math.random()<0.55 ? (ev.say||"やったね！") : RNG.pick(CHEERS));
+    else if(meal.bites%4===0) speak(RNG.pick(CHEERS));
+    if(ev.rare && !st.gentle) chime();
     if(game.done(st.gs)){                            // 1食のなかで何回でも完結できる（完結ごとに図鑑へ）
       const f=game.finale(st.gs);
       (st.zukan=st.zukan||[]).push(f.icon);
@@ -2856,7 +3013,8 @@ function registerBite(){
     const c=$("#char"); c.classList.remove("chomp"); void c.offsetWidth; c.classList.add("chomp");
   }
 
-  if(meal.bites>0 && meal.bites%5===0) streak(meal.bites+"れんぞく！");
+  if(chalName) challengeBonus(chalName);            // ③ にがて・はじめて の ひとくちだけ 追加のごほうび
+  else if(meal.bites>0 && meal.bites%5===0) streak(meal.bites+"れんぞく！");
 
   if(SHOW_PET){                                     // 育成キャラ表示時のみ進化・開花（トップ非表示時はゲームのスタンプに一本化）
     const f=FORMS[st.stageIdx];
@@ -2873,6 +3031,116 @@ function registerBite(){
     }
   }
   save(); renderChar(); renderParent();
+}
+
+/* ---------- ③ チャレンジ（にがて・はじめての食べもの）----------
+   なぜ対象をしぼるか: 食領域のRCTでは ごほうび自体は内発的動機を損なわないと報告されている一方、
+   すでに好きな物にまで外的報酬を積むのは overjustification のリスクがある。
+   だから「基礎の進行=全部の ひとくち」「追加のごほうび=にがて/はじめて だけ」に分ける。
+   同じものを3回ためせたら 🏅（リピート曝露＝受容を高める手立てを可視化する）。 */
+const CHAL_MAX=3;
+function chalItems(){ return (st.chal && st.chal.items) || []; }
+function findChal(name){ return chalItems().find(i=>i.name===name) || null; }
+function addChal(name){
+  name=(name||"").trim();
+  if(!name) return false;
+  if(findChal(name)) return false;
+  if(chalItems().length>=CHAL_MAX) return false;
+  st.chal.items.push({name:name, count:0});
+  save(); renderChalBar(); renderParent(); return true;
+}
+function removeChal(name){
+  st.chal.items=chalItems().filter(i=>i.name!==name);
+  save(); renderChalBar(); renderParent();
+}
+function challengeBonus(name){
+  const it=findChal(name); if(!it) return;
+  it.count=(it.count||0)+1;
+  st.chal.total=(st.chal.total||0)+1;
+  const medal = it.count%3===0;                       // 3回ためせたら メダル
+  if(medal) st.chal.medals=(st.chal.medals||0)+1;
+  if(st.gentle){
+    streak(name+" ためせたね");                        // ひかえめモード: 短いことばだけ
+  }else{
+    burst(["🌟","✨","🎉"]);
+    streak("チャレンジ できた！");
+    speak(medal ? name+" 3かい ためせたね！すごい！" : name+" チャレンジ できたね！");
+  }
+  if(medal) setTimeout(()=>showEvolveEmoji("🏅","メダル ゲット！",name+" を 3かい ためせたよ！"),900);
+}
+/* 子ども画面の チャレンジ帯（登録が無いときは出さない） */
+function renderChalBar(){
+  const bar=$("#chalBar"); if(!bar) return;
+  const items=chalItems();
+  bar.innerHTML="";
+  bar.hidden = items.length===0;
+  items.forEach(i=>{
+    const b=document.createElement("button");
+    b.className="chal-chip"; b.dataset.chal=i.name;
+    b.textContent="🌟 "+i.name+(i.count?" ("+i.count+")":"");
+    bar.appendChild(b);
+  });
+}
+
+/* ---------- ⑥ 安全のかくにん（禁忌スクリーニング）----------
+   ARFID・感覚の過敏さ・体重や成長の心配がある場合、ごほうびで食事をうながす設計は
+   かえって子を追い込みうる（研究レビュー 2026-07-22）。診断はしない・あそびも減らさない。
+   やることは「気づき」と「専門家へつなぐ案内」と「ごほうびを ひかえめに する提案」だけ。 */
+const SCREEN_ITEMS=[
+  {id:"weight",  t:"体重が減ってきた／身長の伸びが止まっている"},
+  {id:"narrow",  t:"食べられるものが10種類くらいしかなく、増える気配がない"},
+  {id:"sensory", t:"見た目・におい・食感を強くいやがる／パニックになる"},
+  {id:"choke",   t:"のどに詰まった・むせた・吐いた あとから 食べられなくなった"},
+  {id:"life",    t:"食事を避けるために 園・外食・友だちとの食事に支障がある"}
+];
+let scrFromOnb=false;
+function openScr(fromOnb){
+  scrFromOnb=!!fromOnb;
+  const list=$("#scrList"); list.innerHTML="";
+  SCREEN_ITEMS.forEach(it=>{
+    const l=document.createElement("label"); l.className="scr-item";
+    const c=document.createElement("input"); c.type="checkbox"; c.dataset.scr=it.id;
+    c.checked=(st.scr.flags||[]).includes(it.id);
+    const s=document.createElement("span"); s.textContent=it.t;
+    l.appendChild(c); l.appendChild(s); list.appendChild(l);
+  });
+  $("#scrRes").hidden=true; $("#scrRes").innerHTML="";
+  $("#scrSkip").style.display=scrFromOnb?"":"none";
+  $("#scrDone").textContent="これで OK";
+  $("#scrDone").onclick=submitScr;      // 結果を出したあと closeScr に差し替わるので毎回ここで戻す
+  $("#parentBack").style.display="none";  // 親シートは一旦しまう（閉じたら戻す）
+  $("#scrBack").style.display="grid";
+}
+/* 「あとで」でも「一度は出した」印を付ける＝毎回の起動で出して急かさない（親を煽らない設計） */
+function closeScr(){ $("#scrBack").style.display="none";
+  if(!st.scr.asked){ st.scr.asked=true; save(); }
+  renderParent();
+  if(!scrFromOnb) $("#parentBack").style.display="flex";   // 親メニューから来たなら そこへ戻す
+  scrFromOnb=false; }
+function submitScr(){
+  const flags=[...$("#scrList").querySelectorAll("input[data-scr]")].filter(c=>c.checked).map(c=>c.dataset.scr);
+  st.scr={done:true, asked:true, flags:flags, ts:Date.now()};
+  save(); renderParent();
+  if(!flags.length){ closeScr(); return; }
+  const res=$("#scrRes");
+  res.innerHTML =
+    "<b>気になる項目が "+flags.length+"こ ありました。</b><br>"+
+    "こうした食べにくさには「えらび食い」とは別の背景（感覚の過敏さ・ARFID・体の要因など）があることがあります。"+
+    "その場合、ごほうびで食べることをうながす方法は かえって お子さんの負担になることがあります。<br>"+
+    "まずは相談してみてください：<ul>"+
+    "<li>かかりつけの小児科</li>"+
+    "<li>市区町村の保健センター（乳幼児健診・栄養相談）</li>"+
+    "<li>管理栄養士・公認心理師</li></ul>"+
+    "このアプリは <b>食べた量の目標にはせず</b>、記録と あそびだけに お使いください。";
+  const btn=document.createElement("button");
+  btn.className="scr-gentle"; btn.id="scrGentle";
+  btn.textContent=st.gentle?"✓ ごほうびは ひかえめです":"ごほうびを ひかえめにする";
+  btn.onclick=()=>{ st.gentle=true; save(); renderParent(); btn.textContent="✓ ごほうびは ひかえめです"; };
+  res.appendChild(btn);
+  res.hidden=false;
+  $("#scrDone").textContent="とじる";
+  $("#scrSkip").style.display="none";
+  $("#scrDone").onclick=closeScr;                 // 結果を読んだうえで閉じる
 }
 
 /* ---------- effects ---------- */
@@ -3218,6 +3486,20 @@ function renderParent(){
   $("#sexChips").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.s===(st.sex||"")));
   const top=orderedGames()[0];
   $("#ageDesc").textContent=(st.age==null?"こたえていません":st.age+"さい")+"／おすすめの1番目は "+top.icon+" "+top.name;
+  /* ⑥ 安全のかくにん: 未回答／該当なし／気になる項目あり を そのまま出す（警告色で煽らない） */
+  const sc=st.scr||{};
+  $("#scrDesc").textContent = !sc.done ? "まだ 答えていません（1分でおわります）"
+    : (sc.flags.length ? "気になる項目 "+sc.flags.length+"こ ／ 専門家への相談をおすすめします"
+                       : "気になる項目は ありませんでした");
+  $("#gentleDesc").textContent = st.gentle ? "オン（掛け声ひかえめ・派手な音を出さない）" : "オフ（ふつうの演出）";
+  $("#gentleToggle").classList.toggle("on",!!st.gentle);
+  $("#gentleToggle").setAttribute("aria-checked",st.gentle?"true":"false");
+  /* ③ チャレンジ: 登録した食べもの（タップで削除）と 味見の回数 */
+  const cc=$("#chalChips"); cc.innerHTML="";
+  chalItems().forEach(i=>{ const b=document.createElement("button"); b.dataset.c=i.name;
+    b.textContent=i.name+"（"+(i.count||0)+"回）✕"; cc.appendChild(b); });
+  $("#chalStat").textContent="チャレンジの ひとくち "+(st.chal.total||0)+"回 ／ 🏅 "+(st.chal.medals||0)+"こ"
+    + (chalItems().length>=CHAL_MAX ? "（登録は3つまで）" : "");
   const g=GESTURES[st.gesture]||GESTURES.peace;
   const row=$("#gestRow"); if(row) row.style.display=st.camMode?"":"none";
   if($("#gestDesc")){
@@ -3242,6 +3524,17 @@ $("#rewardToggle").onclick=()=>{ st.rewardMode=st.rewardMode==="grow"?"praise":"
 $("#btnToggle").onclick=()=>{ st.showButton=!st.showButton; save(); renderParent(); updateButtonVis(); };
 $("#bgmToggle").onclick=()=>{ st.bgm=!st.bgm; save(); renderParent(); st.bgm? startBGM():stopBGM(); };
 $("#camToggle").onclick=()=>{ st.camMode=!st.camMode; save(); renderParent(); updateButtonVis(); applyGestureUI(); st.camMode? startCamera():stopCamera(); };
+/* ⑥ 安全のかくにん / ごほうびひかえめ */
+$("#scrOpen").onclick=()=>openScr(false);
+$("#scrSkip").onclick=closeScr;
+$("#scrBack").addEventListener("click",e=>{ if(e.target.id==="scrBack") closeScr(); });
+$("#gentleToggle").onclick=()=>{ st.gentle=!st.gentle; save(); renderParent(); };
+/* ③ チャレンジの登録・削除・こども画面のタップ */
+$("#chalAdd").onclick=()=>{ const inp=$("#chalInput"); if(addChal(inp.value)) inp.value=""; };
+$("#chalInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#chalAdd").onclick(); } });
+$("#chalChips").onclick=e=>{ const b=e.target.closest("button[data-c]"); if(b) removeChal(b.dataset.c); };
+$("#chalBar").onclick=e=>{ const b=e.target.closest("button[data-chal]"); if(!b) return;
+  resumeAudio(); registerBite({chal:b.dataset.chal}); renderChalBar(); };
 /* あそび選択チップを組み立てる（日替わり＋全ゲーム） */
 GAMES.forEach(g=>{ const b=document.createElement("button"); b.dataset.p=g.id; b.textContent=g.icon+" "+g.name; $("#gameChips").appendChild(b); });
 $("#gameChips").onclick=e=>{ const b=e.target.closest("button[data-p]"); if(!b) return;
@@ -3264,7 +3557,8 @@ $("#onbSex").onclick=e=>{ const b=e.target.closest("button[data-s]"); if(!b) ret
   st.onboarded=true;
   st.gamePick=recOrder()[0];            // 日替わりの押しつけではなく、おすすめの1つから始める
   $("#onbBack").style.display="none";
-  renderGame(); save(); renderParent(); };
+  renderGame(); save(); renderParent();
+  openScr(true); };                     // つづけて 安全のかくにん（「あとで」で飛ばせる）
 
 /* ---------- こどもが あそびを えらぶ ---------- */
 function openPick(){
@@ -3289,10 +3583,12 @@ $("#sexChips").onclick=e=>{ const b=e.target.closest("button[data-s]"); if(!b) r
 $("#gestChips").onclick=e=>{ const b=e.target.closest("button[data-g]"); if(!b) return;
   st.gesture=b.dataset.g; save(); renderParent(); applyGestureUI(); detState="IDLE"; gHist.length=0; setRing(0); };
 $("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm,gs=st.gesture,gp=st.gamePick,
-        kp=st.kidPick,ag=st.age,sx=st.sex,ob=st.onboarded;
+        kp=st.kidPick,ag=st.age,sx=st.sex,ob=st.onboarded,sc=st.scr,ge=st.gentle,
+        ci=chalItems().map(i=>({name:i.name,count:0}));   /* チャレンジの登録は残し 回数だけ0に戻す */
     st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; st.gesture=gs; st.gamePick=gp;
     st.kidPick=kp; st.age=ag; st.sex=sx; st.onboarded=ob;   /* 設定（年齢・性別など）は消さない */
-    save(); meal.bites=0; renderChar(); renderGame(); renderParent(); } };
+    st.scr=sc; st.gentle=ge; st.chal={items:ci, total:0, medals:0};   /* 安全のかくにんの回答も消さない */
+    save(); meal.bites=0; renderChar(); renderGame(); renderParent(); renderChalBar(); } };
 
 /* ---------- camera + hand detection ---------- */
 let handLandmarker=null, stream=null, rafId=null, camReady=false;
@@ -3369,8 +3665,9 @@ function loop(){
 
 /* ---------- boot ---------- */
 if(!SHOW_PET) $(".phone").classList.add("no-pet");   // 育成キャラをトップから隠す
-renderChar(); renderGame(); save(); renderParent(); updateButtonVis(); applyGestureUI(); updatePickVis();
+renderChar(); renderGame(); save(); renderParent(); updateButtonVis(); applyGestureUI(); updatePickVis(); renderChalBar();
 if(!st.onboarded) openOnb();                        // はじめて開いた時だけ 年齢・性別をきく（どちらも省略可）
+else if(!st.scr.done && !st.scr.asked) openScr(true);   // 既存ユーザーにも1回だけ出す（「あとで」で二度と出ない）
 loadAudioFiles();                                   // CC0音源を先読み（1口目から本物の音が鳴るように）
 document.addEventListener("click",resumeAudio,{once:true});
 if(st.camMode) startCamera(); else { camFailed=false; updateButtonVis(); }
