@@ -1341,6 +1341,51 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   box-shadow: 0 2px 6px rgba(0,0,0,.12);
 }
 .chal-chip:active { transform: scale(.95) }
+/* 味見(曝露)の食材別記録: 「いま なにを ひとくち したか」を残すための帯。
+   KPIは食べた量ではなく“味見できた回数と種類”（リピート曝露が受容を高める＝USDA中〜高グレード）。
+   チップを押す＝いま食べている物にする＋そのまま ひとくち記録（子の操作を増やさない）。
+   以降の 手かざし／ボタン の ひとくちは 選ばれている物に自動でひもづく。 */
+/* 帯は必ず1行に収める。折り返すと iPhone SE で下部ボタンが画面外に出る（実測で踏んだ問題）。 */
+/* 幅を明示しないと nowrap の中身ぶんだけ横に広がり、.phone(overflow:hidden) の外へはみ出して
+   「見えているのに押せない」帯になる（実測で踏んだ。min-width:auto が既定のため縮まない）。 */
+#foodBar { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; overflow-y: hidden;
+           width: 100%; max-width: 100%; min-width: 0; align-self: stretch; box-sizing: border-box;
+           padding: 2px 10px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch }
+#foodBar::-webkit-scrollbar { display: none }
+#foodBar .chal-chip { flex: 0 0 auto; white-space: nowrap }
+.chal-chip.food { color: #2F5D33; background: linear-gradient(180deg, #EAF7E4, #CFEBC4); border-color: #A6D19A }
+.chal-chip.on   { color: #22421F; background: linear-gradient(180deg, #C8EEB4, #9FDD87); border-color: #5FA45A;
+                  box-shadow: 0 0 0 3px rgba(95,164,90,.28), 0 2px 6px rgba(0,0,0,.12) }
+.chal-chip.add  { color: var(--ink-soft); background: #fff; border-color: var(--line); font-size: 18px; padding: 8px 14px }
+/* 食べもの えらび（子どもが押しても安全＝あそびは1つも減らない） */
+.food-cats { display: flex; flex-direction: column; gap: 12px; max-height: 62vh; overflow: auto; margin-top: 10px }
+.food-cat-t { font-size: 13px; font-weight: 800; color: var(--ink-soft); text-align: left }
+.food-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 6px }
+.food-grid button {
+  font-family: var(--disp);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 8px 2px 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.food-grid button .ic { font-size: 24px }
+.food-grid button.on { border-color: var(--leaf); background: #EAF7E4 }
+/* おうちの人向け「あじみ の きろく」。不足・未達を出さない＝親を追い詰めない（ガードレール④）。 */
+.food-rec { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; max-height: 190px; overflow: auto }
+.food-rec-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink) }
+.food-rec-row .nm { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.food-rec-row .ct { font-size: 11px; color: var(--ink-soft); font-variant-numeric: tabular-nums }
+.food-rec-row .md { font-size: 13px }
+.food-cat-bars { display: flex; flex-direction: column; gap: 5px; margin-top: 8px }
+.food-cat-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-soft) }
+.food-cat-bar .cn { flex: 0 0 116px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.food-cat-bar .bx { flex: 1; min-width: 0; height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden }
+.food-cat-bar .bx i { display: block; height: 100%; border-radius: 999px; background: var(--leaf) }
 .chal-add { display: flex; gap: 8px; align-items: center; margin-top: 8px }
 .chal-add input {
   flex: 1;
@@ -1448,9 +1493,10 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="cam-hint" id="camHint"></div>
     </div>
 
-    <!-- ③ にがて・はじめての食べもの を おうちの人が登録すると ここに出る。
-         押すと「ふつうの ひとくち＋チャレンジのごほうび」になる（すきな物には出ない）。 -->
-    <div class="chal-bar" id="chalBar" hidden></div>
+    <!-- たべもの帯。押すと「いま これ たべてる」になり、そのまま ひとくちも記録される。
+         以降の 手かざし／ボタン の ひとくちは 選ばれている物にひもづく（＝食材別の味見記録）。
+         ③ にがて・はじめて に登録した物は 🌟 付きで、その ひとくちだけ 追加のごほうびが出る。 -->
+    <div class="chal-bar" id="foodBar" hidden></div>
 
     <button class="fallback hide" id="fallback">🥄 たべた！</button>
 
@@ -1528,6 +1574,16 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
     </div>
   </div>
 
+  <!-- 食べもの えらび。子どもが押しても安全（あそびは1つも減らない・まちがえても何も起きない）。
+       写真からの自動判別はやらない（栄養推定の精度が担保できないため選択式が確実）。 -->
+  <div class="ov-back" id="foodPickBack" style="display:none">
+    <div class="ov-card pick-card">
+      <h3>なにを たべてる？</h3>
+      <div class="food-cats" id="foodCats"></div>
+      <p class="pick-note">えらぶと「いま たべてるもの」になるよ</p>
+    </div>
+  </div>
+
   <div class="ov-back" id="giftBack" style="display:none">
     <div class="ov-card">
       <div class="big" id="boardBig">📔</div>
@@ -1548,6 +1604,27 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
         <div><b id="pBest">0</b><span>1食の最高</span></div>
       </div>
       <div class="pnote"><b>今は食べきれなくてOK。</b>ひとくちの挑戦をくり返すことが「すき」への近道です。時間は記録だけ・子どもには見せていません。</div>
+
+      <!-- 味見（曝露）の記録。見るのは「食べた量」ではなく "何を・何回・何日 ためせたか"。
+           くり返し出会うほど受け入れやすくなる（リピート曝露）ので、回数と日数だけを出す。
+           足りない・未達・目標といった表示は出さない（親のプレッシャーは偏食を悪化させるため）。 -->
+      <div class="prow">
+        <div style="flex:1">
+          <div class="lab">あじみ の きろく</div>
+          <div class="pstat" style="margin:8px 0 0">
+            <div><b id="fdKinds">0</b><span>あじみできた種類</span></div>
+            <div><b id="fdRepeat">0</b><span>3日以上ためせた</span></div>
+            <div><b id="fdBites">0</b><span>あじみのひとくち</span></div>
+          </div>
+          <div class="food-cat-bars" id="fdCats"></div>
+          <div class="food-rec" id="fdList"></div>
+          <div class="desc" style="margin-top:8px">量ではなく「ためせた回数」を見ています。1口でも、口に入れなくても、同じ食卓に出せた日が積み上がります。</div>
+          <div class="gchips">
+            <button id="fdEdit">🍽 帯にだす食べものを えらぶ</button>
+            <button id="fdCopy">きろくをコピー</button>
+          </div>
+        </div>
+      </div>
 
       <div class="prow">
         <div style="flex:1">
@@ -2770,20 +2847,53 @@ const GESTURES = {
 
 const KEY="sodateru_v1";
 try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){} // URLに ?reset で最初から
+/* ---------- 味見（曝露）の食材マスター ----------
+   base() から参照するので、必ず base() より前に置く（const は巻き上がらない）。
+   cat は将来の栄養ざっくり表示（文科省 食品成分表）に接続するための持ち手。 */
+const FOOD_CATS=[
+  {id:"veg",   ic:"🥦", name:"やさい・きのこ"},
+  {id:"fruit", ic:"🍎", name:"くだもの"},
+  {id:"prot",  ic:"🍖", name:"おにく・おさかな"},
+  {id:"soy",   ic:"🥚", name:"たまご・まめ"},
+  {id:"grain", ic:"🍚", name:"ごはん・パン・いも"},
+  {id:"milk",  ic:"🥛", name:"ぎゅうにゅう・チーズ"}
+];
+/* [名前, 絵文字, カテゴリ]。種類の多さが要る所は絵文字が勝つ（スプライト化の教訓）。 */
+const FOOD_MASTER=[
+  ["にんじん","🥕","veg"],["ピーマン","🫑","veg"],["ブロッコリー","🥦","veg"],["トマト","🍅","veg"],
+  ["きゅうり","🥒","veg"],["ほうれんそう","🥬","veg"],["なす","🍆","veg"],["かぼちゃ","🎃","veg"],
+  ["たまねぎ","🧅","veg"],["コーン","🌽","veg"],["きのこ","🍄","veg"],["サラダ","🥗","veg"],
+  ["りんご","🍎","fruit"],["バナナ","🍌","fruit"],["みかん","🍊","fruit"],["いちご","🍓","fruit"],
+  ["ぶどう","🍇","fruit"],["なし","🍐","fruit"],["メロン","🍈","fruit"],["キウイ","🥝","fruit"],
+  ["とりにく","🍗","prot"],["ぶたにく","🥓","prot"],["ぎゅうにく","🥩","prot"],["さかな","🐟","prot"],
+  ["えび","🍤","prot"],["ウインナー","🌭","prot"],["ハンバーグ","🍖","prot"],
+  ["たまご","🥚","soy"],["とうふ","🧈","soy"],["なっとう","🫘","soy"],["えだまめ","🫛","soy"],
+  ["ごはん","🍚","grain"],["パン","🍞","grain"],["うどん","🍜","grain"],["パスタ","🍝","grain"],
+  ["おにぎり","🍙","grain"],["いも","🍠","grain"],["シリアル","🥣","grain"],
+  ["ぎゅうにゅう","🥛","milk"],["ヨーグルト","🍨","milk"],["チーズ","🧀","milk"]
+];
+/* 帯の初期値。空だと最初の一口が どの食材にも ひもづかないので 定番を並べておく（親が入れ替え可）。 */
+const FOOD_BAR_DEFAULT=["ごはん","にんじん","ブロッコリー","とりにく","たまご","トマト","バナナ","ぎゅうにゅう"];
+const FOOD_BAR_MAX=12;
 function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[], spaBook:[], rideBook:[], dressBook:[], musicBook:[],
   gsAll:{},            // ゲームごとの途中経過（あそびを かえても つづきから）
   kidPick:true,        // こどもが自分で あそびを えらべるか（親メニューで切替）
   age:null, sex:null, onboarded:false,       // オンボーディングで聞く（どちらも「こたえない」可）
   scr:{done:false, asked:false, flags:[], ts:0},   // ⑥ 安全のかくにん（禁忌スクリーニング）。askedは「一度出した」印
   gentle:false,                              // ごほうびを ひかえめに（該当ありのとき提案する）
-  chal:{items:[], total:0, medals:0} }; }    // ③ にがて・はじめての食べもの（ごほうびの対象をしぼる）
+  chal:{items:[], total:0, medals:0},        // ③ にがて・はじめての食べもの（ごほうびの対象をしぼる）
+  foods:{},                                  // 味見(曝露)の食材別きろく: 名前 -> {n:回数, days:[日], cat, ic}
+  curFood:null,                              // いま食べているもの（食事がおわると外れる）
+  foodBar:FOOD_BAR_DEFAULT.slice() }; }      // 子ども画面の帯に出す食べもの（最近つかった順）
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d){
   const s=Object.assign(base(),d);
-  /* Object.assign は浅いコピー。古い保存データには scr/chal が無いので既定値で埋め直す */
+  /* Object.assign は浅いコピー。古い保存データには scr/chal/foods が無いので既定値で埋め直す */
   s.scr =Object.assign({done:false, asked:false, flags:[], ts:0}, s.scr||{});
   s.chal=Object.assign({items:[], total:0, medals:0}, s.chal||{});
   if(!Array.isArray(s.scr.flags))  s.scr.flags=[];
   if(!Array.isArray(s.chal.items)) s.chal.items=[];
+  if(!s.foods || typeof s.foods!=="object") s.foods={};
+  if(!Array.isArray(s.foodBar)) s.foodBar=FOOD_BAR_DEFAULT.slice();
   return s;
 } }catch(e){} return base(); }
 function save(){ try{
@@ -2983,7 +3093,11 @@ function renderChar(){
    opt.chal に食べもの名が入っていれば「にがて・はじめての ひとくち」＝追加のごほうびを重ねる。
    基礎の進行（あそびが1手すすむ）は どの ひとくちでも同じ扱いにする。 */
 function registerBite(opt){
-  const chalName = opt && opt.chal || null;
+  /* どの食べものの ひとくちか。帯を押した時はその食べもの、
+     手かざし／ボタンの時は「いま たべてるもの」に自動でひもづく（子の操作は増やさない）。 */
+  const food = (opt && (opt.food || opt.chal)) || st.curFood || null;
+  const chalName = (food && findChal(food)) ? food : null;
+  if(food) logFood(food);
   if(!meal.active) startMeal();
   st.total++; meal.bites++; st.stageProg++;
 
@@ -3028,7 +3142,7 @@ function registerBite(opt){
       }
     }
   }
-  save(); renderChar(); renderParent();
+  save(); renderChar(); renderParent(); renderFoodBar();
 }
 
 /* ---------- ③ チャレンジ（にがて・はじめての食べもの）----------
@@ -3045,11 +3159,11 @@ function addChal(name){
   if(findChal(name)) return false;
   if(chalItems().length>=CHAL_MAX) return false;
   st.chal.items.push({name:name, count:0});
-  save(); renderChalBar(); renderParent(); return true;
+  save(); renderFoodBar(); renderParent(); return true;
 }
 function removeChal(name){
   st.chal.items=chalItems().filter(i=>i.name!==name);
-  save(); renderChalBar(); renderParent();
+  save(); renderFoodBar(); renderParent();
 }
 function challengeBonus(name){
   const it=findChal(name); if(!it) return;
@@ -3066,18 +3180,150 @@ function challengeBonus(name){
   }
   if(medal) setTimeout(()=>showEvolveEmoji("🏅","メダル ゲット！",name+" を 3かい ためせたよ！"),900);
 }
-/* 子ども画面の チャレンジ帯（登録が無いときは出さない） */
-function renderChalBar(){
-  const bar=$("#chalBar"); if(!bar) return;
-  const items=chalItems();
-  bar.innerHTML="";
-  bar.hidden = items.length===0;
-  items.forEach(i=>{
+/* ---------- 味見（曝露）の 食材別きろく ----------
+   このアプリの KPI は「食べた量」ではなく <何を・何回・何日 ためせたか>。
+   くり返し出会うほど受け入れやすくなる（リピート曝露／USDA 中〜高グレード）ので、
+   量や達成率ではなく 回数と日数 だけを残す。写真からの自動判別はしない
+   （栄養推定の精度が担保できないため、成分表に載る名前を選ぶ選択式が確実）。
+   cat は将来の栄養ざっくり表示（文科省 食品成分表）に接続するための持ち手。 */
+function foodInfo(name){ return FOOD_MASTER.find(f=>f[0]===name) || null; }
+function foodIcon(name){ const f=foodInfo(name); return f?f[1]:"🍽"; }
+function foodEntries(){ const f=st.foods||{}; return Object.keys(f).map(k=>Object.assign({name:k},f[k])); }
+function foodStats(){
+  const es=foodEntries();
+  return { kinds: es.length,                                    // あじみできた種類（＝曝露の広さ）
+           repeat: es.filter(e=>(e.days||[]).length>=3).length,  // 3日以上ためせた種類（＝リピート曝露）
+           bites:  es.reduce((a,e)=>a+(e.n||0),0) };
+}
+/* ひとくちを 食材にひもづける。日付は「その日ためした」印だけを残す（時刻や量は取らない）。 */
+function logFood(name){
+  if(!name) return;
+  const f=(st.foods=st.foods||{});
+  const inf=foodInfo(name);
+  const e=f[name] || (f[name]={n:0, days:[], cat:inf?inf[2]:"other", ic:inf?inf[1]:"🍽"});
+  if(!Array.isArray(e.days)) e.days=[];
+  e.n=(e.n||0)+1;
+  const d=dayKey();
+  if(!e.days.includes(d)) e.days.push(d);
+  if(e.days.length>400) e.days=e.days.slice(-400);   // 1年ちょっとで頭から捨てる（localStorage を太らせない）
+}
+/* 「いま これ たべてる」に切り替える。以降の 手かざし／ボタン の ひとくちは これにひもづく。 */
+function useFood(name){
+  st.curFood=name||null;
+  if(name){
+    const bar=(st.foodBar=st.foodBar||[]).filter(n=>n!==name);
+    bar.unshift(name);                                 // 最近つかった順に前へ（探す手間を減らす）
+    st.foodBar=bar.slice(0,FOOD_BAR_MAX);
+  }
+  save(); renderFoodBar(); renderParent();
+}
+/* 帯に出す食べもの＝チャレンジ（🌟）＋ 最近つかったもの */
+function barFoods(){
+  const names=[];
+  chalItems().forEach(i=>{ if(!names.includes(i.name)) names.push(i.name); });
+  (st.foodBar||[]).forEach(n=>{ if(!names.includes(n)) names.push(n); });
+  return names.slice(0,FOOD_BAR_MAX);
+}
+/* 子ども画面の たべもの帯。押す＝いま食べている物にする＋そのまま ひとくちも記録。 */
+function renderFoodBar(){
+  const bar=$("#foodBar"); if(!bar) return;
+  bar.innerHTML=""; bar.hidden=false;
+  barFoods().forEach(n=>{
+    const chal=!!findChal(n);
     const b=document.createElement("button");
-    b.className="chal-chip"; b.dataset.chal=i.name;
-    b.textContent="🌟 "+i.name+(i.count?" ("+i.count+")":"");
+    b.className="chal-chip"+(chal?"":" food")+(st.curFood===n?" on":"");
+    b.dataset.food=n;
+    if(chal) b.dataset.chal=n;                          // 🌟＝追加のごほうびが出る物
+    const cnt=(st.foods&&st.foods[n]&&st.foods[n].n)||0;
+    b.textContent=(chal?"🌟":foodIcon(n))+" "+n+(cnt?" ("+cnt+")":"");
     bar.appendChild(b);
   });
+  const add=document.createElement("button");
+  add.className="chal-chip add"; add.dataset.foodAdd="1";
+  add.textContent="＋"; add.setAttribute("aria-label","たべものを えらぶ");
+  bar.appendChild(add);
+  const on=bar.querySelector(".chal-chip.on");
+  if(on && on.scrollIntoView) try{ on.scrollIntoView({block:"nearest",inline:"nearest"}); }catch(e){}
+}
+/* 食べもの えらび画面。子どもが押しても安全＝あそびは1つも減らないし、まちがえても何も失われない。
+   ここでは ひとくちを記録しない（えらぶ操作で口数が増えると記録が汚れるため）。 */
+function openFoodPick(){
+  const wrap=$("#foodCats"); if(!wrap) return;
+  wrap.innerHTML="";
+  FOOD_CATS.forEach(c=>{
+    const sec=document.createElement("div");
+    const t=document.createElement("div"); t.className="food-cat-t"; t.textContent=c.ic+" "+c.name;
+    sec.appendChild(t);
+    const g=document.createElement("div"); g.className="food-grid";
+    FOOD_MASTER.filter(f=>f[2]===c.id).forEach(f=>{
+      const b=document.createElement("button"); b.dataset.food=f[0];
+      if(st.curFood===f[0]) b.className="on";
+      b.innerHTML='<span class="ic">'+f[1]+'</span>'+f[0];
+      g.appendChild(b);
+    });
+    sec.appendChild(g); wrap.appendChild(sec);
+  });
+  $("#foodPickBack").style.display="grid";
+}
+function closeFoodPick(){ $("#foodPickBack").style.display="none"; }
+/* おうちの人向けの きろく表示。足りない・未達・目標は出さない（親のプレッシャーは偏食を悪化させる）。 */
+function renderFoodRec(){
+  if(!$("#fdKinds")) return;
+  const s=foodStats();
+  $("#fdKinds").textContent=s.kinds; $("#fdRepeat").textContent=s.repeat; $("#fdBites").textContent=s.bites;
+  const es=foodEntries();
+  const counts=FOOD_CATS.map(c=>es.filter(e=>e.cat===c.id).length);
+  const max=Math.max(1,...counts);
+  const cats=$("#fdCats"); cats.innerHTML="";
+  FOOD_CATS.forEach((c,i)=>{
+    const row=document.createElement("div"); row.className="food-cat-bar"; row.dataset.cat=c.id;
+    const ic=document.createElement("span"); ic.className="cn"; ic.textContent=c.ic+" "+c.name;
+    const bx=document.createElement("span"); bx.className="bx";
+    const fill=document.createElement("i"); fill.style.width=Math.round(counts[i]/max*100)+"%";
+    bx.appendChild(fill);
+    const nm=document.createElement("span"); nm.textContent=counts[i]+"しゅるい";
+    row.appendChild(ic); row.appendChild(bx); row.appendChild(nm);
+    cats.appendChild(row);
+  });
+  const list=$("#fdList"); list.innerHTML="";
+  if(!es.length){
+    const p=document.createElement("div"); p.className="food-rec-row";
+    p.textContent="まだ 記録はありません。帯の食べものを押すと たまっていきます。";
+    list.appendChild(p); return;
+  }
+  es.sort((a,b)=>(b.n||0)-(a.n||0)).forEach(e=>{
+    const days=(e.days||[]).length;
+    const row=document.createElement("div"); row.className="food-rec-row"; row.dataset.food=e.name;
+    const nm=document.createElement("span"); nm.className="nm"; nm.textContent=(e.ic||foodIcon(e.name))+" "+e.name;
+    const ct=document.createElement("span"); ct.className="ct"; ct.textContent=(e.n||0)+"回 ／ "+days+"日";
+    const md=document.createElement("span"); md.className="md"; md.textContent=days>=3?"🏅":"";
+    row.appendChild(nm); row.appendChild(ct); row.appendChild(md);
+    list.appendChild(row);
+  });
+}
+/* 記録の持ち出し（受診・栄養相談でそのまま見せられる形）。 */
+function foodRecText(){
+  const s=foodStats();
+  const lines=["あじみのきろく（"+new Date().toLocaleDateString("ja-JP")+"）",
+    "あじみできた種類: "+s.kinds+" ／ 3日以上ためせた: "+s.repeat+" ／ あじみのひとくち: "+s.bites,
+    "※食べた量ではなく、味見（曝露）の回数と日数の記録です。",""];
+  foodEntries().sort((a,b)=>(b.n||0)-(a.n||0))
+    .forEach(e=>lines.push(e.name+"\t"+(e.n||0)+"回\t"+((e.days||[]).length)+"日"));
+  return lines.join("\n");
+}
+function copyFoodRec(){
+  const txt=foodRecText();
+  const done=()=>{ const b=$("#fdCopy"); if(b){ b.textContent="コピーしました"; setTimeout(()=>b.textContent="きろくをコピー",1600); } };
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done)); return; }
+  }catch(e){}
+  fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){
+  try{ const ta=document.createElement("textarea"); ta.value=txt;
+    ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta);
+    ta.select(); document.execCommand("copy"); document.body.removeChild(ta); done();
+  }catch(e){}
 }
 
 /* ---------- ⑥ 安全のかくにん（禁忌スクリーニング）----------
@@ -3446,6 +3692,7 @@ function startMeal(){ if(meal.active) return; startBGM(); meal={active:true,star
   $("#mealBtn").textContent="🟢 ごはんちゅう… (タップでおわり)"; $("#mealBtn").classList.remove("btn-start"); $("#mealBtn").classList.add("btn-end");
   meal.tickId=setInterval(renderParent,1000); renderParent(); }
 function endMeal(){ if(!meal.active) return; clearInterval(meal.tickId); meal.active=false; const n=meal.bites;
+  st.curFood=null; renderFoodBar();          // 次の食事は また「いま食べてるもの」から選び直す
   $("#mealBtn").textContent="🍽️ ごはん スタート"; $("#mealBtn").classList.add("btn-start"); $("#mealBtn").classList.remove("btn-end");
   const rec=n>st.best&&n>0; if(n>st.best) st.best=n; save();
   $("#sumMsg").textContent="きょうは "+n+"こ ひとくち できたね！";
@@ -3498,6 +3745,7 @@ function renderParent(){
     b.textContent=i.name+"（"+(i.count||0)+"回）✕"; cc.appendChild(b); });
   $("#chalStat").textContent="チャレンジの ひとくち "+(st.chal.total||0)+"回 ／ 🏅 "+(st.chal.medals||0)+"こ"
     + (chalItems().length>=CHAL_MAX ? "（登録は3つまで）" : "");
+  renderFoodRec();                                    // 味見（曝露）の食材別きろく
   const g=GESTURES[st.gesture]||GESTURES.peace;
   const row=$("#gestRow"); if(row) row.style.display=st.camMode?"":"none";
   if($("#gestDesc")){
@@ -3531,8 +3779,24 @@ $("#gentleToggle").onclick=()=>{ st.gentle=!st.gentle; save(); renderParent(); }
 $("#chalAdd").onclick=()=>{ const inp=$("#chalInput"); if(addChal(inp.value)) inp.value=""; };
 $("#chalInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#chalAdd").onclick(); } });
 $("#chalChips").onclick=e=>{ const b=e.target.closest("button[data-c]"); if(b) removeChal(b.dataset.c); };
-$("#chalBar").onclick=e=>{ const b=e.target.closest("button[data-chal]"); if(!b) return;
-  resumeAudio(); registerBite({chal:b.dataset.chal}); renderChalBar(); };
+/* たべもの帯: 押す＝「いま これ たべてる」に切り替え＋そのまま ひとくちも記録する。
+   選び直す操作を増やさないための一体化。＋ は 食べもの えらび画面をひらくだけ（記録しない）。 */
+$("#foodBar").onclick=e=>{
+  const add=e.target.closest("button[data-food-add]");
+  if(add){ resumeAudio(); openFoodPick(); return; }
+  const b=e.target.closest("button[data-food]"); if(!b) return;
+  resumeAudio();
+  const name=b.dataset.food;
+  st.curFood=name;
+  const bar=(st.foodBar=st.foodBar||[]).filter(n=>n!==name); bar.unshift(name); st.foodBar=bar.slice(0,FOOD_BAR_MAX);
+  registerBite({food:name});
+};
+/* 食べもの えらび: ここでは ひとくちを記録しない（えらぶ操作で口数が増えると記録が汚れる） */
+$("#foodCats").onclick=e=>{ const b=e.target.closest("button[data-food]"); if(!b) return;
+  useFood(b.dataset.food); closeFoodPick(); };
+$("#foodPickBack").onclick=e=>{ if(e.target.id==="foodPickBack") closeFoodPick(); };
+$("#fdEdit").onclick=()=>{ $("#parentBack").style.display="none"; openFoodPick(); };
+$("#fdCopy").onclick=copyFoodRec;
 /* あそび選択チップを組み立てる（日替わり＋全ゲーム） */
 GAMES.forEach(g=>{ const b=document.createElement("button"); b.dataset.p=g.id; b.textContent=g.icon+" "+g.name; $("#gameChips").appendChild(b); });
 $("#gameChips").onclick=e=>{ const b=e.target.closest("button[data-p]"); if(!b) return;
@@ -3582,11 +3846,13 @@ $("#gestChips").onclick=e=>{ const b=e.target.closest("button[data-g]"); if(!b) 
   st.gesture=b.dataset.g; save(); renderParent(); applyGestureUI(); detState="IDLE"; gHist.length=0; setRing(0); };
 $("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm,gs=st.gesture,gp=st.gamePick,
         kp=st.kidPick,ag=st.age,sx=st.sex,ob=st.onboarded,sc=st.scr,ge=st.gentle,
-        ci=chalItems().map(i=>({name:i.name,count:0}));   /* チャレンジの登録は残し 回数だけ0に戻す */
+        ci=chalItems().map(i=>({name:i.name,count:0})),   /* チャレンジの登録は残し 回数だけ0に戻す */
+        fb=(st.foodBar||FOOD_BAR_DEFAULT).slice();        /* 帯に出す食べものの並びは「設定」なので残す */
     st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; st.gesture=gs; st.gamePick=gp;
     st.kidPick=kp; st.age=ag; st.sex=sx; st.onboarded=ob;   /* 設定（年齢・性別など）は消さない */
     st.scr=sc; st.gentle=ge; st.chal={items:ci, total:0, medals:0};   /* 安全のかくにんの回答も消さない */
-    save(); meal.bites=0; renderChar(); renderGame(); renderParent(); renderChalBar(); } };
+    st.foodBar=fb; st.foods={}; st.curFood=null;                      /* 味見のきろくは消える・帯の設定は残る */
+    save(); meal.bites=0; renderChar(); renderGame(); renderParent(); renderFoodBar(); } };
 
 /* ---------- camera + hand detection ---------- */
 let handLandmarker=null, stream=null, rafId=null, camReady=false;
@@ -3663,7 +3929,7 @@ function loop(){
 
 /* ---------- boot ---------- */
 if(!SHOW_PET) $(".phone").classList.add("no-pet");   // 育成キャラをトップから隠す
-renderChar(); renderGame(); save(); renderParent(); updateButtonVis(); applyGestureUI(); updatePickVis(); renderChalBar();
+renderChar(); renderGame(); save(); renderParent(); updateButtonVis(); applyGestureUI(); updatePickVis(); renderFoodBar();
 if(!st.onboarded) openOnb();                        // はじめて開いた時だけ 年齢・性別をきく（どちらも省略可）
 else if(!st.scr.done && !st.scr.asked) openScr(true);   // 既存ユーザーにも1回だけ出す（「あとで」で二度と出ない）
 loadAudioFiles();                                   // CC0音源を先読み（1口目から本物の音が鳴るように）
