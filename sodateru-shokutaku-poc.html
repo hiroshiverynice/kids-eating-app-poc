@@ -1375,6 +1375,28 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 }
 .food-grid button .ic { font-size: 24px }
 .food-grid button.on { border-color: var(--leaf); background: #EAF7E4 }
+/* おでかけ（出発の時刻）。おうちの人だけの表示なので、警告色ではなく穏やかな面で出す。
+   「まにあわない」ではなく「切り上げて大丈夫」を伝えるための枠。 */
+.out-set { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin-top: 10px; font-size: 12px; color: var(--ink-soft) }
+/* display を指定した要素は hidden 属性だけでは消えない（.chal-bar でも踏んだ罠） */
+.out-set[hidden], .out-live[hidden] { display: none }
+.prow-top { align-items: flex-start }
+.out-set label { display: flex; align-items: center; gap: 6px }
+.out-set input {
+  font-family: var(--disp);
+  font-size: 14px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+.out-set input[type="number"] { width: 62px }
+.out-live { margin-top: 10px; padding: 11px 13px; border-radius: 12px; background: var(--surface-2);
+            font-size: 13px; line-height: 1.75; color: var(--ink); text-align: left }
+.out-live.soft { background: #FFF6E3 }
+.out-live b { font-family: var(--disp); font-size: 15px }
+.out-live .sub { font-size: 11px; color: var(--ink-soft) }
 /* おうちの人向け「あじみ の きろく」。不足・未達を出さない＝親を追い詰めない（ガードレール④）。 */
 .food-rec { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; max-height: 190px; overflow: auto }
 .food-rec-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink) }
@@ -1604,6 +1626,23 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
         <div><b id="pBest">0</b><span>1食の最高</span></div>
       </div>
       <div class="pnote"><b>今は食べきれなくてOK。</b>ひとくちの挑戦をくり返すことが「すき」への近道です。時間は記録だけ・子どもには見せていません。</div>
+
+      <!-- おでかけ（出発の時刻）。締切は おうちの人だけが持ち、子ども画面は1ドットも変えない。
+           カウントダウンを子に見せると、テンポが上がるどころか手が止まるため。 -->
+      <div class="prow prow-top">
+        <div style="flex:1">
+          <div class="lab">おでかけ（出発の時刻）</div>
+          <div class="desc" id="outDesc">オフ（時間のことは いっさい出しません）</div>
+          <div class="out-set" id="outSet" hidden>
+            <label>出発 <input id="outLeave" type="time" value="07:50"></label>
+            <label>ごはんのあとの支度 <input id="outPrep" type="number" min="0" max="60" step="5" value="10">分</label>
+          </div>
+          <div class="out-live" id="outLive" hidden></div>
+          <div class="desc" style="margin-top:8px">ここは <b>おうちの人だけ</b>に見えます。子ども画面には 時計もカウントダウンも出しません（急かすと かえって手が止まるため）。</div>
+        </div>
+        <div class="toggle" id="outToggle" role="switch" aria-checked="false"></div>
+      </div>
+
 
       <!-- 味見（曝露）の記録。見るのは「食べた量」ではなく "何を・何回・何日 ためせたか"。
            くり返し出会うほど受け入れやすくなる（リピート曝露）ので、回数と日数だけを出す。
@@ -2884,7 +2923,9 @@ function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fed
   chal:{items:[], total:0, medals:0},        // ③ にがて・はじめての食べもの（ごほうびの対象をしぼる）
   foods:{},                                  // 味見(曝露)の食材別きろく: 名前 -> {n:回数, days:[日], cat, ic}
   curFood:null,                              // いま食べているもの（食事がおわると外れる）
-  foodBar:FOOD_BAR_DEFAULT.slice() }; }      // 子ども画面の帯に出す食べもの（最近つかった順）
+  foodBar:FOOD_BAR_DEFAULT.slice(),          // 子ども画面の帯に出す食べもの（最近つかった順）
+  meals:[],                                  // 食事ログ {t:開始, sec:所要, n:口数}。逆算にだけ使う
+  out:{on:false, leave:"07:50", prep:10} }; }// おでかけ（出発時刻）。おうちの人だけに出す
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d){
   const s=Object.assign(base(),d);
   /* Object.assign は浅いコピー。古い保存データには scr/chal/foods が無いので既定値で埋め直す */
@@ -2894,6 +2935,8 @@ function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d){
   if(!Array.isArray(s.chal.items)) s.chal.items=[];
   if(!s.foods || typeof s.foods!=="object") s.foods={};
   if(!Array.isArray(s.foodBar)) s.foodBar=FOOD_BAR_DEFAULT.slice();
+  if(!Array.isArray(s.meals)) s.meals=[];
+  s.out=Object.assign({on:false, leave:"07:50", prep:10}, s.out||{});
   return s;
 } }catch(e){} return base(); }
 function save(){ try{
@@ -3694,12 +3737,106 @@ function startMeal(){ if(meal.active) return; startBGM(); meal={active:true,star
 function endMeal(){ if(!meal.active) return; clearInterval(meal.tickId); meal.active=false; const n=meal.bites;
   st.curFood=null; renderFoodBar();          // 次の食事は また「いま食べてるもの」から選び直す
   $("#mealBtn").textContent="🍽️ ごはん スタート"; $("#mealBtn").classList.add("btn-start"); $("#mealBtn").classList.remove("btn-end");
-  const rec=n>st.best&&n>0; if(n>st.best) st.best=n; save();
+  const rec=n>st.best&&n>0; if(n>st.best) st.best=n;
+  /* 食事の所要時間ログ。おうちの人の「何時に始めれば間に合うか」の逆算にだけ使う。
+     子どもには時間を一切見せない（急かすと かえって手が止まる＝V1で出した結論のまま）。 */
+  if(n>0){ st.meals=(st.meals||[]);
+    st.meals.push({t:meal.startTs, sec:Math.max(1,Math.floor((Date.now()-meal.startTs)/1000)), n:n});
+    if(st.meals.length>60) st.meals=st.meals.slice(-60); }
+  save();
   $("#sumMsg").textContent="きょうは "+n+"こ ひとくち できたね！";
   $("#sumRec").textContent=rec?"🎉 しんきろく！":(st.best>0?"さいこう記録: "+st.best+"こ":"");
   $("#sumColl").textContent=(st.zukan||[]).slice(-8).join(" ");
   if(n>0){ $("#sumBack").style.display="grid"; praise(rec?"しんきろく！すごい！":"ごちそうさま！"); }
   const sb=$("#sumBack"); clearTimeout(endMeal._t); endMeal._t=setTimeout(()=>sb.style.display="none",3200); sb.onclick=()=>sb.style.display="none"; renderParent(); }
+
+/* ---------- おでかけ（出発の時刻）----------
+   朝ごはんには「保育園に間に合わせる」という現実の締切がある。
+   ただし子どもに残り時間やカウントダウンを見せると、テンポが上がるどころか手が止まる
+   （遅食児への時間圧＝親のプレッシャーと同じ作用）。だから
+   <締切はおうちの人だけが持ち、子ども画面は1ドットも変えない>。
+   アプリが子を急かすことは一切せず、代わりに おうちの人へ
+   (a) いまのペースでの見通し (b) 何時に始めれば間に合うか (c) 切り上げていいという許可
+   の3つを渡す。とくに (b) は「食べるのが遅い」より「始まるのが遅い」ことに効く。 */
+function outOn(){ return !!(st.out && st.out.on); }
+function hhmmToMin(s){ const m=/^(\d{1,2}):(\d{2})$/.exec(s||""); return m?(+m[1])*60+(+m[2]):null; }
+function minToHHMM(v){ v=((Math.round(v)%1440)+1440)%1440; return String(Math.floor(v/60)).padStart(2,"0")+":"+String(v%60).padStart(2,"0"); }
+/* 「ごちそうさま」の目標時刻＝出発時刻 − ごはんのあとの支度 */
+function outFinishMin(){ const l=hhmmToMin(st.out&&st.out.leave); return l==null?null:l-(st.out.prep||0); }
+function nowMin(){ const d=new Date(); return d.getHours()*60+d.getMinutes()+d.getSeconds()/60; }
+/* 朝の食事だけを見る（夕食のペースで朝を見積もると外れる） */
+function morningMeals(){ return (st.meals||[]).filter(m=>{ const h=new Date(m.t).getHours(); return h>=4 && h<11; }); }
+function paceOf(list){
+  const use=list.slice(-10).filter(m=>m.n>0);
+  if(!use.length) return null;
+  const sec=use.reduce((a,m)=>a+m.sec,0)/use.length;
+  const n  =use.reduce((a,m)=>a+m.n,0)/use.length;
+  return { sec:Math.round(sec), n:Math.round(n), per:n>0?sec/n:null, count:use.length };
+}
+/* 見積もりに使うペース。朝の記録が2回以上あればそれを、無ければ全食事で代用する。 */
+function outPace(){
+  const mo=paceOf(morningMeals());
+  if(mo && mo.count>=2) return Object.assign({morning:true}, mo);
+  const all=paceOf(st.meals||[]);
+  return all ? Object.assign({morning:false}, all) : null;
+}
+const mmss=sec=>Math.floor(sec/60)+"分";
+function renderOuting(){
+  if(!$("#outDesc")) return;
+  const on=outOn();
+  $("#outToggle").classList.toggle("on",on);
+  $("#outToggle").setAttribute("aria-checked",on?"true":"false");
+  $("#outSet").hidden=!on;
+  $("#outLive").hidden=!on;
+  $("#outDesc").textContent = on
+    ? (st.out.leave+" に出発（ごはんのあと "+(st.out.prep||0)+"分の支度）")
+    : "オフ（時間のことは いっさい出しません）";
+  if(!on) return;
+  $("#outLeave").value=st.out.leave; $("#outPrep").value=st.out.prep;
+
+  const live=$("#outLive"); live.className="out-live";
+  const fin=outFinishMin(), pace=outPace();
+  const lines=[];
+  if(meal.active){
+    /* 食事中: 残り時間と「あと何口ぶんの時間があるか」。口数の目標にはしない。 */
+    let left=fin-nowMin();
+    if(left<-720) left+=1440;                       // 日をまたぐ設定でも素直に読む
+    const elapsed=(Date.now()-meal.startTs)/1000;
+    /* 序盤の数口でペースを決めると数字が暴れる（最初の2口を勢いよく食べただけで
+       「あと1000口ぶん」になり、おうちの人が余裕があると誤解する）。
+       5口たまるまでは その子の過去の平均を使う。 */
+    const per = meal.bites>=5 ? elapsed/meal.bites : (pace&&pace.per) || null;
+    if(left<=3){
+      live.className="out-live soft";
+      lines.push("<b>そろそろ時間です。</b>");
+      lines.push("きょうは ここで切り上げて大丈夫です。のこりは また次の食卓に出せば大丈夫。");
+      lines.push('<span class="sub">急がせるより、明日また出すほうが「食べられる」に近づきます。</span>');
+    }else{
+      lines.push("のこり <b>"+Math.floor(left)+"分</b>（"+minToHHMM(fin)+" までに ごちそうさま）");
+      if(per){
+        /* いつもの1食ぶんより余裕があるなら 口数を出さない。数字が大きいほど正確さは落ちるし、
+           そこまで細かく知る意味もない（口数はノルマではない）。 */
+        const room=Math.max(0,Math.floor(left*60/per));
+        const enough=pace ? Math.max(pace.n,10) : 40;
+        lines.push(room>=enough ? "いまのペースなら <b>じゅうぶん 時間があります</b>"
+                                : "いまのペースなら <b>あと "+room+"口ぶん</b>の 時間があります");
+      }
+      lines.push('<span class="sub">この表示は おうちの人だけに見えています。</span>');
+    }
+  }else{
+    /* 食事の外: 何時に始めれば間に合うかを出す（遅食は「始まりが遅い」ことが多い） */
+    if(pace){
+      const start=fin-Math.round(pace.sec/60);
+      lines.push((pace.morning?"朝ごはん":"これまでの食事")+"は 平均 <b>"+mmss(pace.sec)+"・"+pace.n+"口</b>（直近"+pace.count+"回）");
+      lines.push("<b>"+minToHHMM(start)+"ごろ</b>に 始められると ちょうど良さそうです");
+      if(!pace.morning) lines.push('<span class="sub">朝ごはんの記録が2回たまると、朝だけの平均に切り替わります。</span>');
+    }else{
+      lines.push("まだ 食事の記録が ありません。");
+      lines.push('<span class="sub">何回か記録すると「何時に始めると間に合うか」を出します。</span>');
+    }
+  }
+  live.innerHTML=lines.join("<br>");
+}
 
 /* ---------- button visibility (hidden by default) ---------- */
 function updateButtonVis(){
@@ -3746,6 +3883,7 @@ function renderParent(){
   $("#chalStat").textContent="チャレンジの ひとくち "+(st.chal.total||0)+"回 ／ 🏅 "+(st.chal.medals||0)+"こ"
     + (chalItems().length>=CHAL_MAX ? "（登録は3つまで）" : "");
   renderFoodRec();                                    // 味見（曝露）の食材別きろく
+  renderOuting();                                     // おでかけ（出発の時刻・おうちの人だけ）
   const g=GESTURES[st.gesture]||GESTURES.peace;
   const row=$("#gestRow"); if(row) row.style.display=st.camMode?"":"none";
   if($("#gestDesc")){
@@ -3797,6 +3935,11 @@ $("#foodCats").onclick=e=>{ const b=e.target.closest("button[data-food]"); if(!b
 $("#foodPickBack").onclick=e=>{ if(e.target.id==="foodPickBack") closeFoodPick(); };
 $("#fdEdit").onclick=()=>{ $("#parentBack").style.display="none"; openFoodPick(); };
 $("#fdCopy").onclick=copyFoodRec;
+/* おでかけ（出発の時刻）。子ども画面には何も出さないので、ここでの操作は親画面の表示だけを変える。 */
+$("#outToggle").onclick=()=>{ st.out.on=!st.out.on; save(); renderParent(); };
+$("#outLeave").onchange=e=>{ if(hhmmToMin(e.target.value)!=null){ st.out.leave=e.target.value; save(); } renderParent(); };
+$("#outPrep").onchange=e=>{ const v=parseInt(e.target.value,10);
+  st.out.prep=isNaN(v)?0:Math.max(0,Math.min(60,v)); save(); renderParent(); };
 /* あそび選択チップを組み立てる（日替わり＋全ゲーム） */
 GAMES.forEach(g=>{ const b=document.createElement("button"); b.dataset.p=g.id; b.textContent=g.icon+" "+g.name; $("#gameChips").appendChild(b); });
 $("#gameChips").onclick=e=>{ const b=e.target.closest("button[data-p]"); if(!b) return;
@@ -3847,11 +3990,13 @@ $("#gestChips").onclick=e=>{ const b=e.target.closest("button[data-g]"); if(!b) 
 $("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm,gs=st.gesture,gp=st.gamePick,
         kp=st.kidPick,ag=st.age,sx=st.sex,ob=st.onboarded,sc=st.scr,ge=st.gentle,
         ci=chalItems().map(i=>({name:i.name,count:0})),   /* チャレンジの登録は残し 回数だけ0に戻す */
-        fb=(st.foodBar||FOOD_BAR_DEFAULT).slice();        /* 帯に出す食べものの並びは「設定」なので残す */
+        fb=(st.foodBar||FOOD_BAR_DEFAULT).slice(),        /* 帯に出す食べものの並びは「設定」なので残す */
+        ot=Object.assign({},st.out);                      /* おでかけの時刻も「設定」なので残す */
     st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; st.gesture=gs; st.gamePick=gp;
     st.kidPick=kp; st.age=ag; st.sex=sx; st.onboarded=ob;   /* 設定（年齢・性別など）は消さない */
     st.scr=sc; st.gentle=ge; st.chal={items:ci, total:0, medals:0};   /* 安全のかくにんの回答も消さない */
     st.foodBar=fb; st.foods={}; st.curFood=null;                      /* 味見のきろくは消える・帯の設定は残る */
+    st.out=ot; st.meals=[];                                           /* 食事ログは消える・出発時刻の設定は残る */
     save(); meal.bites=0; renderChar(); renderGame(); renderParent(); renderFoodBar(); } };
 
 /* ---------- camera + hand detection ---------- */
