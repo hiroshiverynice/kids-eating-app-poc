@@ -1,0 +1,496 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFF8EE">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="だせたね">
+<title>だせたね</title>
+<style>
+/* ──────────────────────────────────────────────
+   「だせたね」= 曝露プランナー単体版
+   ねらい: 苦手な食べものを「食卓に出せた回数」だけを数える。
+   ・食べたかどうかは一切聞かない（食べさせる道具にしない）
+   ・未達・警告・連続記録の途切れを出さない（親を追い詰めない）
+   ・開いて2タップで終わる（1週間続くかを見るのが目的なので、続けやすさが最優先）
+   根拠: 繰り返し曝露5〜10回で新規食物の受容が上がる。
+        記録すること自体で出す回数が増えた可能性（対照群も増えた/de Wild）。
+   ────────────────────────────────────────────── */
+:root{
+  --bg:#FFF8EE; --card:#FFFFFF; --line:#EADFCF; --soft:#FDF3E4;
+  --ink:#4A3B2A; --ink-soft:#9A8974; --leaf:#5FA45A; --leaf-l:#8FCB86;
+  --carrot:#E88A3C; --gold:#F0C24A;
+  --disp:"Hiragino Maru Gothic ProN","ヒラギノ丸ゴ ProN",-apple-system,"Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--disp); background:var(--bg); color:var(--ink);
+  -webkit-font-smoothing:antialiased; line-height:1.6;
+  padding:0 0 env(safe-area-inset-bottom);
+}
+.wrap{max-width:520px;margin:0 auto;padding:20px 16px 40px}
+header{padding:10px 2px 16px}
+h1{font-size:26px;font-weight:800;margin:0;letter-spacing:.02em}
+.lead{font-size:13px;color:var(--ink-soft);margin:6px 0 0}
+.lead b{color:var(--carrot)}
+
+/* 食べものカード */
+.foods{display:flex;flex-direction:column;gap:12px}
+.fcard{
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:14px 16px 16px; box-shadow:0 1px 3px rgba(74,59,42,.05);
+}
+.fcard.done{border-color:var(--leaf-l); background:linear-gradient(180deg,#F6FCF3,#FFFFFF)}
+.fhead{display:flex;align-items:center;gap:10px}
+.fic{font-size:30px;line-height:1}
+.fname{flex:1;font-size:19px;font-weight:800}
+.fcount{font-size:12px;color:var(--ink-soft);white-space:nowrap;font-variant-numeric:tabular-nums}
+.dots{display:flex;gap:5px;margin:12px 0 4px;flex-wrap:wrap}
+.dot{width:19px;height:19px;border-radius:50%;background:var(--soft);border:1.5px solid var(--line)}
+.dot.on{background:var(--leaf);border-color:var(--leaf)}
+.dot.today{box-shadow:0 0 0 3px rgba(95,164,90,.22)}
+.today-n{font-size:12px;color:var(--leaf);font-weight:700;min-height:18px;margin-top:2px}
+.today-n.zero{color:var(--ink-soft);font-weight:600}
+.frow{display:flex;gap:8px;margin-top:10px;align-items:stretch}
+.btn-out{
+  flex:1; font-family:var(--disp); font-size:17px; font-weight:800; color:#fff;
+  background:linear-gradient(180deg,var(--leaf-l),var(--leaf));
+  border:none; border-radius:14px; padding:14px 10px; cursor:pointer;
+  box-shadow:0 2px 0 rgba(63,120,60,.35);
+}
+.btn-out:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(63,120,60,.35)}
+.btn-undo{
+  font-family:var(--disp); font-size:13px; font-weight:700; color:var(--ink-soft);
+  background:#fff; border:1px solid var(--line); border-radius:14px; padding:0 14px; cursor:pointer;
+}
+.btn-undo:disabled{opacity:.35}
+.reached{
+  margin-top:10px; font-size:13px; font-weight:700; color:#3F7A3C;
+  background:#EDF8E9; border-radius:12px; padding:9px 12px;
+}
+.reached span{font-weight:800}
+
+/* 追加・空状態 */
+.add{
+  width:100%; margin-top:14px; font-family:var(--disp); font-size:15px; font-weight:700;
+  color:var(--ink-soft); background:transparent; border:1.5px dashed var(--line);
+  border-radius:16px; padding:15px; cursor:pointer;
+}
+.empty{
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:26px 20px; text-align:center;
+}
+.empty p{margin:0 0 16px;font-size:14px;color:var(--ink-soft)}
+.empty .big{font-size:40px;margin-bottom:8px}
+
+/* 7日間 */
+.week{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.week h2{font-size:14px;font-weight:800;margin:0 0 12px;color:var(--ink)}
+.wgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.wcell .wd{font-size:10px;color:var(--ink-soft);margin-bottom:4px}
+.wcell .wn{
+  font-size:15px;font-weight:800;padding:8px 0;border-radius:10px;
+  background:var(--soft);color:var(--ink-soft);font-variant-numeric:tabular-nums;
+}
+.wcell .wn.has{background:var(--leaf);color:#fff}
+.wcell.is-today .wd{color:var(--carrot);font-weight:800}
+.wsum{font-size:13px;color:var(--ink-soft);margin:12px 0 0;text-align:center}
+.wsum b{color:var(--ink);font-size:15px}
+
+/* フッタ */
+.note{
+  margin-top:20px;font-size:12px;line-height:1.85;color:var(--ink-soft);
+  background:var(--soft);border-radius:14px;padding:14px 16px;
+}
+.note b{color:var(--ink)}
+.links{margin-top:16px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.links button{
+  font-family:var(--disp);font-size:12px;color:var(--ink-soft);
+  background:none;border:none;text-decoration:underline;cursor:pointer;padding:6px;
+}
+
+/* オーバーレイ */
+.ov{position:fixed;inset:0;background:rgba(74,59,42,.45);display:none;
+    align-items:flex-end;justify-content:center;z-index:50;padding:0}
+.ov.open{display:flex}
+.sheet{
+  background:var(--bg);width:100%;max-width:520px;max-height:88vh;overflow:auto;
+  border-radius:22px 22px 0 0;padding:22px 18px calc(28px + env(safe-area-inset-bottom));
+}
+.sheet h3{font-size:19px;font-weight:800;margin:0 0 4px}
+.sheet .sub{font-size:12px;color:var(--ink-soft);margin:0 0 16px}
+.cat{font-size:12px;font-weight:800;color:var(--ink-soft);margin:16px 0 8px;text-align:left}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grid button{
+  font-family:var(--disp);font-size:11px;font-weight:700;line-height:1.25;color:var(--ink);
+  background:var(--card);border:1.5px solid var(--line);border-radius:14px;
+  padding:9px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
+}
+.grid button .ic{font-size:25px}
+.grid button.on{border-color:var(--leaf);background:#EDF8E9}
+.grid button:disabled{opacity:.4}
+.freerow{display:flex;gap:8px;margin-top:14px}
+.freerow input{
+  flex:1;min-width:0;font-family:var(--disp);font-size:15px;padding:12px;
+  border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);
+}
+.freerow button{
+  font-family:var(--disp);font-size:14px;font-weight:700;color:#fff;background:var(--leaf);
+  border:none;border-radius:12px;padding:0 18px;cursor:pointer;
+}
+.close{
+  width:100%;margin-top:20px;font-family:var(--disp);font-size:16px;font-weight:800;
+  color:var(--ink);background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:14px;cursor:pointer;
+}
+.sheet p.body{font-size:14px;line-height:1.9;margin:0 0 14px}
+.sheet p.body b{color:var(--carrot)}
+.sheet ul{margin:0 0 14px;padding-left:20px;font-size:14px;line-height:1.9}
+.rm{
+  display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);
+}
+.rm .ic{font-size:22px}
+.rm .nm{flex:1;font-size:16px;font-weight:700}
+.rm button{
+  font-family:var(--disp);font-size:12px;font-weight:700;color:#B4573C;
+  background:#FCEFEA;border:none;border-radius:10px;padding:8px 14px;cursor:pointer;
+}
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:28px;
+  background:rgba(74,59,42,.94);color:#fff;font-size:14px;font-weight:700;
+  padding:12px 20px;border-radius:999px;z-index:60;opacity:0;transition:opacity .18s;
+  pointer-events:none;max-width:90vw;text-align:center;
+}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>だせたね</h1>
+    <p class="lead">食べなくて大丈夫。<b>「食卓に出せた回数」</b>だけを数えます。</p>
+  </header>
+
+  <div id="foods" class="foods"></div>
+  <button class="add" id="addBtn" hidden>＋ 食べものを ふやす</button>
+
+  <div class="week" id="week" hidden>
+    <h2>この7日間</h2>
+    <div class="wgrid" id="wgrid"></div>
+    <p class="wsum" id="wsum"></p>
+  </div>
+
+  <div class="note" id="note" hidden>
+    <b>5〜10回くり返し食卓に出す</b>と、新しい食べものを受け入れやすくなることが分かっています。
+    食べたかどうかは数えません。出せた日が積み上がることが、そのまま近道です。
+  </div>
+
+  <div class="links">
+    <button id="aboutBtn">これは何のアプリ？</button>
+    <button id="manageBtn" hidden>食べものを へらす</button>
+  </div>
+</div>
+
+<!-- 食べものを選ぶ -->
+<div class="ov" id="pickOv">
+  <div class="sheet">
+    <h3>にがて・はじめての 食べもの</h3>
+    <p class="sub">まずは 3つまでが おすすめです（あとで変えられます）</p>
+    <div id="cats"></div>
+    <div class="freerow">
+      <input id="freeInput" type="text" maxlength="10" placeholder="ここに書いて追加もできます">
+      <button id="freeAdd">追加</button>
+    </div>
+    <button class="close" id="pickClose">とじる</button>
+  </div>
+</div>
+
+<!-- 説明 -->
+<div class="ov" id="aboutOv">
+  <div class="sheet">
+    <h3>これは何のアプリ？</h3>
+    <p class="body">
+      にがて・はじめての食べものを <b>食卓に出せた回数</b> だけを数える、それだけのアプリです。
+    </p>
+    <p class="body">
+      子どもが新しい食べものを受け入れるには、くり返し出会うことがいちばん効きます。
+      研究では <b>5〜10回</b> が目安とされています。1回で食べなくても、それが普通です。
+    </p>
+    <p class="body">このアプリが<b>やらないこと</b>：</p>
+    <ul>
+      <li>食べたかどうかを聞くこと</li>
+      <li>食べた量を記録すること</li>
+      <li>「今日は出せていません」と急かすこと</li>
+      <li>記録が途切れたことを責めること</li>
+    </ul>
+    <p class="body">
+      出せなかった日は、ただ何も起きません。空いた日があっても大丈夫です。
+    </p>
+    <p class="body" style="font-size:12px;color:var(--ink-soft)">
+      体重が減ってきた・身長の伸びが止まった・食べられるものが10種類くらいしかない・
+      のどに詰まった経験のあとから食べられない——こうしたことがあるときは、
+      このアプリではなく かかりつけの小児科や保健センターにご相談ください。
+    </p>
+    <button class="close" id="aboutClose">とじる</button>
+  </div>
+</div>
+
+<!-- 削除 -->
+<div class="ov" id="mgOv">
+  <div class="sheet">
+    <h3>食べものを へらす</h3>
+    <p class="sub">記録もいっしょに消えます</p>
+    <div id="mgList"></div>
+    <button class="close" id="mgClose">とじる</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── 保存 ────────────────────────────────── */
+var KEY="dasetane_v1";
+try{ if(/reset/i.test(location.search+location.hash)) localStorage.removeItem(KEY); }catch(e){}
+
+/* 食べものマスター（[名前, 絵文字, カテゴリ]） */
+var CATS=[
+  {id:"veg",   ic:"🥦", name:"やさい・きのこ"},
+  {id:"fruit", ic:"🍎", name:"くだもの"},
+  {id:"prot",  ic:"🍖", name:"おにく・おさかな"},
+  {id:"soy",   ic:"🥚", name:"たまご・まめ"},
+  {id:"grain", ic:"🍚", name:"ごはん・パン・いも"},
+  {id:"milk",  ic:"🥛", name:"ぎゅうにゅう・チーズ"}
+];
+var MASTER=[
+  ["にんじん","🥕","veg"],["ピーマン","🫑","veg"],["ブロッコリー","🥦","veg"],["トマト","🍅","veg"],
+  ["きゅうり","🥒","veg"],["ほうれんそう","🥬","veg"],["なす","🍆","veg"],["かぼちゃ","🎃","veg"],
+  ["たまねぎ","🧅","veg"],["コーン","🌽","veg"],["きのこ","🍄","veg"],["サラダ","🥗","veg"],
+  ["りんご","🍎","fruit"],["バナナ","🍌","fruit"],["みかん","🍊","fruit"],["いちご","🍓","fruit"],
+  ["ぶどう","🍇","fruit"],["なし","🍐","fruit"],["メロン","🍈","fruit"],["キウイ","🥝","fruit"],
+  ["とりにく","🍗","prot"],["ぶたにく","🥓","prot"],["ぎゅうにく","🥩","prot"],["さかな","🐟","prot"],
+  ["えび","🍤","prot"],["ウインナー","🌭","prot"],["ハンバーグ","🍖","prot"],
+  ["たまご","🥚","soy"],["とうふ","🧈","soy"],["なっとう","🫘","soy"],["えだまめ","🫛","soy"],
+  ["ごはん","🍚","grain"],["パン","🍞","grain"],["うどん","🍜","grain"],["パスタ","🍝","grain"],
+  ["おにぎり","🍙","grain"],["いも","🍠","grain"],["シリアル","🥣","grain"],
+  ["ぎゅうにゅう","🥛","milk"],["ヨーグルト","🍨","milk"],["チーズ","🧀","milk"]
+];
+var GOAL=10;              // 5〜10回が目安。10で「ひと区切り」にする
+var SUGGEST_MAX=3;        // まずは3つまで（多いと続かない）
+
+function info(n){ for(var i=0;i<MASTER.length;i++) if(MASTER[i][0]===n) return MASTER[i]; return null; }
+function iconOf(n){ var f=info(n); return f?f[1]:"🍽"; }
+
+function base(){ return {foods:[], started:dayKey()}; }
+function load(){
+  try{
+    var d=JSON.parse(localStorage.getItem(KEY));
+    if(d && Array.isArray(d.foods)){
+      for(var i=0;i<d.foods.length;i++) if(!Array.isArray(d.foods[i].log)) d.foods[i].log=[];
+      if(typeof d.started!=="number") d.started=dayKey();
+      return d;
+    }
+  }catch(e){}
+  return base();
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+var st=load();
+save();   /* 読み込み時に整えた形（log が無い・started が壊れている等）をその場で保存し直す */
+
+/* ── 日付 ────────────────────────────────── */
+function dayKey(d){ d=d||new Date();
+  return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000); }
+function keyToDate(k){ return new Date(k*86400000); }
+var WD=["日","月","火","水","木","金","土"];
+
+/* ── 記録 ────────────────────────────────── */
+function countOf(f){ return f.log.length; }
+function todayCount(f){
+  var t=dayKey(), n=0;
+  for(var i=0;i<f.log.length;i++) if(f.log[i]===t) n++;
+  return n;
+}
+/* 出せた（1日に何回でも記録できる。朝と晩の2回なら曝露も2回） */
+function markOut(name){
+  var f=find(name); if(!f) return;
+  var before=countOf(f);
+  f.log.push(dayKey());
+  save(); render();
+  if(before+1===GOAL) toast("🎉 "+name+" を "+GOAL+"回 出せました");
+  else toast(name+" を 出せたね");
+}
+/* きょうのぶんだけ取り消せる（押し間違い用。過去は触らせない） */
+function undoToday(name){
+  var f=find(name); if(!f) return;
+  var t=dayKey();
+  for(var i=f.log.length-1;i>=0;i--){ if(f.log[i]===t){ f.log.splice(i,1); break; } }
+  save(); render(); toast("きょうのぶんを 1つ 取り消しました");
+}
+function find(n){ for(var i=0;i<st.foods.length;i++) if(st.foods[i].name===n) return st.foods[i]; return null; }
+function addFood(name){
+  name=(name||"").trim();
+  if(!name) return false;
+  if(find(name)){ toast("すでに あります"); return false; }
+  if(st.foods.length>=8){ toast("いちどに 8つまでです"); return false; }
+  st.foods.push({name:name, ic:iconOf(name), log:[]});
+  save(); render(); renderPick(); renderManage();
+  return true;
+}
+function removeFood(name){
+  for(var i=0;i<st.foods.length;i++) if(st.foods[i].name===name){ st.foods.splice(i,1); break; }
+  save(); render(); renderPick(); renderManage();
+}
+
+/* ── 描画 ────────────────────────────────── */
+var $=function(s){ return document.querySelector(s); };
+function el(tag,cls,txt){ var e=document.createElement(tag); if(cls)e.className=cls; if(txt!=null)e.textContent=txt; return e; }
+
+function render(){
+  var box=$("#foods"); box.innerHTML="";
+  var has=st.foods.length>0;
+  $("#addBtn").hidden=!has;
+  $("#week").hidden=!has;
+  $("#note").hidden=!has;
+  $("#manageBtn").hidden=!has;
+
+  if(!has){
+    var e=el("div","empty");
+    e.appendChild(el("div","big","🥦"));
+    var p=el("p"); p.textContent="にがて・はじめての食べものを 3つまで えらんでください。";
+    e.appendChild(p);
+    var b=el("button","btn-out","食べものを えらぶ");
+    b.id="firstPick"; b.style.width="100%";
+    e.appendChild(b);
+    box.appendChild(e);
+    b.onclick=openPick;
+    return;
+  }
+
+  st.foods.forEach(function(f){
+    var n=countOf(f), tn=todayCount(f), done=n>=GOAL;
+    var c=el("div","fcard"+(done?" done":"")); c.dataset.food=f.name;
+
+    var h=el("div","fhead");
+    h.appendChild(el("span","fic",f.ic||iconOf(f.name)));
+    h.appendChild(el("span","fname",f.name));
+    h.appendChild(el("span","fcount",n+" / "+GOAL+" 回"));
+    c.appendChild(h);
+
+    var dots=el("div","dots");
+    for(var i=0;i<Math.max(GOAL,n);i++){
+      var d=el("span","dot"+(i<n?" on":""));
+      if(i>=n-tn && i<n) d.className+=" today";
+      dots.appendChild(d);
+    }
+    c.appendChild(dots);
+
+    var t=el("div","today-n"+(tn?"":" zero"), tn? ("きょう "+tn+"回 出せました") : "きょうは まだです");
+    c.appendChild(t);
+
+    var row=el("div","frow");
+    var out=el("button","btn-out","きょう 出せた");
+    out.dataset.out=f.name;
+    var un=el("button","btn-undo","取り消し");
+    un.dataset.undo=f.name; un.disabled=(tn===0);
+    row.appendChild(out); row.appendChild(un);
+    c.appendChild(row);
+
+    if(done){
+      var r=el("div","reached");
+      r.innerHTML="<span>"+GOAL+"回 出せました。</span>ここまで来たら、あとは食卓の定番として置いておくだけで大丈夫です。";
+      c.appendChild(r);
+    }
+    box.appendChild(c);
+  });
+  renderWeek();
+}
+
+function renderWeek(){
+  var g=$("#wgrid"); g.innerHTML="";
+  var today=dayKey(), total=0, days=0;
+  for(var i=6;i>=0;i--){
+    var k=today-i, n=0;
+    st.foods.forEach(function(f){ for(var j=0;j<f.log.length;j++) if(f.log[j]===k) n++; });
+    total+=n; if(n>0) days++;
+    var cell=el("div","wcell"+(i===0?" is-today":""));
+    cell.dataset.day=String(k);
+    cell.appendChild(el("div","wd",WD[keyToDate(k).getDay()]));
+    cell.appendChild(el("div","wn"+(n>0?" has":""), n>0?String(n):"·"));
+    g.appendChild(cell);
+  }
+  var s=$("#wsum");
+  s.innerHTML = total>0
+    ? "7日間で <b>"+total+"回</b> 出せました（"+days+"日）"
+    : "まだ記録はありません。出せた日に押してください。";
+}
+
+/* ── 食べもの選び ─────────────────────────── */
+function renderPick(){
+  var w=$("#cats"); w.innerHTML="";
+  CATS.forEach(function(c){
+    var sec=el("div");
+    sec.appendChild(el("div","cat",c.ic+" "+c.name));
+    var g=el("div","grid");
+    MASTER.filter(function(f){ return f[2]===c.id; }).forEach(function(f){
+      var b=el("button"); b.dataset.pick=f[0];
+      if(find(f[0])) b.className="on";
+      var ic=el("span","ic",f[1]); b.appendChild(ic);
+      b.appendChild(document.createTextNode(f[0]));
+      g.appendChild(b);
+    });
+    sec.appendChild(g); w.appendChild(sec);
+  });
+}
+function openPick(){ renderPick(); $("#pickOv").classList.add("open"); }
+function closePick(){ $("#pickOv").classList.remove("open"); }
+
+function renderManage(){
+  var l=$("#mgList"); l.innerHTML="";
+  if(!st.foods.length){ l.appendChild(el("p","sub","登録はありません")); return; }
+  st.foods.forEach(function(f){
+    var r=el("div","rm"); r.dataset.rm=f.name;
+    r.appendChild(el("span","ic",f.ic||iconOf(f.name)));
+    r.appendChild(el("span","nm",f.name+"（"+countOf(f)+"回）"));
+    var b=el("button","", "へらす"); b.dataset.del=f.name;
+    r.appendChild(b); l.appendChild(r);
+  });
+}
+
+var toastT=null;
+function toast(msg){
+  var t=$("#toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove("show"); },1700);
+}
+
+/* ── 操作 ────────────────────────────────── */
+$("#foods").addEventListener("click",function(e){
+  var o=e.target.closest("button[data-out]");
+  if(o){ markOut(o.dataset.out); return; }
+  var u=e.target.closest("button[data-undo]");
+  if(u && !u.disabled){ undoToday(u.dataset.undo); return; }
+});
+$("#addBtn").onclick=openPick;
+$("#pickClose").onclick=closePick;
+$("#pickOv").addEventListener("click",function(e){ if(e.target.id==="pickOv") closePick(); });
+$("#cats").addEventListener("click",function(e){
+  var b=e.target.closest("button[data-pick]"); if(!b) return;
+  var name=b.dataset.pick;
+  if(find(name)){ toast("すでに あります"); return; }
+  if(addFood(name) && st.foods.length>=SUGGEST_MAX) closePick();
+});
+$("#freeAdd").onclick=function(){ var i=$("#freeInput"); if(addFood(i.value)) i.value=""; };
+$("#freeInput").addEventListener("keydown",function(e){
+  if(e.key==="Enter"){ e.preventDefault(); $("#freeAdd").onclick(); }
+});
+$("#aboutBtn").onclick=function(){ $("#aboutOv").classList.add("open"); };
+$("#aboutClose").onclick=function(){ $("#aboutOv").classList.remove("open"); };
+$("#aboutOv").addEventListener("click",function(e){ if(e.target.id==="aboutOv") $("#aboutOv").classList.remove("open"); });
+$("#manageBtn").onclick=function(){ renderManage(); $("#mgOv").classList.add("open"); };
+$("#mgClose").onclick=function(){ $("#mgOv").classList.remove("open"); };
+$("#mgOv").addEventListener("click",function(e){ if(e.target.id==="mgOv") $("#mgOv").classList.remove("open"); });
+$("#mgList").addEventListener("click",function(e){
+  var b=e.target.closest("button[data-del]"); if(!b) return;
+  removeFood(b.dataset.del);
+  toast("へらしました");
+});
+
+render();
+</script>
