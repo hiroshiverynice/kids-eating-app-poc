@@ -55,14 +55,15 @@ h1{font-size:26px;font-weight:800;margin:0;letter-spacing:.02em}
   flex:1; font-family:var(--disp); font-size:17px; font-weight:800; color:#fff;
   background:linear-gradient(180deg,var(--leaf-l),var(--leaf));
   border:none; border-radius:14px; padding:14px 10px; cursor:pointer;
-  box-shadow:0 2px 0 rgba(63,120,60,.35);
+  box-shadow:0 2px 0 rgba(63,120,60,.35); line-height:1.35;
 }
 .btn-out:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(63,120,60,.35)}
-.btn-undo{
-  font-family:var(--disp); font-size:13px; font-weight:700; color:var(--ink-soft);
-  background:#fff; border:1px solid var(--line); border-radius:14px; padding:0 14px; cursor:pointer;
+/* 記録ずみ。もう一度おすと取り消せることを、見た目と小さな文字で示す */
+.btn-out.on{
+  color:var(--leaf); background:#fff; border:2px solid var(--leaf);
+  box-shadow:none; padding:12px 10px;
 }
-.btn-undo:disabled{opacity:.35}
+.btn-out .sub{display:block;font-size:11px;font-weight:700;opacity:.75;margin-top:2px}
 .reached{
   margin-top:10px; font-size:13px; font-weight:700; color:#3F7A3C;
   background:#EDF8E9; border-radius:12px; padding:9px 12px;
@@ -303,26 +304,24 @@ var WD=["日","月","火","水","木","金","土"];
 
 /* ── 記録 ────────────────────────────────── */
 function countOf(f){ return f.log.length; }
-function todayCount(f){
-  var t=dayKey(), n=0;
-  for(var i=0;i<f.log.length;i++) if(f.log[i]===t) n++;
-  return n;
-}
-/* 出せた（1日に何回でも記録できる。朝と晩の2回なら曝露も2回） */
-function markOut(name){
+function hasToday(f){ return f.log.indexOf(dayKey())>=0; }
+/* 出せた／取り消し を1つのボタンで切り替える。
+   1日1回まで数える。同じ日に2回出すより<別の日に出す>ほうが受容には効くとされるので、
+   「その日 出せたか」の1回でよい（押し間違いもその場で戻せる）。 */
+function toggleOut(name){
   var f=find(name); if(!f) return;
-  var before=countOf(f);
-  f.log.push(dayKey());
+  var t=dayKey(), i=f.log.indexOf(t);
+  if(i>=0){                                  // すでに記録ずみ → 取り消し
+    f.log.splice(i,1);
+    save(); render();
+    toast(name+" きょうのぶんを 取り消しました");
+    return;
+  }
+  f.log.push(t);
+  var n=countOf(f);
   save(); render();
-  if(before+1===GOAL) toast("🎉 "+name+" を "+GOAL+"回 出せました");
+  if(n===GOAL) toast("🎉 "+name+" を "+GOAL+"回 出せました");
   else toast(name+" を 出せたね");
-}
-/* きょうのぶんだけ取り消せる（押し間違い用。過去は触らせない） */
-function undoToday(name){
-  var f=find(name); if(!f) return;
-  var t=dayKey();
-  for(var i=f.log.length-1;i>=0;i--){ if(f.log[i]===t){ f.log.splice(i,1); break; } }
-  save(); render(); toast("きょうのぶんを 1つ 取り消しました");
 }
 function find(n){ for(var i=0;i<st.foods.length;i++) if(st.foods[i].name===n) return st.foods[i]; return null; }
 function addFood(name){
@@ -365,7 +364,7 @@ function render(){
   }
 
   st.foods.forEach(function(f){
-    var n=countOf(f), tn=todayCount(f), done=n>=GOAL;
+    var n=countOf(f), tn=hasToday(f)?1:0, done=n>=GOAL;
     var c=el("div","fcard"+(done?" done":"")); c.dataset.food=f.name;
 
     var h=el("div","fhead");
@@ -382,15 +381,19 @@ function render(){
     }
     c.appendChild(dots);
 
-    var t=el("div","today-n"+(tn?"":" zero"), tn? ("きょう "+tn+"回 出せました") : "きょうは まだです");
+    var t=el("div","today-n"+(tn?"":" zero"), tn? "きょう 出せました" : "きょうは まだです");
     c.appendChild(t);
 
     var row=el("div","frow");
-    var out=el("button","btn-out","きょう 出せた");
+    var out=el("button","btn-out"+(tn?" on":""));
     out.dataset.out=f.name;
-    var un=el("button","btn-undo","取り消し");
-    un.dataset.undo=f.name; un.disabled=(tn===0);
-    row.appendChild(out); row.appendChild(un);
+    if(tn){
+      out.appendChild(document.createTextNode("✓ きょう 出せた"));
+      out.appendChild(el("span","sub","もう一度おすと 取り消し"));
+    }else{
+      out.appendChild(document.createTextNode("きょう 出せた"));
+    }
+    row.appendChild(out);
     c.appendChild(row);
 
     if(done){
@@ -463,17 +466,22 @@ function toast(msg){
 /* ── 操作 ────────────────────────────────── */
 $("#foods").addEventListener("click",function(e){
   var o=e.target.closest("button[data-out]");
-  if(o){ markOut(o.dataset.out); return; }
-  var u=e.target.closest("button[data-undo]");
-  if(u && !u.disabled){ undoToday(u.dataset.undo); return; }
+  if(o) toggleOut(o.dataset.out);
 });
 $("#addBtn").onclick=openPick;
 $("#pickClose").onclick=closePick;
 $("#pickOv").addEventListener("click",function(e){ if(e.target.id==="pickOv") closePick(); });
+/* 選ぶ画面でも、えらんだものをもう一度おせば はずせる（記録があるときだけ確かめる） */
 $("#cats").addEventListener("click",function(e){
   var b=e.target.closest("button[data-pick]"); if(!b) return;
-  var name=b.dataset.pick;
-  if(find(name)){ toast("すでに あります"); return; }
+  var name=b.dataset.pick, f=find(name);
+  if(f){
+    var n=countOf(f);
+    if(n>0 && !confirm(name+" を はずしますか？\n出せた記録 "+n+"回 もいっしょに消えます。")) return;
+    removeFood(name);
+    toast(name+" を はずしました");
+    return;
+  }
   if(addFood(name) && st.foods.length>=SUGGEST_MAX) closePick();
 });
 $("#freeAdd").onclick=function(){ var i=$("#freeInput"); if(addFood(i.value)) i.value=""; };
