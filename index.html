@@ -1405,6 +1405,68 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .food-rec-row .md { font-size: 13px }
 .food-cat-bars { display: flex; flex-direction: column; gap: 5px; margin-top: 8px }
 .food-cat-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-soft) }
+/* ---------- 🌸 げんきに なあれ（⚔️バトルの「たすける」版）----------
+   構造はバトルと同じ（一口＝1手番でゲージが動く）。意味だけを反転している。
+   たおす→げんきにする／ダメージ→げんきの数字／HPが減る→げんきが増える。
+   よわっている間は色をぬいて（grayscale）うつむかせ、げんきになるほど色が戻る。 */
+/* .gf-stage の既定は display:block。ゾーンを flex:1 で伸ばすには、バトルと同じく
+   ステージ側を flex コンテナにする必要がある。これを忘れると中身が全部 absolute なので
+   ゾーンの高さが0になり、動物もゲージも情景も見えなくなる（実際に踏んだ）。 */
+.gf-stage.help { display: flex; flex-direction: column }
+.hzone { position: relative; flex: 1; min-height: 0; border-radius: 18px; overflow: hidden;
+         background: linear-gradient(180deg, #CFEBFF 0%, #E8F7DC 62%, #DCF0C8 100%) }
+.hzone .scn { position: absolute; inset: 0; pointer-events: none }
+.hzone .scn.fg { z-index: 2 }
+.hcl { position: absolute; width: 72px; opacity: .85 }
+.hcl.c1 { right: 5%; top: 8% }
+.hcl.c2 { left: 14%; top: 21%; width: 54px }
+.htr { position: absolute; bottom: 24%; width: 56px; opacity: .92 }
+.htr.t1 { left: 3% }
+.htr.t2 { right: 5%; width: 48px }
+.hhill { position: absolute; left: -10%; right: -10%; bottom: 0; height: 34%;
+         background: radial-gradient(120% 100% at 50% 0%, #A8DC8A, #86C767); border-radius: 50% 50% 0 0 }
+.hgr { position: absolute; bottom: 1%; width: 42px; opacity: .95 }
+.hgr.g1 { left: 7% }
+.hgr.g2 { right: 9%; width: 36px }
+.hname { position: absolute; left: 0; right: 0; top: 7px; text-align: center;
+         font-size: 17px; font-weight: 800; color: #37662C; z-index: 3; text-shadow: 0 1px 0 rgba(255,255,255,.7) }
+.gwrap { position: absolute; left: 50%; transform: translateX(-50%); top: 33px; width: 74%; z-index: 3 }
+.gbar { height: 14px; border-radius: 999px; background: rgba(255,255,255,.78); overflow: hidden; border: 1.5px solid #fff }
+.gfill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #FFC7DD, #FF8FBF); transition: width .32s ease }
+.gfill.mid { background: linear-gradient(90deg, #FFD9A0, #FFB25E) }
+.gfill.full { background: linear-gradient(90deg, #9FE08A, #5FC24A) }
+.gnum { text-align: center; font-size: 11px; font-weight: 700; color: #37662C; margin-top: 3px;
+        text-shadow: 0 1px 0 rgba(255,255,255,.7) }
+.hani { position: absolute; left: 50%; bottom: 11%; width: 104px; z-index: 3;
+        transform: translateX(-50%); transform-origin: 50% 100%;
+        transition: filter .45s ease }
+.hani.fb { font-size: 62px; width: auto }
+.hani.sad { animation: hsad 2.6s ease-in-out infinite }
+@keyframes hsad { 0%,100% { transform: translateX(-50%) rotate(-5deg) } 50% { transform: translateX(-50%) rotate(2deg) } }
+.hani.care { animation: hcare .5s ease }
+@keyframes hcare { 0% { transform: translateX(-50%) scale(1) } 40% { transform: translateX(-50%) scale(1.13) } 100% { transform: translateX(-50%) scale(1) } }
+.hani.ok { animation: hjoy .72s ease-in-out infinite }
+@keyframes hjoy { 0%,100% { transform: translateX(-50%) translateY(0) } 50% { transform: translateX(-50%) translateY(-13px) } }
+.hani.come { animation: hcome .6s ease }
+@keyframes hcome { 0% { opacity: 0; transform: translateX(-50%) translateY(16px) scale(.8) } 100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1) } }
+.hzz { position: absolute; left: 63%; bottom: 33%; font-size: 19px; color: #6F8168; z-index: 3;
+       animation: hzz 2.4s ease-in-out infinite }
+@keyframes hzz { 0%,100% { opacity: .25; transform: translateY(0) } 50% { opacity: .85; transform: translateY(-9px) } }
+.heal { position: absolute; left: 50%; top: 42%; font-size: 30px; font-weight: 800;
+        color: #E8578F; text-shadow: 0 2px 0 #fff, 0 0 8px rgba(255,255,255,.8); z-index: 4;
+        animation: healup 1s ease forwards; pointer-events: none }
+.heal.crit { font-size: 38px; color: #D6357A }
+@keyframes healup {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(.7) }
+  25% { opacity: 1; transform: translate(-50%, -6px) scale(1.12) }
+  100% { opacity: 0; transform: translate(-50%, -48px) scale(1) }
+}
+.hhud { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700;
+        color: var(--ink-soft); padding: 6px 4px 0 }
+.friends { display: flex; align-items: center; gap: 6px; overflow-x: auto; padding: 6px 4px 0; min-height: 40px }
+.friends .lbl { font-size: 11px; color: var(--ink-soft); flex: 0 0 auto }
+.fri { width: 32px; flex: 0 0 auto }
+.fri.fb { font-size: 22px; width: auto }
 .food-cat-bar .cn { flex: 0 0 116px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 .food-cat-bar .bx { flex: 1; min-width: 0; height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden }
 .food-cat-bar .bx i { display: block; height: 100%; border-radius: 999px; background: var(--leaf) }
@@ -1675,6 +1737,12 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <div class="prow">
         <div><div class="lab">ごほうびを ひかえめに</div><div class="desc" id="gentleDesc">オフ（ふつうの演出）</div></div>
         <div class="toggle" id="gentleToggle" role="switch" aria-checked="false"></div>
+      </div>
+      <!-- 一口＝1ターンだけだと、小食の子は「何も起きない食事」が続く。
+           食べた量に報酬を紐づけないまま、座っていられること自体を報いるための設定。 -->
+      <div class="prow">
+        <div><div class="lab">食卓にいる時間でも すすむ</div><div class="desc" id="timeProgDesc">オン（1分ごとに あそびが1つすすむ）</div></div>
+        <div class="toggle on" id="timeProgToggle" role="switch" aria-checked="true"></div>
       </div>
       <div class="prow">
         <div style="flex:1">
@@ -2804,7 +2872,148 @@ const MUSIC = {
   }
 };
 
-const GAMES = [BATTLE, GROW, SPA, RIDE, DRESS, MUSIC, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
+/* ---------- 🌸 げんきに なあれ（⚔️もぐもぐクエストの「たすける」版）----------
+   なぜ作るか: バトルは女児のおすすめ順で最下位（REC_GIRL）になる。しかし
+   「一口＝1手番でゲージが動く」という手ごたえ自体は、この子たちにも届けたい。
+   そこで構造をそのままに、意味だけを反転した姉妹ゲームにする。
+     たおす → げんきにする ／ ダメージ → げんきの数字 ／ HPが減る → げんきが増える
+   養育的な遊び（お世話）は女児に届きやすいという発達リサーチ（2026-07-29）に沿う。
+   ガードレールはバトルと同じ: 相手は反撃しない・まけない・こわい演出をしない。
+   さらにこちらは「よわらせる」描写が一切ないので、より安全側に立つ。 */
+const HELP_GOAL = 4;                    // 4ひき げんきにしたら ひと区切り
+function helpPick(g){
+  const seen=(g.saved||[]).map(x=>x.id);
+  const pool=SPA_ANIMALS.filter(a=>!seen.includes(a[0]));
+  const m=RNG.pick(pool.length?pool:SPA_ANIMALS);
+  return { id:m[0], n:m[1], hp:0, max:100 };
+}
+const HELP = {
+  id:"help", name:"げんきに なあれ", icon:"🌸", cls:"gf-help", sub:"ひとくちで げんきに！",
+  init(){ const g={ lv:1, saved:[] }; g.a=helpPick(g); return g; },
+  status(g){ return "🌸 "+g.saved.length+" / "+HELP_GOAL+"　やさしさ "+g.lv; },
+  bite(g,n){
+    const a=g.a;
+    const critP=Math.min(0.32, 0.08 + n*0.012);            // 口数が進むほど「とびきり」が出やすい
+    const crit=RNG.chance(critP);
+    let heal=RNG.int(14,19) + g.lv*2;
+    if(crit) heal=Math.round(heal*2.2);
+    // 天井: あと少しで満タンになる時は確実に届かせる（1だけ残ってもどかしい、を作らない）
+    if(a.hp+heal >= a.max - Math.max(2, Math.round(a.max*0.07))) heal=a.max-a.hp;
+    heal=Math.max(1,heal);
+    a.hp=Math.min(a.max, a.hp+heal);
+    const well=a.hp>=a.max;
+    const ev={ heal, crit, well, hp:a.hp, max:a.max, pct:a.hp/a.max*100,
+               aname:a.n, aid:a.id, rare:crit||well, lvup:false, isNew:false, next:null };
+    if(well){
+      g.saved.push({id:a.id,n:a.n});
+      const book=(st.helpBook = st.helpBook || []);          // なかま図鑑は 食事をまたいで ずっと残る
+      if(!book.includes(a.n)){ book.push(a.n); ev.isNew=true; }
+      const newLv=1+Math.floor(g.saved.length/2);
+      if(newLv>g.lv){ g.lv=newLv; ev.lvup=true; }
+      if(g.saved.length<HELP_GOAL){ g.a=helpPick(g); ev.next={id:g.a.id,n:g.a.n}; }
+      ev.say=a.n+" が げんきに なった！";
+    }else{
+      ev.say = crit ? "とびきり げんきに なあれ！"
+                    : RNG.pick(["げんきに なあれ","もぐもぐ おすそわけ","いいこ いいこ","あとすこし！","にこにこ","元気 わけてあげる"]);
+    }
+    return ev;
+  },
+  done(g){ return g.saved.length>=HELP_GOAL; },
+  finale(g){ return {icon:"🌸", title:"もりが げんきに なった！",
+    msg:"なかま "+g.saved.length+"ひき／やさしさ "+g.lv+" になったよ！"}; },
+  _gcls(pct){ return pct>=100 ? "gfill full" : pct>=60 ? "gfill mid" : "gfill"; },
+  /* よわっている間は色をぬく。げんきになるほど 色と明るさが戻る */
+  _filt(pct){ return "grayscale("+((1-pct/100)*0.72).toFixed(2)+") brightness("+(0.86+pct/100*0.14).toFixed(2)+")"; },
+  enter(host,g){ host.className="gf-stage help";
+    const a=g.a, pct=a.hp/a.max*100, well=pct>=100;
+    host.innerHTML=
+      '<div class="hzone">'+
+        '<div class="scn">'+
+          '<img class="hcl c1" src="'+SCN+'cloud3.png" alt="">'+
+          '<img class="hcl c2" src="'+SCN+'cloud7.png" alt="">'+
+          '<img class="htr t1" src="'+SCN+'tree06.png" alt="">'+
+          '<img class="htr t2" src="'+SCN+'tree34.png" alt="">'+
+        '</div>'+
+        '<div class="hhill"></div>'+
+        '<div class="scn fg"><img class="hgr g1" src="'+SCN+'grass2.png" alt=""><img class="hgr g2" src="'+SCN+'grass6.png" alt=""></div>'+
+        '<div class="hname">'+a.n+'</div>'+
+        '<div class="gwrap"><div class="gbar"><div class="'+this._gcls(pct)+'" style="width:'+pct+'%"></div></div>'+
+          '<div class="gnum">げんき '+a.hp+' / '+a.max+'</div></div>'+
+        aniImg(a,"hani"+(well?" ok":" sad"))+
+        (well?'':'<div class="hzz">…</div>')+
+      '</div>'+
+      '<div class="cmdwin"><div class="msg">'+(a.hp? "あと すこしで げんき！" : (a.n+" が しょんぼり している…"))+'</div></div>'+
+      '<div class="hhud"><span>🌸 やさしさ '+g.lv+'</span><span>💗 たすけた '+g.saved.length+' / '+HELP_GOAL+'</span></div>'+
+      '<div class="friends"><span class="lbl">なかま</span>'+g.saved.map(p=>aniImg(p,"fri")).join("")+'</div>';
+    host.dataset.ani=a.n;                       // いま画面に出ている子（連打で画面と状態がズレるのを検出）
+    const el=host.querySelector(".hani"); if(el && el.tagName==="IMG") el.style.filter=this._filt(pct);
+    const fr=host.querySelector(".friends"); fr.scrollLeft=fr.scrollWidth; },
+  act(host,g,ev){
+    const self=this;
+    clearTimeout(this._nextT);
+    const gen = this._gen = (this._gen||0)+1;   // 新しい一口が来たら、前の一口の演出タイマーは無効にする
+    if(host.dataset.ani !== ev.aname){
+      // 決着演出の途中で つぎの一口が来た場合（連打など）。画面をいまの子に追いつかせてから演出する
+      this.enter(host,g);
+      const pre=Math.max(0,(ev.hp-ev.heal)/ev.max*100), pf=host.querySelector(".gfill");
+      pf.className=this._gcls(pre); pf.style.width=pre+"%";
+      host.querySelector(".gnum").textContent="げんき "+(ev.hp-ev.heal)+" / "+ev.max;
+      const a0=host.querySelector(".hani"); if(a0) a0.classList.add("come");
+    }
+    const zone=host.querySelector(".hzone"), an=host.querySelector(".hani"),
+          fill=host.querySelector(".gfill"), num=host.querySelector(".gnum"),
+          msg=host.querySelector(".msg"), fri=host.querySelector(".friends"),
+          hud=host.querySelector(".hhud");
+    msg.textContent="モグの おてつだい！";
+    fxBurst(host,50,52,["💗","✨"],ev.crit?8:4);
+    sfxCare(ev.crit);
+    setTimeout(()=>{
+      if(gen!==self._gen) return;
+      an.classList.remove("care"); void an.offsetWidth; an.classList.add("care");
+      const d=document.createElement("div"); d.className="heal"+(ev.crit?" crit":""); d.textContent="+"+ev.heal;
+      zone.appendChild(d); setTimeout(()=>d.remove(),1050);
+      fill.className=self._gcls(ev.pct); fill.style.width=ev.pct+"%";
+      num.textContent="げんき "+ev.hp+" / "+ev.max;
+      if(an.tagName==="IMG") an.style.filter=self._filt(ev.pct);
+      if(ev.crit){
+        msg.textContent="とびきり げんきに！ げんきが "+ev.heal+" ふえた！";
+        fxBurst(host,50,44,["✨","💖","🌟"],14); sfxBloom();
+      }else{
+        msg.textContent=ev.aname+"の げんきが "+ev.heal+" ふえた！";
+      }
+      if(ev.well) setTimeout(()=>{ if(gen===self._gen) self._well(host,g,ev,{an,msg,fri,hud},gen); }, 600);
+    }, 240);
+  },
+  _well(host,g,ev,el,gen){
+    const self=this;
+    el.an.classList.remove("sad","care"); el.an.classList.add("ok");
+    if(el.an.tagName==="IMG") el.an.style.filter="none";
+    const zz=host.querySelector(".hzz"); if(zz) zz.remove();
+    el.msg.textContent=ev.aname+" が げんきに なった！";
+    fxBurst(host,50,46,["🌸","✨","💗"],12); sfxWell();
+    setTimeout(()=>{
+      if(gen!==self._gen) return;
+      el.msg.textContent=ev.aname+" が なかまに なりたそうに こちらを みている！"+(ev.isNew?" ✨はじめて！":"");
+      sfxAlly();
+      el.fri.insertAdjacentHTML("beforeend", aniImg({id:ev.aid,n:ev.aname},"fri")); el.fri.scrollLeft=el.fri.scrollWidth;
+      el.hud.innerHTML='<span>🌸 やさしさ '+g.lv+'</span><span>💗 たすけた '+g.saved.length+' / '+HELP_GOAL+'</span>';
+      if(ev.lvup){
+        const lv=document.createElement("div"); lv.className="lvup"; lv.textContent="やさしさ アップ！ "+g.lv;
+        host.querySelector(".hzone").appendChild(lv); setTimeout(()=>lv.remove(),1550);
+        sfxLevel(); speak("やさしさ アップ！");
+      }
+    }, 1150);
+    if(ev.next){                                    // つぎの子が やってくる（1食のなかで つづく）
+      this._nextT=setTimeout(()=>{ if(gen!==self._gen) return;
+        self.enter(host,g);
+        const na=host.querySelector(".hani"); if(na) na.classList.add("come");
+        host.querySelector(".msg").textContent=ev.next.n+" が しょんぼり している…";
+        sfxAppear();
+      }, 2500);
+    }
+  }
+};
+const GAMES = [BATTLE, HELP, GROW, SPA, RIDE, DRESS, MUSIC, FISHING, SWEETS, RACE, BOARD, DIG, ROCKET, GARDEN];
 
 /* 各ゲームの enter は「完結演出の1.7〜2.2秒後に次の1回を組み直す」ために setTimeout から呼ばれる。
    そのあいだに あそびを かえると、切り替わった画面に前のあそびの enter が描き戻されてしまい、
@@ -2845,10 +3054,10 @@ function ensureGame(){
    ・3〜5歳は「お世話(nurturing)」の欲求がピーク。複雑なルールと遅延報酬は処理できない
    ・6〜8歳でルール理解と自己ベスト志向が出て、バトルの戦略性を評価しはじめる
    ・性差は統計的な傾向にすぎないので、並び順を変えるだけにして選択肢は減らさない */
-const REC_YOUNG = ["grow","spa","ride","garden","music","sweets","dress","fishing","race","board","dig","rocket","battle"];
-const REC_OLDER = ["battle","board","dig","rocket","race","music","fishing","dress","ride","grow","spa","sweets","garden"];
-const REC_BOY   = ["battle","ride","race","rocket","dig","board","music","fishing","spa","grow","sweets","dress","garden"];
-const REC_GIRL  = ["dress","music","spa","grow","sweets","garden","fishing","board","ride","race","dig","rocket","battle"];
+const REC_YOUNG = ["grow","help","spa","ride","garden","music","sweets","dress","fishing","race","board","dig","rocket","battle"];
+const REC_OLDER = ["battle","help","board","dig","rocket","race","music","fishing","dress","ride","grow","spa","sweets","garden"];
+const REC_BOY   = ["battle","ride","race","rocket","dig","board","music","fishing","help","spa","grow","sweets","dress","garden"];
+const REC_GIRL  = ["help","dress","music","spa","grow","sweets","garden","fishing","board","ride","race","dig","rocket","battle"];
 function recOrder(){
   const ids=GAMES.map(g=>g.id);
   const byAge = st.age==null ? null : (st.age<=5 ? REC_YOUNG : REC_OLDER);
@@ -2914,7 +3123,7 @@ const FOOD_MASTER=[
 /* 帯の初期値。空だと最初の一口が どの食材にも ひもづかないので 定番を並べておく（親が入れ替え可）。 */
 const FOOD_BAR_DEFAULT=["ごはん","にんじん","ブロッコリー","とりにく","たまご","トマト","バナナ","ぎゅうにゅう"];
 const FOOD_BAR_MAX=12;
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], growBook:[], spaBook:[], rideBook:[], dressBook:[], musicBook:[],
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], helpBook:[], growBook:[], spaBook:[], rideBook:[], dressBook:[], musicBook:[],
   gsAll:{},            // ゲームごとの途中経過（あそびを かえても つづきから）
   kidPick:true,        // こどもが自分で あそびを えらべるか（親メニューで切替）
   age:null, sex:null, onboarded:false,       // オンボーディングで聞く（どちらも「こたえない」可）
@@ -2924,6 +3133,7 @@ function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fed
   foods:{},                                  // 味見(曝露)の食材別きろく: 名前 -> {n:回数, days:[日], cat, ic}
   curFood:null,                              // いま食べているもの（食事がおわると外れる）
   foodBar:FOOD_BAR_DEFAULT.slice(),          // 子ども画面の帯に出す食べもの（最近つかった順）
+  timeProg:true,                             // 食卓にいる時間でも すこし進む（小食の子が報われないのを防ぐ）
   meals:[],                                  // 食事ログ {t:開始, sec:所要, n:口数}。逆算にだけ使う
   out:{on:false, leave:"07:50", prep:10} }; }// おでかけ（出発時刻）。おうちの人だけに出す
 function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d){
@@ -3135,6 +3345,44 @@ function renderChar(){
 /* ---------- a bite happened: get a food, feed the pet, it grows ----------
    opt.chal に食べもの名が入っていれば「にがて・はじめての ひとくち」＝追加のごほうびを重ねる。
    基礎の進行（あそびが1手すすむ）は どの ひとくちでも同じ扱いにする。 */
+/* ---------- あそびを1手すすめる ----------
+   ひとくちだけでなく <食卓にいる時間> からも呼ばれる（下の tickTimeProgress）。
+   食べられない日でも話が前に進むようにするための共通処理。
+   silent=true のときは掛け声や「きらっ」を出さない（食べていないのに褒めない）。 */
+function advanceGame(silent){
+  const game=ensureGame();
+  st.gsN=(st.gsN||0)+1;
+  const ev=game.bite(st.gs,st.gsN);               // ゲーム状態を1手すすめ、演出用イベントを得る
+  game.act($("#gfStage"),st.gs,ev);               // ゲームごとの作り込み演出＋効果音（シーンを更新）
+  updateHud(game);
+  const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
+  if(!silent){
+    /* ひかえめモードでは 掛け声を数口に1回まで減らす（急かす感じ・にぎやかさを弱める） */
+    if(!st.gentle) speak(Math.random()<0.55 ? (ev.say||"やったね！") : RNG.pick(CHEERS));
+    else if(meal.bites%4===0) speak(RNG.pick(CHEERS));
+    if(ev.rare && !st.gentle) chime();
+  }
+  if(game.done(st.gs)){                            // 1食のなかで何回でも完結できる（完結ごとに図鑑へ）
+    const f=game.finale(st.gs);
+    (st.zukan=st.zukan||[]).push(f.icon);
+    setTimeout(()=>{ showEvolveEmoji(f.icon,f.title,f.msg); speak(f.title); }, 1400);
+    st.gs=game.init(); st.gsN=0;                   // 次の1回を新規スタート
+    setTimeout(()=>{ renderGame(); }, 2600);       // 完結演出のあと新しいシーンを構築
+  }
+  return ev;
+}
+/* ---------- 食卓にいる時間でも すこし進む ----------
+   なぜ必要か: 一口＝1ターンだけだと、小食の子は「何も起きない食事」が続いてしまう。
+   食べた量に報酬を紐づけない原則を守りながら、食べられない日でも報われるようにする。
+   食事時間は長いほど摂取が増える（RCT d=0.52）ので、<座っていられること>を価値にするのは
+   エビデンスとも合う。60秒に1つ＝実測ペース(1口40秒)より遅いので、食べたほうが速く進む。 */
+const TIME_STEP_MS=60000;
+function tickTimeProgress(){
+  if(!meal.active || !st.timeProg) return;
+  if(st.rewardMode!=="grow") return;
+  advanceGame(true);                                // 掛け声なしで静かに1手
+  save();
+}
 function registerBite(opt){
   /* どの食べものの ひとくちか。帯を押した時はその食べもの、
      手かざし／ボタンの時は「いま たべてるもの」に自動でひもづく（子の操作は増やさない）。 */
@@ -3145,24 +3393,8 @@ function registerBite(opt){
   st.total++; meal.bites++; st.stageProg++;
 
   if(st.rewardMode==="grow"){
-    const game=ensureGame();                        // きょうのミニゲーム（一口=1ターン）
-    st.gsN=(st.gsN||0)+1;
-    const ev=game.bite(st.gs,st.gsN);               // ゲーム状態を1手すすめ、演出用イベントを得る
     st.fedCount=(st.fedCount||0)+1;
-    game.act($("#gfStage"),st.gs,ev);               // ゲームごとの作り込み演出＋効果音（シーンを更新）
-    updateHud(game);
-    const gb=$("#giftBadge"); gb.classList.remove("bump"); void gb.offsetWidth; gb.classList.add("bump");
-    /* ひかえめモードでは 掛け声を数口に1回まで減らす（急かす感じ・にぎやかさを弱める） */
-    if(!st.gentle) speak(Math.random()<0.55 ? (ev.say||"やったね！") : RNG.pick(CHEERS));
-    else if(meal.bites%4===0) speak(RNG.pick(CHEERS));
-    if(ev.rare && !st.gentle) chime();
-    if(game.done(st.gs)){                            // 1食のなかで何回でも完結できる（完結ごとに図鑑へ）
-      const f=game.finale(st.gs);
-      (st.zukan=st.zukan||[]).push(f.icon);
-      setTimeout(()=>{ showEvolveEmoji(f.icon,f.title,f.msg); speak(f.title); }, 1400);
-      st.gs=game.init(); st.gsN=0;                   // 次の1回を新規スタート
-      setTimeout(()=>{ renderGame(); }, 2600);       // 完結演出のあと新しいシーンを構築
-    }
+    advanceGame(false);                             // あそびを1手すすめる（掛け声つき）
   }else{
     praise(CHEERS[st.total % CHEERS.length]);        // ことばで ほめるモード
     const c=$("#char"); c.classList.remove("chomp"); void c.offsetWidth; c.classList.add("chomp");
@@ -3525,11 +3757,11 @@ const SFX_FILES = {
 const BGM_FILES = {
   battle:"battle_bgm.ogg", fishing:"fishing_bgm.ogg", sweets:"sweets_bgm.ogg",
   race:"race_bgm.ogg", board:"board_bgm.ogg", dig:"dig_bgm.ogg",
-  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg", grow:"grow_bgm.ogg", spa:"spa_bgm.ogg", ride:"ride_bgm.ogg", dress:"dress_bgm.ogg"
+  rocket:"rocket_bgm.ogg", garden:"garden_bgm.ogg", help:"garden_bgm.ogg", grow:"grow_bgm.ogg", spa:"spa_bgm.ogg", ride:"ride_bgm.ogg", dress:"dress_bgm.ogg"
 };
 const SFX_GAIN = { atk:0.5, atkCrit:0.6, hit:0.55, crit:0.7, boss:0.6, defeat:0.5, ally:0.55, levelup:0.55, clear:0.6, appear:0.45 };
 const buf={};                       // 名前 -> AudioBuffer（読み込めたものだけ入る）
-try{ window.__mogu={buf:buf}; }catch(e){}   // 診断用: Object.keys(__mogu.buf) で読み込めた音を確認できる
+try{ window.__mogu={buf:buf, tick:()=>tickTimeProgress()}; }catch(e){}   // 診断用: 読み込めた音の確認と、時間進行を1手だけ呼ぶ
 let sfxLoaded=false;
 function loadAudioFiles(){
   if(sfxLoaded) return; sfxLoaded=true;
@@ -3655,11 +3887,19 @@ function sfxEnsemble(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.cu
   ch.forEach((f,i)=>{ tone(f,t,0.9,'triangle',0.055); tone(f*2,t+0.05*i,0.7,'sine',0.022); });
   [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,t+0.55+i*0.1,0.5,'square',0.06));
   noise(t,0.3,0.09,600); }
+function sfxCare(big){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;      // おてつだい（やさしい上昇）
+  tone(660,t,0.10,'sine',big?0.11:0.08); tone(880,t+0.07,0.12,'sine',big?0.10:0.07);
+  if(big) tone(1174,t+0.15,0.16,'sine',0.09); }
+function sfxWell(){ ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;         // げんきに なった
+  [523,659,784,1046].forEach((f,i)=>tone(f,t+i*0.09,0.22,'triangle',0.10)); }
 function sfxBattleBoss(){ if(play("boss")) return; sfxBoss(); }                                                               // ボス出現（釣りの「ぬし」とは別音）
 
 /* ---------- ゲームごとのBGM（WebAudio・メロディ＋ベース、それぞれ別の曲）---------- */
 /* mel=メロディ(半音・nullは休符)、bass=2ステップごとの低音、ms=テンポ */
 const BGMS = {
+  help: { ms:500, // やさしい 子もりうた風
+    mel:[0,4,7,12, 11,7,9,null, 4,7,11,14, 12,9,7,null, 5,9,12,16, 14,12,9,5, 7,11,14,11, 7,4,0,null],
+    bass:[0,7,5,7, -3,4,5,0] },
   fishing: { ms:470, // おだやかな 水辺のワルツ風
     mel:[7,9,12,9, 7,4,7,null, 9,11,12,11, 9,7,4,null, 7,9,12,14, 12,11,9,7, 5,7,9,7, 4,2,0,null],
     bass:[0,7,-3,5, 0,7,5,0] },
@@ -3731,10 +3971,12 @@ function startBGM(){ if(bgm.on||!st.bgm) return; if(!ensureAudio()) return; load
 function stopBGM(){ bgm.on=false; clearInterval(bgm.id); bgm.id=null; stopBGMFile(); }
 
 /* ---------- meal ---------- */
-function startMeal(){ if(meal.active) return; startBGM(); meal={active:true,startTs:Date.now(),bites:0,tickId:null};
+function startMeal(){ if(meal.active) return; startBGM(); meal={active:true,startTs:Date.now(),bites:0,tickId:null,progId:null};
   $("#mealBtn").textContent="🟢 ごはんちゅう… (タップでおわり)"; $("#mealBtn").classList.remove("btn-start"); $("#mealBtn").classList.add("btn-end");
-  meal.tickId=setInterval(renderParent,1000); renderParent(); }
-function endMeal(){ if(!meal.active) return; clearInterval(meal.tickId); meal.active=false; const n=meal.bites;
+  meal.tickId=setInterval(renderParent,1000);
+  meal.progId=setInterval(tickTimeProgress,TIME_STEP_MS);   // 食卓にいる時間でも すこし進む
+  renderParent(); }
+function endMeal(){ if(!meal.active) return; clearInterval(meal.tickId); clearInterval(meal.progId); meal.active=false; const n=meal.bites;
   st.curFood=null; renderFoodBar();          // 次の食事は また「いま食べてるもの」から選び直す
   $("#mealBtn").textContent="🍽️ ごはん スタート"; $("#mealBtn").classList.add("btn-start"); $("#mealBtn").classList.remove("btn-end");
   const rec=n>st.best&&n>0; if(n>st.best) st.best=n;
@@ -3876,6 +4118,9 @@ function renderParent(){
   $("#gentleDesc").textContent = st.gentle ? "オン（掛け声ひかえめ・派手な音を出さない）" : "オフ（ふつうの演出）";
   $("#gentleToggle").classList.toggle("on",!!st.gentle);
   $("#gentleToggle").setAttribute("aria-checked",st.gentle?"true":"false");
+  $("#timeProgDesc").textContent = st.timeProg ? "オン（1分ごとに あそびが1つすすむ）" : "オフ（ひとくちの時だけ すすむ）";
+  $("#timeProgToggle").classList.toggle("on",!!st.timeProg);
+  $("#timeProgToggle").setAttribute("aria-checked",st.timeProg?"true":"false");
   /* ③ チャレンジ: 登録した食べもの（タップで削除）と 味見の回数 */
   const cc=$("#chalChips"); cc.innerHTML="";
   chalItems().forEach(i=>{ const b=document.createElement("button"); b.dataset.c=i.name;
@@ -3913,6 +4158,7 @@ $("#scrOpen").onclick=()=>openScr(false);
 $("#scrSkip").onclick=closeScr;
 $("#scrBack").addEventListener("click",e=>{ if(e.target.id==="scrBack") closeScr(); });
 $("#gentleToggle").onclick=()=>{ st.gentle=!st.gentle; save(); renderParent(); };
+$("#timeProgToggle").onclick=()=>{ st.timeProg=!st.timeProg; save(); renderParent(); };
 /* ③ チャレンジの登録・削除・こども画面のタップ */
 $("#chalAdd").onclick=()=>{ const inp=$("#chalInput"); if(addChal(inp.value)) inp.value=""; };
 $("#chalInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#chalAdd").onclick(); } });
@@ -3988,13 +4234,13 @@ $("#sexChips").onclick=e=>{ const b=e.target.closest("button[data-s]"); if(!b) r
 $("#gestChips").onclick=e=>{ const b=e.target.closest("button[data-g]"); if(!b) return;
   st.gesture=b.dataset.g; save(); renderParent(); applyGestureUI(); detState="IDLE"; gHist.length=0; setRing(0); };
 $("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消しますか？")){ const rm=st.rewardMode,cm=st.camMode,sb=st.showButton,bg=st.bgm,gs=st.gesture,gp=st.gamePick,
-        kp=st.kidPick,ag=st.age,sx=st.sex,ob=st.onboarded,sc=st.scr,ge=st.gentle,
+        kp=st.kidPick,ag=st.age,sx=st.sex,ob=st.onboarded,sc=st.scr,ge=st.gentle,tp=st.timeProg,
         ci=chalItems().map(i=>({name:i.name,count:0})),   /* チャレンジの登録は残し 回数だけ0に戻す */
         fb=(st.foodBar||FOOD_BAR_DEFAULT).slice(),        /* 帯に出す食べものの並びは「設定」なので残す */
         ot=Object.assign({},st.out);                      /* おでかけの時刻も「設定」なので残す */
     st=base(); st.rewardMode=rm; st.camMode=cm; st.showButton=sb; st.bgm=bg; st.gesture=gs; st.gamePick=gp;
     st.kidPick=kp; st.age=ag; st.sex=sx; st.onboarded=ob;   /* 設定（年齢・性別など）は消さない */
-    st.scr=sc; st.gentle=ge; st.chal={items:ci, total:0, medals:0};   /* 安全のかくにんの回答も消さない */
+    st.scr=sc; st.gentle=ge; st.timeProg=tp; st.chal={items:ci, total:0, medals:0};   /* 安全のかくにんの回答も消さない */
     st.foodBar=fb; st.foods={}; st.curFood=null;                      /* 味見のきろくは消える・帯の設定は残る */
     st.out=ot; st.meals=[];                                           /* 食事ログは消える・出発時刻の設定は残る */
     save(); meal.bites=0; renderChar(); renderGame(); renderParent(); renderFoodBar(); } };
