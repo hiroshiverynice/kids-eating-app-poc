@@ -3805,6 +3805,7 @@ let speakN=0;
 /* 端末の合成音声。抑揚が乏しく端末で声も変わるが、どこでも鳴るのが強み。
    下の speak() から「ずんだもんの音声が無いとき」のフォールバックとして使う。 */
 function speakTTS(text){ try{ if(!("speechSynthesis" in window)) return; if(!jaVoice) pickVoice();
+  duckBGM(0.25 + (text||"").length*0.14);        // 合成音声は長さが取れないので文字数から見積もる
   const u=new SpeechSynthesisUtterance(text); u.lang="ja-JP"; if(jaVoice) u.voice=jaVoice;
   u.rate=1.06; u.pitch=1.4 + ((speakN++ %3)-1)*0.08; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
 
@@ -3815,6 +3816,7 @@ function speakTTS(text){ try{ if(!("speechSynthesis" in window)) return; if(!jaV
    生成は tools/gen_voice.py（VOICEVOX を起動して実行すれば作り直せる）。
    manifest に無い文言は 従来どおり端末の合成音声で鳴らす＝無音にはしない。 */
 const VOICE_DIR="assets/voice/";
+const VOICE_VOL=1.85;                 // TTSの波形は音楽より振幅が小さいので 1.0 では埋もれる
 let voiceMap=null, voiceSrc=null;
 const voiceGot={};                                   // ファイル名 -> 取得済み/取得中
 function loadVoiceMap(){
@@ -3836,13 +3838,32 @@ function fetchVoice(text){
     .then(b=>{ buf["v_"+f]=b; })
     .catch(()=>{ delete voiceGot[f]; });
 }
+/* ---------- ダッキング ----------
+   掛け声がBGMに埋もれる。数値上は 声(0.95) > BGM(0.22) だが、
+   BGMは鳴りっぱなし・声は一瞬なので 耳では BGM が勝ってしまう。
+   （VOICEVOXの音声は 音楽より平均音圧が低いのも効いている）
+   → 声を上げるだけでなく、<声が鳴っている間だけ BGM を下げて、あとで戻す>。
+   テレビやラジオでナレーションを聞かせる時と同じ手。 */
+const BGM_VOL=0.20, BGM_DUCK=0.055;
+function duckBGM(sec){
+  if(!bgmGain || !audioCtx) return;
+  const t=audioCtx.currentTime, hold=Math.max(0.25, sec||0.8);
+  try{
+    bgmGain.gain.cancelScheduledValues(t);
+    bgmGain.gain.setValueAtTime(bgmGain.gain.value, t);
+    bgmGain.gain.linearRampToValueAtTime(BGM_DUCK, t+0.06);        // すっと下げて
+    bgmGain.gain.setValueAtTime(BGM_DUCK, t+hold);                  // 声のあいだ保ち
+    bgmGain.gain.linearRampToValueAtTime(BGM_VOL, t+hold+0.45);     // ゆっくり戻す
+  }catch(e){}
+}
 function playVoice(f){
   try{
     if(!audioCtx || !buf["v_"+f]) return false;
     if(voiceSrc){ try{ voiceSrc.stop(); }catch(e){} }   // 前の声は止める（重ねない）
     const s=audioCtx.createBufferSource(), g=audioCtx.createGain();
-    s.buffer=buf["v_"+f]; g.gain.value=0.95;
+    s.buffer=buf["v_"+f]; g.gain.value=VOICE_VOL;
     s.connect(g); g.connect(audioCtx.destination); s.start();
+    duckBGM(s.buffer.duration);                 // 声の長さぶんだけ BGM を下げる
     voiceSrc=s; return true;
   }catch(e){ return false; }
 }
@@ -3880,7 +3901,9 @@ const SFX_GAIN = { atk:0.5, atkCrit:0.6, hit:0.55, crit:0.7, boss:0.6, defeat:0.
 const buf={};                       // 名前 -> AudioBuffer（読み込めたものだけ入る）
 try{ window.__mogu={ buf:buf, tick:()=>tickTimeProgress(),
   get st(){ return st; }, BATTLE, btlSpawn, BTL_MONS, BTL_FRIEND, btlMet, btlMark,
-  get voiceMap(){ return voiceMap; }, speak, fetchVoice }; }catch(e){}
+  get voiceMap(){ return voiceMap; }, speak, fetchVoice, speakTTS,
+  get bgmGain(){ return bgmGain; }, duckBGM,
+  get vol(){ return {VOICE_VOL, BGM_VOL, BGM_DUCK}; } }; }catch(e){}
 /* 診断用: 読み込めた音の確認／時間進行を1手だけ呼ぶ／もぐもぐクエストの内部を外から確かめる */
 let sfxLoaded=false;
 function loadAudioFiles(){
@@ -3925,7 +3948,7 @@ function playBGMFile(key){                       // ループBGM（1曲を切れ
   stopBGMFile();
   try{
     bgmSrc=audioCtx.createBufferSource(); bgmGain=audioCtx.createGain();
-    bgmSrc.buffer=b; bgmSrc.loop=true; bgmGain.gain.value=0.22;
+    bgmSrc.buffer=b; bgmSrc.loop=true; bgmGain.gain.value=BGM_VOL;
     bgmSrc.connect(bgmGain); bgmGain.connect(audioCtx.destination); bgmSrc.start(0);
     return true;
   }catch(e){ return false; }
