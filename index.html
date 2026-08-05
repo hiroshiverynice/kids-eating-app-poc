@@ -1234,6 +1234,8 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   filter: drop-shadow(0 10px 14px rgba(0,0,0,.45)); animation: efloat 2.8s ease-in-out infinite }
 .battle .enemy.fb { font-size:94px; line-height:1; height:auto }        /* 画像が出ない時の絵文字フォールバック */
 @keyframes efloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+.battle .enemy.m-shiny { filter: drop-shadow(0 0 12px rgba(255,238,140,.95)) saturate(1.15) }
+.battle .enemy.m-big { height:164px }
 .battle .enemy.boss { height:160px; max-width:88%; filter: drop-shadow(0 0 15px #FFC83D) drop-shadow(0 10px 14px rgba(0,0,0,.5)) }
 .battle .pty { height:30px; width:auto; flex:0 0 auto; animation: gfpop .4s var(--spring) }
 .battle .pty.fb { font-size:24px; height:auto }
@@ -2238,15 +2240,54 @@ function monImg(m,cls,ko){
   return '<img class="'+cls+'" src="'+MON_DIR+m.id+(ko?"_ko":"")+'.png" alt="'+m.n+'" '+
          'onerror="this.outerHTML=\'<span class=&quot;'+cls+' fb&quot;>'+m.f+'</span>\'">';
 }
+/* ---------- C2: なかよし度 ----------
+   同じ子と何度も会うことに意味を持たせる。モンスターは22体しかいないので、
+   在庫が尽きたあとは「深さ」で体験の在庫を増やす（habituation は在庫切れで起きる）。
+   図鑑は 名前の配列 → {名前: 出会った回数} に変えた（古い保存データは load で移行）。 */
+const BTL_FRIEND = [
+  { n:6, mark:"💛", word:"しんゆう" },
+  { n:3, mark:"✨", word:"なかよし" }
+];
+function btlBook(){
+  const b = st.battleBook;
+  if(Array.isArray(b)){ const o={}; b.forEach(n=>{ o[n]=1; }); return (st.battleBook=o); }
+  return (st.battleBook = b || {});
+}
+function btlMet(name){ return btlBook()[name] || 0; }
+function btlMark(name){ const c=btlMet(name); const r=BTL_FRIEND.find(f=>c>=f.n); return r?r.mark:""; }
+
+/* ---------- D4: てきの「きぶん」 ----------
+   同じ子でも 出会うたびに少しちがう。22体を実質3〜4倍の遭遇パターンにする。
+   おこっている・かなしい など ネガティブな気分は作らない（こわくしない）。 */
+const BTL_MOODS = [
+  { id:"",       pre:"",           w:58 },
+  { id:"happy",  pre:"ごきげんな ", w:14, crit:0.12 },   // かいしんが出やすい
+  { id:"sleepy", pre:"ねむそうな ", w:14, hpx:0.75 },    // すこし早く なかまになる
+  { id:"shiny",  pre:"きらきらの ", w:9,  hpx:1.20 },    // ひかっている
+  { id:"big",    pre:"おおきな ",   w:5,  hpx:1.45 }     // おおきい
+];
+function btlMood(){
+  const tot=BTL_MOODS.reduce((a,m)=>a+m.w,0);
+  let r=Math.random()*tot;
+  for(let i=0;i<BTL_MOODS.length;i++){ r-=BTL_MOODS[i].w; if(r<=0) return BTL_MOODS[i]; }
+  return BTL_MOODS[0];
+}
 const BTL_GOAL = 4;                       // 4たいで 1回の ぼうけんクリア（4たい目がボス）
 const BTL_HITS = [5,7], BTL_BOSS_HITS = [8,11];   // 1たいに かかる ひとくち数のめやす
 function btlSpawn(g){
   const boss = (g.defeated+1) >= BTL_GOAL;
-  const m = RNG.pick(boss ? BTL_BOSSES : BTL_MONS);
+  const pool0 = boss ? BTL_BOSSES : BTL_MONS;
+  /* C4: まだ なかまにしていない子を優先する。ぜんぶそろっていたら全体から選ぶ。
+     （毎回ぜんぶから引き直すと、3日目には「はじめて！」がほとんど出なくなる） */
+  const fresh = pool0.filter(x => !btlMet(x[1]));
+  const pool = fresh.length ? fresh : pool0;
+  const m = RNG.pick(pool);
+  const mood = btlMood();
   const avg = 10 + g.lv*3;                                     // レベルが上がると こうげき力も上がる
   const hits = boss ? RNG.int(BTL_BOSS_HITS[0],BTL_BOSS_HITS[1]) : RNG.int(BTL_HITS[0],BTL_HITS[1]);
-  const max = Math.round(avg*hits);
-  return { id:m[0], n:m[1], f:m[2], hp:max, max, boss };
+  const max = Math.max(avg, Math.round(avg*hits*(mood.hpx||1)));
+  return { id:m[0], n:m[1], f:m[2], hp:max, max, boss,
+           mood:mood.id, pre:mood.pre, moodCrit:mood.crit||0 };
 }
 const BATTLE = {
   id:"battle", name:"もぐもぐクエスト", icon:"⚔️", cls:"gf-battle", sub:"ひとくちで こうげき！",
@@ -2254,7 +2295,7 @@ const BATTLE = {
   status(g){ return "⚔️ "+g.defeated+" / "+BTL_GOAL+"　Lv."+g.lv; },
   bite(g,n){
     const m=g.m;
-    const critP = Math.min(0.32, 0.08 + n*0.012);              // 口数が進むほど かいしんが出やすい
+    const critP = Math.min(0.44, 0.08 + n*0.012 + (m.moodCrit||0));   // 口数＋きぶん で かいしんが出やすい
     const crit = RNG.chance(critP);
     let dmg = RNG.int(7,12) + g.lv*3;
     if(crit) dmg = Math.round(dmg*2.4);
@@ -2268,12 +2309,17 @@ const BATTLE = {
     if(defeat){
       g.defeated++;
       g.party.push({id:m.id,n:m.n,f:m.f});
-      const book = (st.battleBook = st.battleBook || []);        // なかま図鑑は 食事をまたいで ずっと残る
-      if(!book.includes(m.n)){ book.push(m.n); ev.isNew=true; }
+      const book = btlBook();                                   // なかま図鑑は 食事をまたいで ずっと残る
+      const met = (book[m.n]||0) + 1;
+      book[m.n] = met;
+      ev.isNew = met===1;
+      ev.met = met;
+      ev.rankUp = BTL_FRIEND.find(f => met===f.n) || null;       // ちょうど到達した時だけ祝う
       const newLv = 1 + Math.floor(g.defeated/2);
       if(newLv>g.lv){ g.lv=newLv; ev.lvup=true; }
       if(g.defeated < BTL_GOAL){ g.m=btlSpawn(g); ev.next={id:g.m.id,n:g.m.n,max:g.m.max,boss:g.m.boss}; }
-      ev.say = m.n+" が なかまに なった！";
+      ev.say = ev.rankUp ? (m.n+" と "+ev.rankUp.word+" に なった！")
+                         : (m.n+" が なかまに なった！");
     }else{
       ev.say = crit ? "かいしんの いちげきー！"
                     : RNG.pick(["それっ！","えいっ！","たあっ！","いくぞー！","つよい！","もういっぱつ！"]);
@@ -2296,12 +2342,12 @@ const BATTLE = {
           '<img class="far t4" src="'+SCN+'tree02.png" alt="">'+
           '<img class="far t3" src="'+SCN+'tree05.png" alt="">'+
         '</div><div class="ground"></div>'+
-        '<div class="ename">'+(m.boss?'<span class="bosslbl">★ボス★</span> ':'')+m.n+'</div>'+
+        '<div class="ename">'+(m.boss?'<span class="bosslbl">★ボス★</span> ':'')+(m.pre||"")+m.n+btlMark(m.n)+'</div>'+
         '<div class="hpwrap"><div class="hpbar"><div class="'+this._hpcls(pct)+'" style="width:'+pct+'%"></div></div>'+
           '<div class="hpnum">'+m.hp+' / '+m.max+'</div></div>'+
-        monImg(m,"enemy"+(m.boss?" boss":""),false)+
+        monImg(m,"enemy"+(m.boss?" boss":"")+(m.mood?" m-"+m.mood:""),false)+
       '</div>'+
-      '<div class="cmdwin"><div class="msg">'+(m.boss?"ボスが あらわれた！":m.n+" が あらわれた！")+'</div></div>'+
+      '<div class="cmdwin"><div class="msg">'+(m.boss?"ボスが あらわれた！":((m.pre||"")+m.n+" が あらわれた！"))+'</div></div>'+
       '<div class="btlhud"><span>⚔️ レベル '+g.lv+'</span><span>🏆 たおした '+g.defeated+' / '+BTL_GOAL+'</span></div>'+
       '<div class="party"><span class="lbl">なかま</span>'+g.party.map(p=>monImg(p,"pty",false)).join("")+'</div>';
     host.dataset.mon=m.n;                       // いま画面に出ている てき（連打で画面と状態がズレるのを検出するため）
@@ -2352,7 +2398,13 @@ const BATTLE = {
     setTimeout(()=>{
       if(gen!==self._gen) return;
       // たおす＝おしまい ではなく「なかまに なりたそうに こちらを みている」（こわくない・かわいい決着）
-      el.msg.textContent=ev.ename+" は なかまに なりたそうに こちらを みている！"+(ev.isNew?" ✨はじめて！":"");
+      /* C2: はじめて／なかよし度が上がった／また会えた で ことばを変える。
+         同じ子との再会が「またこいつか」ではなく「ひさしぶり」になるようにする。 */
+      el.msg.textContent = ev.isNew
+        ? (ev.ename+" は なかまに なりたそうに こちらを みている！ ✨はじめて！")
+        : ev.rankUp
+          ? (ev.ename+" と "+ev.rankUp.word+" に なった！ "+ev.rankUp.mark)
+          : (ev.ename+" が また あいに きてくれた！"+(btlMark(ev.ename)?" "+btlMark(ev.ename):""));
       fxBurst(host,50,44,["💛","✨","🎉"],14); sfxAlly();
       el.party.insertAdjacentHTML("beforeend", monImg(ev.emon,"pty",false)); el.party.scrollLeft=el.party.scrollWidth;
       el.hud.innerHTML='<span>⚔️ レベル '+g.lv+'</span><span>🏆 たおした '+g.defeated+' / '+BTL_GOAL+'</span>';
@@ -3123,7 +3175,7 @@ const FOOD_MASTER=[
 /* 帯の初期値。空だと最初の一口が どの食材にも ひもづかないので 定番を並べておく（親が入れ替え可）。 */
 const FOOD_BAR_DEFAULT=["ごはん","にんじん","ブロッコリー","とりにく","たまご","トマト","バナナ","ぎゅうにゅう"];
 const FOOD_BAR_MAX=12;
-function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:[], helpBook:[], growBook:[], spaBook:[], rideBook:[], dressBook:[], musicBook:[],
+function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fedCount:0, board:[], boardsDone:0, fedBook:[], rewardMode:"grow", camMode:true, showButton:false, bgm:true, gesture:"peace", gamePick:"auto", gameId:null, gs:null, gsN:0, zukan:[], battleBook:{}, helpBook:[], growBook:[], spaBook:[], rideBook:[], dressBook:[], musicBook:[],
   gsAll:{},            // ゲームごとの途中経過（あそびを かえても つづきから）
   kidPick:true,        // こどもが自分で あそびを えらべるか（親メニューで切替）
   age:null, sex:null, onboarded:false,       // オンボーディングで聞く（どちらも「こたえない」可）
@@ -3146,6 +3198,9 @@ function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d){
   if(!s.foods || typeof s.foods!=="object") s.foods={};
   if(!Array.isArray(s.foodBar)) s.foodBar=FOOD_BAR_DEFAULT.slice();
   if(!Array.isArray(s.meals)) s.meals=[];
+  /* なかま図鑑は 名前の配列 → {名前: 出会った回数} に変わった。古い保存データを移行する */
+  if(Array.isArray(s.battleBook)){ const o={}; s.battleBook.forEach(n=>{ o[n]=1; }); s.battleBook=o; }
+  if(!s.battleBook || typeof s.battleBook!=="object") s.battleBook={};
   s.out=Object.assign({on:false, leave:"07:50", prep:10}, s.out||{});
   return s;
 } }catch(e){} return base(); }
@@ -3761,7 +3816,9 @@ const BGM_FILES = {
 };
 const SFX_GAIN = { atk:0.5, atkCrit:0.6, hit:0.55, crit:0.7, boss:0.6, defeat:0.5, ally:0.55, levelup:0.55, clear:0.6, appear:0.45 };
 const buf={};                       // 名前 -> AudioBuffer（読み込めたものだけ入る）
-try{ window.__mogu={buf:buf, tick:()=>tickTimeProgress()}; }catch(e){}   // 診断用: 読み込めた音の確認と、時間進行を1手だけ呼ぶ
+try{ window.__mogu={ buf:buf, tick:()=>tickTimeProgress(),
+  get st(){ return st; }, BATTLE, btlSpawn, BTL_MONS, BTL_FRIEND, btlMet, btlMark }; }catch(e){}
+/* 診断用: 読み込めた音の確認／時間進行を1手だけ呼ぶ／もぐもぐクエストの内部を外から確かめる */
 let sfxLoaded=false;
 function loadAudioFiles(){
   if(sfxLoaded) return; sfxLoaded=true;
