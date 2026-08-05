@@ -1827,6 +1827,18 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
         <div><div class="lab">さいしょから やりなおす</div><div class="desc">成長・コレクション・きろくを 全部リセット（テスト用）</div></div>
         <button class="link" id="resetBtn" style="color:var(--ink-soft)">リセット</button>
       </div>
+      <!-- VOICEVOX の利用規約により クレジット表記が必要（商用・非商用を問わず）。
+           「アプリの紹介画面など 少し探せばわかる場所」への記載が求められるので ここに置く。
+           画像と効果音は CC0 なので表記の義務はないが、出所が分かるように併記している。 -->
+      <div class="prow" id="credits">
+        <div style="flex:1">
+          <div class="lab">つかっている そざい</div>
+          <div class="desc">
+            こえ: <b>VOICEVOX:ずんだもん</b><br>
+            え・おと: Kenney / OpenGameArt（CC0）
+          </div>
+        </div>
+      </div>
       <p style="font-size:11px;color:var(--ink-soft);text-align:center;line-height:1.6;margin:10px 0 0">
         V1 PoC・「育てる食卓」/ 一口ごとに あそびが すすむ<br>食べた量でなく“ひとくちの回数”を大切にします
       </p>
@@ -3790,9 +3802,57 @@ function pickVoice(){ try{ const vs=speechSynthesis.getVoices();
          || vs.find(v=>v.name==="Kyoko") || vs.find(v=>/ja(-|_)?JP/i.test(v.lang)||/^ja\b/i.test(v.lang)) || null; }catch(e){} }
 if("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
 let speakN=0;
-function speak(text){ try{ if(!("speechSynthesis" in window)) return; if(!jaVoice) pickVoice();
+/* 端末の合成音声。抑揚が乏しく端末で声も変わるが、どこでも鳴るのが強み。
+   下の speak() から「ずんだもんの音声が無いとき」のフォールバックとして使う。 */
+function speakTTS(text){ try{ if(!("speechSynthesis" in window)) return; if(!jaVoice) pickVoice();
   const u=new SpeechSynthesisUtterance(text); u.lang="ja-JP"; if(jaVoice) u.voice=jaVoice;
   u.rate=1.06; u.pitch=1.4 + ((speakN++ %3)-1)*0.08; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
+
+/* ---------- 掛け声（ずんだもん / VOICEVOX で事前生成）----------
+   なぜ事前生成か: クラウドTTSは通信が要る＝食卓のWi-Fiが弱いと鳴らない
+   （CDN由来で起動できなくなる事故を実際に踏んでいる）。掛け声は固定文言なので
+   あらかじめ作って同梱できる。費用ゼロ・オフライン・端末差なし。
+   生成は tools/gen_voice.py（VOICEVOX を起動して実行すれば作り直せる）。
+   manifest に無い文言は 従来どおり端末の合成音声で鳴らす＝無音にはしない。 */
+const VOICE_DIR="assets/voice/";
+let voiceMap=null, voiceSrc=null;
+const voiceGot={};                                   // ファイル名 -> 取得済み/取得中
+function loadVoiceMap(){
+  if(voiceMap || location.protocol==="file:") return;   // file:// 直開きでは fetch できない
+  voiceMap={};
+  fetch(VOICE_DIR+"manifest.json").then(r=>{ if(!r.ok) throw 0; return r.json(); })
+    .then(m=>{ voiceMap=m;
+      /* 少しずつ取りにいく。食事が始まるころには大半そろう。
+         そろう前に鳴らす必要が出たら、その回だけ合成音声で代替する。 */
+      Object.keys(m).forEach((t,i)=>setTimeout(()=>fetchVoice(t), i*30));
+    }).catch(()=>{});
+}
+function fetchVoice(text){
+  const f = voiceMap && voiceMap[text];
+  if(!f || voiceGot[f] || !ensureAudio()) return;
+  voiceGot[f]=true;
+  fetch(VOICE_DIR+f).then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); })
+    .then(a=>new Promise((res,rej)=>audioCtx.decodeAudioData(a,res,rej)))
+    .then(b=>{ buf["v_"+f]=b; })
+    .catch(()=>{ delete voiceGot[f]; });
+}
+function playVoice(f){
+  try{
+    if(!audioCtx || !buf["v_"+f]) return false;
+    if(voiceSrc){ try{ voiceSrc.stop(); }catch(e){} }   // 前の声は止める（重ねない）
+    const s=audioCtx.createBufferSource(), g=audioCtx.createGain();
+    s.buffer=buf["v_"+f]; g.gain.value=0.95;
+    s.connect(g); g.connect(audioCtx.destination); s.start();
+    voiceSrc=s; return true;
+  }catch(e){ return false; }
+}
+function speak(text){
+  ensureAudio();
+  const f = voiceMap && voiceMap[text];
+  if(f && buf["v_"+f] && playVoice(f)) return;         // ずんだもんで鳴らす
+  if(f) fetchVoice(text);                              // まだ届いていないだけ＝次からは本物で
+  speakTTS(text);                                      // 今回は端末の合成音声で
+}
 function praise(text){ chime(); if(st.rewardMode==="grow"||st.rewardMode==="praise") speak(text); }
 
 /* ---------- recognition sounds + gentle BGM (WebAudio, no external files) ---------- */
@@ -3819,11 +3879,13 @@ const BGM_FILES = {
 const SFX_GAIN = { atk:0.5, atkCrit:0.6, hit:0.55, crit:0.7, boss:0.6, defeat:0.5, ally:0.55, levelup:0.55, clear:0.6, appear:0.45 };
 const buf={};                       // 名前 -> AudioBuffer（読み込めたものだけ入る）
 try{ window.__mogu={ buf:buf, tick:()=>tickTimeProgress(),
-  get st(){ return st; }, BATTLE, btlSpawn, BTL_MONS, BTL_FRIEND, btlMet, btlMark }; }catch(e){}
+  get st(){ return st; }, BATTLE, btlSpawn, BTL_MONS, BTL_FRIEND, btlMet, btlMark,
+  get voiceMap(){ return voiceMap; }, speak, fetchVoice }; }catch(e){}
 /* 診断用: 読み込めた音の確認／時間進行を1手だけ呼ぶ／もぐもぐクエストの内部を外から確かめる */
 let sfxLoaded=false;
 function loadAudioFiles(){
   if(sfxLoaded) return; sfxLoaded=true;
+  loadVoiceMap();                   // 掛け声（ずんだもん）のマニフェストも取りにいく
   // file:// 直開きでは fetch が必ず失敗する（ブラウザがコンソールにエラーを出すだけ）ので最初から試さない
   if(location.protocol==="file:") return;
   if(!ensureAudio()) return;
