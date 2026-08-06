@@ -1420,6 +1420,44 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 .out-live.soft { background: #FFF6E3 }
 .out-live b { font-family: var(--disp); font-size: 15px }
 .out-live .sub { font-size: 11px; color: var(--ink-soft) }
+/* 「だせたね」= 食卓に出せた回数。食べたかは数えない。
+   くり返し出会うほど受け入れやすくなる（リピート曝露5〜10回）ので、
+   親の行動＝<出した回数>だけを積む。未達・目標・連続記録は出さない。 */
+.sv-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px }
+.sv-card { background: var(--card, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px }
+.sv-card.done { border-color: var(--leaf); background: linear-gradient(180deg, #F6FCF3, #FFFFFF) }
+.sv-head { display: flex; align-items: center; gap: 8px }
+.sv-ic { font-size: 22px; line-height: 1 }
+.sv-nm { flex: 1; font-size: 16px; font-weight: 800 }
+.sv-ct { font-size: 11px; color: var(--ink-soft); white-space: nowrap; font-variant-numeric: tabular-nums }
+.sv-dots { display: flex; gap: 4px; margin: 9px 0 3px; flex-wrap: wrap }
+.sv-dot { width: 15px; height: 15px; border-radius: 50%; background: var(--surface-2); border: 1.5px solid var(--line) }
+.sv-dot.on { background: var(--leaf); border-color: var(--leaf) }
+.sv-today { font-size: 11px; font-weight: 700; color: var(--leaf); min-height: 15px }
+.sv-today.zero { color: var(--ink-soft); font-weight: 600 }
+.sv-btn {
+  width: 100%; margin-top: 8px; font-family: var(--disp); font-size: 15px; font-weight: 800;
+  color: #fff; background: linear-gradient(180deg, var(--leaf-l, #8FCB86), var(--leaf));
+  border: none; border-radius: 12px; padding: 12px 8px; cursor: pointer; line-height: 1.3;
+}
+.sv-btn.on { color: var(--leaf); background: #fff; border: 2px solid var(--leaf); padding: 10px 8px }
+.sv-btn .sub { display: block; font-size: 10px; font-weight: 700; opacity: .75; margin-top: 1px }
+.sv-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; margin-top: 12px }
+.sv-week .wd { font-size: 9px; color: var(--ink-soft); margin-bottom: 3px }
+.sv-week .wn { font-size: 13px; font-weight: 800; padding: 6px 0; border-radius: 8px;
+               background: var(--surface-2); color: var(--ink-soft); font-variant-numeric: tabular-nums }
+.sv-week .wn.has { background: var(--leaf); color: #fff }
+.sv-week .is-today .wd { color: var(--carrot); font-weight: 800 }
+.sv-sum { font-size: 12px; color: var(--ink-soft); text-align: center; margin-top: 9px }
+.sv-sum b { color: var(--ink); font-size: 14px }
+.sv-toast {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: 96px;
+  background: rgba(74,59,42,.94); color: #fff; font-size: 13px; font-weight: 700;
+  padding: 10px 18px; border-radius: 999px; z-index: 90; opacity: 0;
+  transition: opacity .18s; pointer-events: none; max-width: 84%; text-align: center;
+}
+.sv-toast.show { opacity: 1 }
+.sv-empty { font-size: 13px; color: var(--ink-soft); line-height: 1.8; padding: 6px 2px }
 /* おうちの人向け「あじみ の きろく」。不足・未達を出さない＝親を追い詰めない（ガードレール④）。 */
 .food-rec { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; max-height: 190px; overflow: auto }
 .food-rec-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink) }
@@ -1769,6 +1807,20 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
           <div class="desc" id="chalStat">チャレンジの ひとくち 0回 ／ 🏅 0こ</div>
         </div>
       </div>
+
+      <!-- だせたね: 食卓に「出せた回数」だけを数える。食べたかは聞かない。
+           受容を高めるのは くり返し出すこと（5〜10回）であって 食べさせることではないため。 -->
+      <div class="prow">
+        <div style="flex:1">
+          <div class="lab">だせたね（食卓に出せた回数）</div>
+          <div class="desc"><b>食べなくて大丈夫。</b>「食卓に出せた回数」だけを数えます。
+            5〜10回くり返し出すと、新しい食べものを受け入れやすくなります。</div>
+          <div class="sv-list" id="svList"></div>
+          <div class="sv-week" id="svWeek" hidden></div>
+          <div class="sv-sum" id="svSum"></div>
+        </div>
+      </div>
+      <div class="sv-toast" id="svToast"></div>
       </div>
 
       <div class="ptab-body" id="ptabSet" hidden>
@@ -3234,6 +3286,7 @@ function base(){ return { total:0, best:0, stageIdx:0, stageProg:0, coll:[], fed
   gentle:false,                              // ごほうびを ひかえめに（該当ありのとき提案する）
   chal:{items:[], total:0, medals:0},        // ③ にがて・はじめての食べもの（ごほうびの対象をしぼる）
   foods:{},                                  // 味見(曝露)の食材別きろく: 名前 -> {n:回数, days:[日], cat, ic}
+  served:{},                                 // 「だせたね」: 名前 -> [出せた日]。食べたかは数えない
   curFood:null,                              // いま食べているもの（食事がおわると外れる）
   foodBar:FOOD_BAR_DEFAULT.slice(),          // 子ども画面の帯に出す食べもの（最近つかった順）
   timeProg:true,                             // 食卓にいる時間でも すこし進む（小食の子が報われないのを防ぐ）
@@ -3247,6 +3300,7 @@ function load(){ try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d){
   if(!Array.isArray(s.scr.flags))  s.scr.flags=[];
   if(!Array.isArray(s.chal.items)) s.chal.items=[];
   if(!s.foods || typeof s.foods!=="object") s.foods={};
+  if(!s.served || typeof s.served!=="object") s.served={};
   if(!Array.isArray(s.foodBar)) s.foodBar=FOOD_BAR_DEFAULT.slice();
   if(!Array.isArray(s.meals)) s.meals=[];
   /* なかま図鑑は 名前の配列 → {名前: 出会った回数} に変わった。古い保存データを移行する */
@@ -3540,7 +3594,7 @@ function addChal(name){
   if(findChal(name)) return false;
   if(chalItems().length>=CHAL_MAX) return false;
   st.chal.items.push({name:name, count:0});
-  save(); renderFoodBar(); renderParent(); return true;
+  save(); renderFoodBar(); renderParent(); return true;   // renderParent が renderPrep も呼ぶ
 }
 function removeChal(name){
   st.chal.items=chalItems().filter(i=>i.name!==name);
@@ -3709,6 +3763,94 @@ function fallbackCopy(txt,done){
     ta.select(); document.execCommand("copy"); document.body.removeChild(ta); done();
   }catch(e){}
 }
+
+/* ---------- 「だせたね」= 食卓に出せた回数 ----------
+   なぜ「食べたか」でなく「出したか」を数えるのか:
+   受容を高めるのは <くり返し食卓に出すこと>（5〜10回）であって、食べさせることではない。
+   数える対象を親の行動にすると、子を追い立てずに前へ進める。
+   対象の食べものは「きょうの チャレンジ」と同じリストを使う。 */
+const SERVE_GOAL = 10;
+function servedOf(name){ const a=(st.served||{})[name]; return Array.isArray(a)?a:[]; }
+function servedToday(name){ return servedOf(name).indexOf(dayKey())>=0; }
+/* 押すたびに 記録⇔取り消し。1日1回まで数える
+   （同じ日に2回出すより<別の日に出す>ほうが受容には効くため）。 */
+function toggleServed(name){
+  const sv=(st.served=st.served||{});
+  const a=sv[name]=servedOf(name).slice();
+  const t=dayKey(), i=a.indexOf(t);
+  if(i>=0){ a.splice(i,1); toast2(name+" きょうのぶんを 取り消しました"); }
+  else{
+    a.push(t);
+    toast2(a.length===SERVE_GOAL ? ("🎉 "+name+" を "+SERVE_GOAL+"回 出せました") : (name+" を 出せたね"));
+  }
+  sv[name]=a; save(); renderPrep();
+}
+/* 「そなえ」タブのかんたんな知らせ（子ども画面の streak とは別に、親シートの中に出す） */
+let toast2T=null;
+function toast2(msg){
+  const t=$("#svToast"); if(!t) return;
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(toast2T); toast2T=setTimeout(()=>t.classList.remove("show"),1700);
+}
+/* 「そなえ」タブの描画（チャレンジに登録した食べものごとに 出せた回数を出す） */
+function renderPrep(){
+  const box=$("#svList"); if(!box) return;
+  const items=chalItems();
+  box.innerHTML="";
+  if(!items.length){
+    const e=document.createElement("div"); e.className="sv-empty";
+    e.textContent="上で にがて・はじめての食べものを登録すると、ここに「出せた回数」がたまります。食べなくて大丈夫です。";
+    box.appendChild(e);
+    $("#svWeek").hidden=true; $("#svSum").textContent="";
+    return;
+  }
+  $("#svWeek").hidden=false;
+  items.forEach(it=>{
+    const n=servedOf(it.name).length, today=servedToday(it.name), done=n>=SERVE_GOAL;
+    const c=document.createElement("div"); c.className="sv-card"+(done?" done":""); c.dataset.sv=it.name;
+    const h=document.createElement("div"); h.className="sv-head";
+    const ic=document.createElement("span"); ic.className="sv-ic"; ic.textContent=foodIcon(it.name);
+    const nm=document.createElement("span"); nm.className="sv-nm"; nm.textContent=it.name;
+    const ct=document.createElement("span"); ct.className="sv-ct"; ct.textContent=n+" / "+SERVE_GOAL+" 回";
+    h.appendChild(ic); h.appendChild(nm); h.appendChild(ct); c.appendChild(h);
+    const dots=document.createElement("div"); dots.className="sv-dots";
+    for(let i=0;i<Math.max(SERVE_GOAL,n);i++){
+      const d=document.createElement("span"); d.className="sv-dot"+(i<n?" on":""); dots.appendChild(d);
+    }
+    c.appendChild(dots);
+    const td=document.createElement("div"); td.className="sv-today"+(today?"":" zero");
+    td.textContent=today?"きょう 出せました":"きょうは まだです"; c.appendChild(td);
+    const b=document.createElement("button"); b.className="sv-btn"+(today?" on":""); b.dataset.serve=it.name;
+    if(today){
+      b.appendChild(document.createTextNode("✓ きょう 出せた"));
+      const sub=document.createElement("span"); sub.className="sub"; sub.textContent="もう一度おすと 取り消し";
+      b.appendChild(sub);
+    }else b.appendChild(document.createTextNode("きょう 出せた"));
+    c.appendChild(b);
+    if(done){
+      const r=document.createElement("div"); r.className="reached";
+      r.innerHTML="<span>"+SERVE_GOAL+"回 出せました。</span>あとは食卓の定番として置いておくだけで大丈夫です。";
+      c.appendChild(r);
+    }
+    box.appendChild(c);
+  });
+  // この7日間
+  const g=$("#svWeek"); g.innerHTML="";
+  const today=dayKey(); let total=0, days=0;
+  for(let i=6;i>=0;i--){
+    const k=today-i;
+    let n=0; items.forEach(it=>{ if(servedOf(it.name).indexOf(k)>=0) n++; });
+    total+=n; if(n>0) days++;
+    const cell=document.createElement("div"); cell.className=(i===0?"is-today":""); cell.dataset.day=String(k);
+    const wd=document.createElement("div"); wd.className="wd"; wd.textContent=WDAY[new Date(k*86400000).getDay()];
+    const wn=document.createElement("div"); wn.className="wn"+(n>0?" has":""); wn.textContent=n>0?String(n):"·";
+    cell.appendChild(wd); cell.appendChild(wn); g.appendChild(cell);
+  }
+  $("#svSum").innerHTML = total>0
+    ? "7日間で <b>"+total+"回</b> 出せました（"+days+"日）"
+    : "まだ記録はありません。出せた日に押してください。";
+}
+const WDAY=["日","月","火","水","木","金","土"];
 
 /* ---------- ⑥ 安全のかくにん（禁忌スクリーニング）----------
    ARFID・感覚の過敏さ・体重や成長の心配がある場合、ごほうびで食事をうながす設計は
@@ -4313,6 +4455,7 @@ function renderParent(){
     + (chalItems().length>=CHAL_MAX ? "（登録は3つまで）" : "");
   renderFoodRec();                                    // 味見（曝露）の食材別きろく
   renderOuting();                                     // おでかけ（出発の時刻・おうちの人だけ）
+  renderPrep();                                       // だせたね（食卓に出せた回数）
   const g=GESTURES[st.gesture]||GESTURES.peace;
   const row=$("#gestRow"); if(row) row.style.display=st.camMode?"":"none";
   if($("#gestDesc")){
@@ -4355,6 +4498,7 @@ $("#timeProgToggle").onclick=()=>{ st.timeProg=!st.timeProg; save(); renderParen
 $("#chalAdd").onclick=()=>{ const inp=$("#chalInput"); if(addChal(inp.value)) inp.value=""; };
 $("#chalInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#chalAdd").onclick(); } });
 $("#chalChips").onclick=e=>{ const b=e.target.closest("button[data-c]"); if(b) removeChal(b.dataset.c); };
+$("#svList").onclick=e=>{ const b=e.target.closest("button[data-serve]"); if(b) toggleServed(b.dataset.serve); };
 /* たべもの帯: 押す＝「いま これ たべてる」に切り替え＋そのまま ひとくちも記録する。
    選び直す操作を増やさないための一体化。＋ は 食べもの えらび画面をひらくだけ（記録しない）。 */
 $("#foodBar").onclick=e=>{
@@ -4434,6 +4578,7 @@ $("#resetBtn").onclick=()=>{ if(confirm("キャラ・きろくを ぜんぶ消�
     st.kidPick=kp; st.age=ag; st.sex=sx; st.onboarded=ob;   /* 設定（年齢・性別など）は消さない */
     st.scr=sc; st.gentle=ge; st.timeProg=tp; st.chal={items:ci, total:0, medals:0};   /* 安全のかくにんの回答も消さない */
     st.foodBar=fb; st.foods={}; st.curFood=null;                      /* 味見のきろくは消える・帯の設定は残る */
+    st.served={};                                                     /* 出せた回数も きろくなので消える */
     st.out=ot; st.meals=[];                                           /* 食事ログは消える・出発時刻の設定は残る */
     save(); meal.bites=0; renderChar(); renderGame(); renderParent(); renderFoodBar(); } };
 
