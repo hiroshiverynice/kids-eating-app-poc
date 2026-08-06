@@ -560,16 +560,50 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   align-items: flex-end;
   animation: fade .22s ease;
 }
+/* 親シート = ヘッダー / 中身(スクロール) / 下タブ の3段。
+   中身だけがスクロールし、タブは常に指の届く下に残る。 */
 .parent {
   width: 100%;
   background: var(--surface);
   border-radius: 32px 32px 0 0;
-  padding: 0 20px calc(28px + env(safe-area-inset-bottom));
   animation: rise .30s var(--out);
   max-height: 90%;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 -10px 40px rgba(0,0,0,.18), inset 0 0 0 1px var(--line);
 }
+.phead {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 20px 0;
+}
+.phead h3 { flex: 1 }
+.pclose {
+  width: 40px; height: 40px; flex: 0 0 auto;
+  font-size: 18px; color: var(--ink-soft);
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 50%; cursor: pointer;
+}
+.ptab-body { flex: 1 1 auto; overflow-y: auto; padding: 0 20px 16px; -webkit-overflow-scrolling: touch }
+.ptab-body[hidden] { display: none }
+.ptabs {
+  flex: 0 0 auto;
+  display: flex;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.ptabs button {
+  flex: 1;
+  font-family: var(--disp); font-size: 11px; font-weight: 700;
+  color: var(--ink-soft); background: none; border: none;
+  padding: 10px 2px 12px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  border-top: 3px solid transparent; margin-top: -1px;
+}
+.ptabs button span { font-size: 20px; line-height: 1 }
+.ptabs button.on { color: var(--carrot); border-top-color: var(--carrot); background: var(--surface) }
 @keyframes rise { from { transform: translateY(100%) } }
 .parent::before {
   content: "";
@@ -1296,19 +1330,6 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   cursor: pointer;
 }
 .gchips button.on { border-color: var(--leaf); background: var(--leaf); color: #fff }
-.pclose {
-  width: 100%;
-  margin-top: 18px;
-  padding: 16px;
-  border-radius: 18px;
-  background: var(--surface-2);
-  color: var(--ink-soft);
-  font-size: 16px;
-  font-weight: 700;
-  border: 1px solid var(--line);
-  transition: background .15s;
-}
-.pclose:active { background: var(--line) }
 .link {
   background: none;
   color: var(--berry);
@@ -1684,7 +1705,12 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 
   <div class="parent-back" id="parentBack" style="display:none">
     <div class="parent">
-      <h3>おうちの人メニュー</h3>
+      <div class="phead">
+        <h3>おうちの人メニュー</h3>
+        <button class="pclose" id="parentClose" aria-label="とじる">✕</button>
+      </div>
+
+      <div class="ptab-body" id="ptabToday">
       <div class="pstat">
         <div><b id="pBites">0</b><span>この食事のひとくち</span></div>
         <div><b id="pTime">0:00</b><span>食事の時間</span></div>
@@ -1692,7 +1718,6 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
         <div><b id="pBest">0</b><span>1食の最高</span></div>
       </div>
       <div class="pnote"><b>今は食べきれなくてOK。</b>ひとくちの挑戦をくり返すことが「すき」への近道です。時間は記録だけ・子どもには見せていません。</div>
-
       <!-- おでかけ（出発の時刻）。締切は おうちの人だけが持ち、子ども画面は1ドットも変えない。
            カウントダウンを子に見せると、テンポが上がるどころか手が止まるため。 -->
       <div class="prow prow-top">
@@ -1708,8 +1733,9 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
         </div>
         <div class="toggle" id="outToggle" role="switch" aria-checked="false"></div>
       </div>
+      </div>
 
-
+      <div class="ptab-body" id="ptabRec" hidden>
       <!-- 味見（曝露）の記録。見るのは「食べた量」ではなく "何を・何回・何日 ためせたか"。
            くり返し出会うほど受け入れやすくなる（リピート曝露）ので、回数と日数だけを出す。
            足りない・未達・目標といった表示は出さない（親のプレッシャーは偏食を悪化させるため）。 -->
@@ -1730,7 +1756,24 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
           </div>
         </div>
       </div>
+      </div>
 
+      <div class="ptab-body" id="ptabPrep" hidden>
+      <div class="prow">
+        <div style="flex:1">
+          <div class="lab">きょうの チャレンジ</div>
+          <div class="desc">にがて・はじめて の食べものを 3つまで。<b>ここに入れた ひとくちだけ</b> 追加のごほうびが出ます（すきな物には出しません）。同じものを3回 ためせたら 🏅。</div>
+          <div class="chal-add">
+            <input id="chalInput" type="text" maxlength="8" placeholder="ピーマン">
+            <button class="link" id="chalAdd">＋ 追加</button>
+          </div>
+          <div class="gchips" id="chalChips"></div>
+          <div class="desc" id="chalStat">チャレンジの ひとくち 0回 ／ 🏅 0こ</div>
+        </div>
+      </div>
+      </div>
+
+      <div class="ptab-body" id="ptabSet" hidden>
       <div class="prow">
         <div style="flex:1">
           <div class="lab">安全のかくにん</div>
@@ -1748,19 +1791,6 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
         <div><div class="lab">食卓にいる時間でも すすむ</div><div class="desc" id="timeProgDesc">オン（1分ごとに あそびが1つすすむ）</div></div>
         <div class="toggle on" id="timeProgToggle" role="switch" aria-checked="true"></div>
       </div>
-      <div class="prow">
-        <div style="flex:1">
-          <div class="lab">きょうの チャレンジ</div>
-          <div class="desc">にがて・はじめて の食べものを 3つまで。<b>ここに入れた ひとくちだけ</b> 追加のごほうびが出ます（すきな物には出しません）。同じものを3回 ためせたら 🏅。</div>
-          <div class="chal-add">
-            <input id="chalInput" type="text" maxlength="8" placeholder="ピーマン">
-            <button class="link" id="chalAdd">＋ 追加</button>
-          </div>
-          <div class="gchips" id="chalChips"></div>
-          <div class="desc" id="chalStat">チャレンジの ひとくち 0回 ／ 🏅 0こ</div>
-        </div>
-      </div>
-
       <div class="prow">
         <div><div class="lab">カメラで手かざし検知</div><div class="desc" id="camModeDesc">オン（画面を触らずに記録）</div></div>
         <div class="toggle on" id="camToggle" role="switch" aria-checked="true"></div>
@@ -1842,7 +1872,16 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       <p style="font-size:11px;color:var(--ink-soft);text-align:center;line-height:1.6;margin:10px 0 0">
         V1 PoC・「育てる食卓」/ 一口ごとに あそびが すすむ<br>食べた量でなく“ひとくちの回数”を大切にします
       </p>
-      <button class="pclose" id="parentClose">とじる</button>
+      </div>
+
+      <!-- 下タブ。子ども画面には置かない（誤タップで食事が止まるため＝childproof navigation）。
+           17項目を1枚に並べると探せないので、使う頻度で4つに分けた。 -->
+      <nav class="ptabs" id="ptabs">
+        <button data-ptab="Today" class="on"><span>🍽</span>きょう</button>
+        <button data-ptab="Rec"><span>📈</span>きろく</button>
+        <button data-ptab="Prep"><span>🥦</span>そなえ</button>
+        <button data-ptab="Set"><span>⚙️</span>せってい</button>
+      </nav>
     </div>
   </div>
 </div>
@@ -4293,7 +4332,15 @@ function resumeAudio(){ try{ audioCtx&&audioCtx.state==="suspended"&&audioCtx.re
 $("#fallback").onclick=()=>{ resumeAudio(); registerBite(); };
 $("#mealBtn").onclick=()=> meal.active?endMeal():startMeal();
 $("#giftBadge").onclick=showBoard;
-$("#parentBtn").onclick=()=>{ renderParent(); $("#parentBack").style.display="flex"; };
+/* おうちの人メニューのタブ。開くたびに「きょう」に戻す（毎食いちばん見るのはここ）。 */
+const PTABS=["Today","Rec","Prep","Set"];
+function showPTab(id){
+  PTABS.forEach(t=>{ const el=$("#ptab"+t); if(el) el.hidden = (t!==id); });
+  $("#ptabs").querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.ptab===id));
+  const body=$("#ptab"+id); if(body) body.scrollTop=0;
+}
+$("#ptabs").onclick=e=>{ const b=e.target.closest("button[data-ptab]"); if(b) showPTab(b.dataset.ptab); };
+$("#parentBtn").onclick=()=>{ renderParent(); showPTab("Today"); $("#parentBack").style.display="flex"; };
 $("#parentClose").onclick=()=> $("#parentBack").style.display="none";
 $("#parentBack").addEventListener("click",e=>{ if(e.target.id==="parentBack") $("#parentBack").style.display="none"; });
 $("#rewardToggle").onclick=()=>{ st.rewardMode=st.rewardMode==="grow"?"praise":"grow"; save(); renderParent(); };
