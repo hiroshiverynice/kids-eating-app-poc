@@ -1352,15 +1352,20 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
    ただし基礎の進行（あそびが1手すすむ）は どの ひとくちでも同じ＝ごほうびを取り上げて泣かせない。 */
 .chal-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 2px 10px 0 }
 .chal-bar[hidden] { display: none }
+/* 子ども向けのタッチターゲットは 2cm角（最小60×80pt）が目安。
+   42px高では基準を下回っていたので、指で押しやすい高さまで広げる。 */
 .chal-chip {
   font-family: var(--disp);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
+  min-height: 60px;
+  display: inline-flex;
+  align-items: center;
   color: #7A4A12;
   background: linear-gradient(180deg, #FFF3CC, #FFE28A);
   border: 1.5px solid #F0C24A;
   border-radius: 999px;
-  padding: 10px 14px;
+  padding: 8px 18px;
   box-shadow: 0 2px 6px rgba(0,0,0,.12);
 }
 .chal-chip:active { transform: scale(.95) }
@@ -1543,6 +1548,30 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
   background: #fff;
   color: var(--ink);
 }
+/* ペアレンタルゲート。App Store キッズカテゴリでは、アプリ外リンク・購入・権限要求を
+   <大人の操作が要るゲートの奥> に置くことが求められる（「13歳以上ですか？」では不十分）。
+   将来のアフィリ送客の導線も必ずこの奥に入る。子どもの誤操作よけも兼ねる。 */
+#gateBack { z-index: 85 }
+.gate-card { max-width: 320px }
+.gate-q { font-size: 13px; color: var(--ink-soft); margin: 2px 0 14px }
+.gate-calc {
+  font-family: var(--disp); font-size: 34px; font-weight: 800; color: var(--ink);
+  letter-spacing: .04em; margin-bottom: 14px;
+}
+.gate-in {
+  width: 130px; font-family: var(--disp); font-size: 26px; font-weight: 800; text-align: center;
+  padding: 10px 8px; border-radius: 14px; border: 2px solid var(--line);
+  background: #fff; color: var(--ink);
+}
+.gate-in:focus { outline: none; border-color: var(--carrot) }
+.gate-err { font-size: 13px; font-weight: 700; color: #B4573C; margin-top: 10px; min-height: 18px }
+.gate-btns { display: flex; gap: 10px; margin-top: 16px }
+.gate-btns button {
+  flex: 1; font-family: var(--disp); font-size: 15px; font-weight: 800;
+  padding: 13px 8px; border-radius: 14px; cursor: pointer; border: 1px solid var(--line);
+  background: var(--surface-2); color: var(--ink-soft);
+}
+.gate-btns button.go { background: var(--carrot); color: #fff; border-color: var(--carrot) }
 /* ⑥ 安全のかくにん（おうちの人向け）。診断ではなく「専門家につなぐ」ための入口。
    ごほうびで食事をうながす方法は、ARFID・感覚の過敏さ・体の要因が背景にある子には
    かえって負担になりうる（研究レビュー 2026-07-22）。だから最初に一度だけ確認する。 */
@@ -1645,9 +1674,6 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
 
     <button class="fallback hide" id="fallback">🥄 たべた！</button>
 
-    <div class="meal-ctrl">
-      <button class="btn-start" id="mealBtn">🍽️ ごはん スタート</button>
-    </div>
   </div>
 
   <div class="streak-toast" id="streakToast"></div>
@@ -1739,6 +1765,21 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
     </div>
   </div>
 
+  <!-- ペアレンタルゲート。子どもが偶然すり抜けない程度の計算にする（大人には一瞬）。 -->
+  <div class="ov-back" id="gateBack" style="display:none">
+    <div class="ov-card gate-card">
+      <h3>おうちの かたへ</h3>
+      <p class="gate-q">つぎの けいさんを してください</p>
+      <div class="gate-calc" id="gateCalc">7 × 8 = ?</div>
+      <input class="gate-in" id="gateAns" type="number" inputmode="numeric" pattern="[0-9]*" aria-label="こたえ">
+      <div class="gate-err" id="gateErr"></div>
+      <div class="gate-btns">
+        <button id="gateCancel">やめる</button>
+        <button class="go" id="gateOk">すすむ</button>
+      </div>
+    </div>
+  </div>
+
   <div class="parent-back" id="parentBack" style="display:none">
     <div class="parent">
       <div class="phead">
@@ -1747,6 +1788,15 @@ button { font-family: var(--disp); cursor: pointer; border: none; color: inherit
       </div>
 
       <div class="ptab-body" id="ptabToday">
+      <!-- 「ごはん スタート/おわり」は子どもが押すものではないので おうちの人メニューに置く。
+           はじまりは最初の ひとくちで自動。押し忘れても 90分で自動的におわる。 -->
+      <div class="prow">
+        <div style="flex:1">
+          <div class="lab">ごはん</div>
+          <div class="desc" id="mealDesc">まだ はじまっていません（最初の ひとくちで はじまります）</div>
+          <div class="gchips"><button id="mealBtn">🍽️ ごはんを おわる</button></div>
+        </div>
+      </div>
       <div class="pstat">
         <div><b id="pBites">0</b><span>この食事のひとくち</span></div>
         <div><b id="pTime">0:00</b><span>食事の時間</span></div>
@@ -3550,6 +3600,7 @@ function registerBite(opt){
   const chalName = (food && findChal(food)) ? food : null;
   if(food) logFood(food);
   if(!meal.active) startMeal();
+  meal.lastTs=Date.now();
   st.total++; meal.bites++; st.stageProg++;
 
   if(st.rewardMode==="grow"){
@@ -4085,7 +4136,9 @@ try{ window.__mogu={ buf:buf, tick:()=>tickTimeProgress(),
   get st(){ return st; }, BATTLE, btlSpawn, BTL_MONS, BTL_FRIEND, btlMet, btlMark,
   get voiceMap(){ return voiceMap; }, speak, fetchVoice, speakTTS,
   get bgmGain(){ return bgmGain; }, duckBGM,
-  get vol(){ return {VOICE_VOL, BGM_VOL, BGM_DUCK}; } }; }catch(e){}
+  get vol(){ return {VOICE_VOL, BGM_VOL, BGM_DUCK}; },
+  passGate(){ gatePassed=true; }, get gateAnswer(){ return gateA*gateB; },
+  checkMealTimeout, get meal(){ return meal; } }; }catch(e){}
 /* 診断用: 読み込めた音の確認／時間進行を1手だけ呼ぶ／もぐもぐクエストの内部を外から確かめる */
 let sfxLoaded=false;
 function loadAudioFiles(){
@@ -4297,14 +4350,19 @@ function startBGM(){ if(bgm.on||!st.bgm) return; if(!ensureAudio()) return; load
 function stopBGM(){ bgm.on=false; clearInterval(bgm.id); bgm.id=null; stopBGMFile(); }
 
 /* ---------- meal ---------- */
+/* 「おわる」を押し忘れても、しばらく何もなければ自動で終わる。
+   押し忘れたまま次の食事が始まると、1食の記録が2食ぶんくっついてしまうため。 */
+const MEAL_AUTO_END_MS = 90*60*1000;
+function checkMealTimeout(){
+  if(!meal.active) return;
+  if(Date.now() - (meal.lastTs || meal.startTs) > MEAL_AUTO_END_MS) endMeal();
+}
 function startMeal(){ if(meal.active) return; startBGM(); meal={active:true,startTs:Date.now(),bites:0,tickId:null,progId:null};
-  $("#mealBtn").textContent="🟢 ごはんちゅう… (タップでおわり)"; $("#mealBtn").classList.remove("btn-start"); $("#mealBtn").classList.add("btn-end");
-  meal.tickId=setInterval(renderParent,1000);
+  meal.tickId=setInterval(()=>{ renderParent(); checkMealTimeout(); },1000);
   meal.progId=setInterval(tickTimeProgress,TIME_STEP_MS);   // 食卓にいる時間でも すこし進む
   renderParent(); }
 function endMeal(){ if(!meal.active) return; clearInterval(meal.tickId); clearInterval(meal.progId); meal.active=false; const n=meal.bites;
   st.curFood=null; renderFoodBar();          // 次の食事は また「いま食べてるもの」から選び直す
-  $("#mealBtn").textContent="🍽️ ごはん スタート"; $("#mealBtn").classList.add("btn-start"); $("#mealBtn").classList.remove("btn-end");
   const rec=n>st.best&&n>0; if(n>st.best) st.best=n;
   /* 食事の所要時間ログ。おうちの人の「何時に始めれば間に合うか」の逆算にだけ使う。
      子どもには時間を一切見せない（急かすと かえって手が止まる＝V1で出した結論のまま）。 */
@@ -4456,6 +4514,17 @@ function renderParent(){
   renderFoodRec();                                    // 味見（曝露）の食材別きろく
   renderOuting();                                     // おでかけ（出発の時刻・おうちの人だけ）
   renderPrep();                                       // だせたね（食卓に出せた回数）
+  const mb=$("#mealBtn"), md=$("#mealDesc");
+  if(mb && md){
+    if(meal.active){
+      const sec=Math.floor((Date.now()-meal.startTs)/1000);
+      md.textContent="ごはんちゅう… "+Math.floor(sec/60)+"分 "+(sec%60)+"秒";
+      mb.textContent="🍽️ ごはんを おわる";
+    }else{
+      md.textContent="まだ はじまっていません（最初の ひとくちで はじまります）";
+      mb.textContent="🍽️ ごはんを はじめる";
+    }
+  }
   const g=GESTURES[st.gesture]||GESTURES.peace;
   const row=$("#gestRow"); if(row) row.style.display=st.camMode?"":"none";
   if($("#gestDesc")){
@@ -4481,7 +4550,30 @@ function showPTab(id){
   const body=$("#ptab"+id); if(body) body.scrollTop=0;
 }
 $("#ptabs").onclick=e=>{ const b=e.target.closest("button[data-ptab]"); if(b) showPTab(b.dataset.ptab); };
-$("#parentBtn").onclick=()=>{ renderParent(); showPTab("Today"); $("#parentBack").style.display="flex"; };
+function openParentSheet(){ renderParent(); showPTab("Today"); $("#parentBack").style.display="flex"; }
+/* ペアレンタルゲート。1度通ったらアプリを開いている間は聞き直さない（毎食のたびに計算させない）。
+   保存はしないので、開き直せばまた聞く。 */
+let gatePassed=false, gateA=0, gateB=0;
+function openGate(){
+  gateA=RNG.int(3,9); gateB=RNG.int(3,9);
+  $("#gateCalc").textContent=gateA+" × "+gateB+" = ?";
+  $("#gateAns").value=""; $("#gateErr").textContent="";
+  $("#gateBack").style.display="grid";
+  setTimeout(()=>{ try{ $("#gateAns").focus(); }catch(e){} },120);
+}
+function submitGate(){
+  if(parseInt($("#gateAns").value,10)===gateA*gateB){
+    gatePassed=true; $("#gateBack").style.display="none"; openParentSheet();
+  }else{
+    $("#gateErr").textContent="もう一度 おねがいします";
+    $("#gateAns").value=""; try{ $("#gateAns").focus(); }catch(e){}
+  }
+}
+$("#parentBtn").onclick=()=>{ gatePassed ? openParentSheet() : openGate(); };
+$("#gateOk").onclick=submitGate;
+$("#gateCancel").onclick=()=>{ $("#gateBack").style.display="none"; };
+$("#gateBack").addEventListener("click",e=>{ if(e.target.id==="gateBack") $("#gateBack").style.display="none"; });
+$("#gateAns").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); submitGate(); } });
 $("#parentClose").onclick=()=> $("#parentBack").style.display="none";
 $("#parentBack").addEventListener("click",e=>{ if(e.target.id==="parentBack") $("#parentBack").style.display="none"; });
 $("#rewardToggle").onclick=()=>{ st.rewardMode=st.rewardMode==="grow"?"praise":"grow"; save(); renderParent(); };
