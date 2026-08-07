@@ -15,7 +15,7 @@ CC0 は帰属表示（クレジット記載）が**不要**で、商用利用・
 | `hit.ogg` | 命中の打撃 | Kenney "Impact Sounds" | `impactGeneric_light_001.ogg` |
 | `crit.ogg` | かいしんの 命中（重い一撃） | Kenney "Impact Sounds" | `impactMetal_heavy_000.ogg` |
 | `boss.ogg` | ボス出現 | Kenney "Impact Sounds" | `impactBell_heavy_002.ogg` |
-| `defeat.ogg` | てきを たおした | Kenney "Music Jingles" | `Pizzicato jingles/jingles_PIZZI05.ogg` |
+| `defeat.ogg` | なかまに なる直前 | Kenney "Music Jingles" | `alt/defeat_b.ogg`（2026-08-07に差し替え。旧 `PIZZI05` は**下降形**で、獲得の瞬間に落胆して聞こえたため） |
 | `ally.ogg` | なかまに なった | Kenney "Music Jingles" | `Pizzicato jingles/jingles_PIZZI02.ogg` |
 | `levelup.ogg` | レベルアップ | Kenney "Music Jingles" | `8-Bit jingles/jingles_NES01.ogg` |
 | `clear.ogg` | ぼうけん クリア | Kenney "Music Jingles" | `8-Bit jingles/jingles_NES00.ogg` |

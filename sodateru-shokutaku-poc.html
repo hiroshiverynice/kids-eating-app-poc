@@ -4240,9 +4240,12 @@ function sfxCrit(){ if(play("crit")) return;                                    
   ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
   noise(t,0.3,0.2,220); tone(90,t,0.34,'sine',0.16);
   [784,1046,1318,1568].forEach((f,i)=>tone(f,t+0.06+i*0.05,0.2,'square',0.1)); }
-function sfxDefeat(){ if(play("defeat")) return;                                                                              // てきが たおれる（下降・こわくない音）
+/* たおれる瞬間の音。ここは「たおした」のではなく <なかまになる> 直前なので、
+   音は上がって終わらせる。以前は下降音階(784→392)で、実音源も下降形を選んでいたため、
+   なかまが増える一番うれしい瞬間に 落胆したように聞こえていた（波形の解析で発覚）。 */
+function sfxDefeat(){ if(play("defeat")) return;
   ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
-  [784,659,523,392].forEach((f,i)=>tone(f,t+i*0.085,0.18,'triangle',0.10)); noise(t+0.34,0.16,0.08,700); }
+  [392,523,659,784].forEach((f,i)=>tone(f,t+i*0.085,0.18,'triangle',0.10)); }
 function sfxAlly(){ if(play("ally")) return; soundGet(); }                                                                    // なかまに なった
 function sfxLevel(){ if(play("levelup")) return;                                                                             // レベルアップ
   ensureAudio(); if(!audioCtx) return; const t=audioCtx.currentTime;
